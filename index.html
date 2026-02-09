@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amr Elharony | Linktree</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #F3F3F1;
+            --text-color: #1e1e1e;
+            --button-bg: #FFFFFF;
+            --button-hover: #FBFBFB;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            padding: 40px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .profile-img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 16px;
+            background-color: #ddd; /* Placeholder color if image missing */
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-bio {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #1e1e1e;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            margin-bottom: 32px;
+            justify-content: center;
+        }
+
+        .social-icons a {
+            color: #1e1e1e;
+            font-size: 26px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.1);
+        }
+
+        .links-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-header {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 24px 0 8px 0;
+            color: #1e1e1e;
+        }
+
+        .link-btn {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 4px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: flex;
+            align-items: center;
+            min-height: 64px;
+            position: relative;
+        }
+
+        .link-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            background-color: var(--button-hover);
+        }
+
+        .link-thumb {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-left: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: #eee; /* Light gray background for transparency */
+        }
+
+        .link-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Fallback icon styling if image breaks */
+        .link-thumb i.fallback {
+            font-size: 24px;
+            color: #888;
+            display: none; /* Hidden by default */
+        }
+
+        .link-text {
+            flex-grow: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 10px;
+        }
+
+        .link-options {
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Copyright Section Styling */
+        .copyright {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            font-weight: 500;
+            width: 100%;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0; /* Subtle line separator */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <!-- Added onerror to show a default user icon if image fails -->
+            <img src="profile.jpg" alt="Amr Elharony" class="profile-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <i class="fa-solid fa-circle-user" style="font-size: 96px; color: #ccc; margin-bottom: 16px; display: none;"></i>
+            
+            <h1 class="profile-name">Amr Elharony</h1>
+            <p class="profile-bio">Agile Delivery Lead |<br>Mentor | Fintech Speaker</p>
+        </div>
+
+        <!-- Social Icons Header -->
+        <div class="social-icons">
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://www.linkedin.com/in/amrmelharony?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+            <a href="https://calendly.com/amrmelharony/30min" target="_blank"><i class="fa-solid fa-globe"></i></a>
+            <a href="mailto:a.elharony@gmail.com"><i class="fa-regular fa-envelope"></i></a>
+        </div>
+
+        <div class="links-wrapper">
+            
+            <!-- Link 1: Fintech Bilinguals -->
+            <a href="https://www.linkedin.com/company/fintech-bilinguals/about/?viewAsMember=true" class="link-btn" target="_blank">
+                <div class="link-thumb">
+                    <img src="linkedin.png" alt="LinkedIn" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
+                    <!-- Fallback Icon if image fails -->
+                    <i class="fa-brands fa-linkedin fallback"></i>
+                </div>
+                <span class="link-text">Fintech Bilinguals</span>
+                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+            </a>
+
+            <!-- Link 2: Get Mentored -->
+            <a href="https://adplist.org/mentors/amr-elharony" class="link-btn" target="_blank">
+                <div class="link-thumb">
+                    <img src="smiley.jpg" alt="Mentored" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
+                    <i class="fa-regular fa-face-smile fallback"></i>
+                </div>
+                <span class="link-text">Get Mentored for Free!</span>
+                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+            </a>
+
+            <!-- Section Header -->
+            <div class="section-header">Linkedin Newsletters</div>
+
+            <!-- Link 3 -->
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" class="link-btn" target="_blank">
+                <div class="link-thumb">
+                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
+                    <i class="fa-solid fa-newspaper fallback"></i>
+                </div>
+                <span class="link-text">LevelUp Your Leadership</span>
+                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+            </a>
+
+            <!-- Link 4 -->
+            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" class="link-btn" target="_blank">
+                <div class="link-thumb">
+                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
+                    <i class="fa-solid fa-newspaper fallback"></i>
+                </div>
+                <span class="link-text">LevelUp Your Business</span>
+                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+            </a>
+
+            <!-- Link 5 -->
+            <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" class="link-btn" target="_blank">
+                <div class="link-thumb">
+                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
+                    <i class="fa-solid fa-newspaper fallback"></i>
+                </div>
+                <span class="link-text">LevelUp Your Tech</span>
+                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+            </a>
+
+        </div>
+
+        <!-- NEW COPYRIGHT SECTION -->
+        <div class="copyright">
+            &copy; <span id="year"></span> Amr Elharony. All Rights Reserved.
+        </div>
+
+    </div>
+
+    <!-- Script to set current year automatically -->
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+</body>
+</html>
