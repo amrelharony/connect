@@ -360,13 +360,15 @@
             });
         });
 
-        // 3. INTERACTIVE PARTICLES
+        // 3. GYROSCOPE & INTERACTIVE PARTICLES
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
         let mouseX = -9999;
         let mouseY = -9999;
+        let gyroX = 0;
+        let gyroY = 0;
 
         const config = {
             particleCount: window.innerWidth < 768 ? 40 : 80,
@@ -374,6 +376,31 @@
             connDist: 150,
             mouseRadius: 150
         };
+
+        // --- GYRO LOGIC ---
+        function handleOrientation(e) {
+            if (e.gamma !== null && e.beta !== null) {
+                gyroX = e.gamma; // Left/Right tilt
+                gyroY = e.beta;  // Front/Back tilt
+            }
+        }
+
+        // Permission for iOS 13+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            document.body.addEventListener('touchstart', function initGyro() {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+                document.body.removeEventListener('touchstart', initGyro);
+            }, { once: true });
+        } else {
+            // Android & Older iOS
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
 
         window.addEventListener('mousemove', e => {
             mouseX = e.clientX;
@@ -410,8 +437,18 @@
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-                if(this.x < 0 || this.x > width) this.vx *= -1;
-                if(this.y < 0 || this.y > height) this.vy *= -1;
+                
+                // Gyroscope Influence
+                this.x += gyroX * 0.05;
+                this.y += gyroY * 0.05;
+
+                // Screen Wrap
+                if(this.x < 0) this.x = width;
+                if(this.x > width) this.x = 0;
+                if(this.y < 0) this.y = height;
+                if(this.y > height) this.y = 0;
+
+                // Mouse/Touch Interaction
                 let dx = mouseX - this.x;
                 let dy = mouseY - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
