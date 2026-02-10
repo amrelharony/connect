@@ -151,7 +151,7 @@
 
         <div class="w-full space-y-4 perspective-1000">
             
-            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
                     <img src="be.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -166,7 +166,7 @@
                 </div>
             </a>
 
-            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
                     <img src="fb.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -181,7 +181,7 @@
                 </div>
             </a>
 
-            <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
                     <img src="smiley.jpg" class="w-8 h-8 rounded-lg object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -202,19 +202,19 @@
                 <div class="h-px bg-white w-full"></div>
             </div>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-chart-line text-yellow-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Leadership</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
             </a>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-briefcase text-green-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Business</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
             </a>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-microchip text-cyan-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Tech</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
@@ -291,21 +291,34 @@
                 stagger: 0.1,
                 ease: "back.out"
             }, "-=0.3")
-            // Animate ALL cards (Main Links + Newsletters)
-            .from(".tilt-card", {
+            
+            // --- FIX: SEQUENCED ANIMATIONS ---
+            
+            // 1. Animate Main Links (Top 3)
+            .from(".main-link", {
                 duration: 0.8,
                 y: 50,
                 opacity: 0,
-                stagger: 0.1,
+                stagger: 0.15,
                 ease: "power3.out"
             }, "-=0.2")
-            // Explicitly animate the divider
+
+            // 2. Animate Divider explicitly
             .from("#newsletter-divider", {
                 duration: 0.8,
                 opacity: 0,
                 scaleX: 0,
                 ease: "power2.out"
-            }, "-=1.0");
+            }, "-=0.5")
+
+            // 3. Animate Newsletters explicitly (guarantees visibility)
+            .from(".newsletter-card", {
+                duration: 0.8,
+                y: 30,
+                opacity: 0,
+                stagger: 0.1,
+                ease: "power3.out"
+            }, "-=0.2");
         }
 
         // 2. 3D TILT EFFECT
@@ -333,12 +346,11 @@
             });
         });
 
-        // 3. INTERACTIVE PARTICLES (FIXED)
+        // 3. INTERACTIVE PARTICLES
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
-        
         let mouseX = -9999;
         let mouseY = -9999;
 
@@ -359,7 +371,7 @@
                 mouseX = e.touches[0].clientX;
                 mouseY = e.touches[0].clientY;
             }
-        }, {passive: false}); // passive false helps with tracking
+        }, {passive: false});
 
         window.addEventListener('touchend', () => {
             mouseX = -9999;
@@ -384,23 +396,17 @@
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-
                 if(this.x < 0 || this.x > width) this.vx *= -1;
                 if(this.y < 0 || this.y > height) this.vy *= -1;
-
-                // INTERACTION
                 let dx = mouseX - this.x;
                 let dy = mouseY - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
-
                 if (distance < config.mouseRadius) {
                     const forceDirectionX = dx / distance;
                     const forceDirectionY = dy / distance;
                     const force = (config.mouseRadius - distance) / config.mouseRadius;
-                    
                     const directionX = forceDirectionX * force * 3;
                     const directionY = forceDirectionY * force * 3;
-                    
                     this.x -= directionX;
                     this.y -= directionY;
                 }
