@@ -39,6 +39,7 @@
         body {
             background-color: #0B0F19;
             overflow: hidden; /* Locked during loading */
+            touch-action: pan-y;
         }
         
         /* Preloader Styles */
@@ -94,11 +95,6 @@
             height: 100%;
             z-index: -1;
         }
-
-        /* Tech Glow */
-        .tech-glow {
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-        }
     </style>
 </head>
 <body class="text-white antialiased min-h-screen flex flex-col items-center">
@@ -113,7 +109,7 @@
 
     <canvas id="canvas-bg"></canvas>
 
-    <div id="main-content" class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center opacity-0 translate-y-4">
+    <div id="main-content" class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center opacity-0 translate-y-4 pb-24">
         
         <div class="relative group cursor-pointer perspective-container">
             <div class="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur opacity-20 group-hover:opacity-70 transition duration-1000 animate-pulse"></div>
@@ -201,19 +197,19 @@
             </div>
 
             <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
-                <i class="fa-solid fa-chart-line text-yellow-500 w-8 text-center"></i>
+                <div class="w-8 flex justify-center"><i class="fa-solid fa-chart-line text-yellow-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Leadership</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
             </a>
 
             <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
-                <i class="fa-solid fa-briefcase text-green-500 w-8 text-center"></i>
+                <div class="w-8 flex justify-center"><i class="fa-solid fa-briefcase text-green-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Business</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
             </a>
 
              <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
-                <i class="fa-solid fa-microchip text-cyan-500 w-8 text-center"></i>
+                <div class="w-8 flex justify-center"><i class="fa-solid fa-microchip text-cyan-500"></i></div>
                 <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Tech</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
             </a>
@@ -231,8 +227,6 @@
 
         // 1. LOADING SEQUENCE (GSAP)
         const tl = gsap.timeline();
-
-        // Simulate Loading Counter
         let count = 0;
         const counterEl = document.getElementById('counter');
         const progressEl = document.getElementById('progress-bar');
@@ -248,13 +242,11 @@
                 clearInterval(loadingInterval);
                 finishLoading();
             }
-        }, 30); // Speed of loader
+        }, 20); // Faster load
 
         function finishLoading() {
-            // Unlock scrolling
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = 'auto'; // Unlock scroll
 
-            // Sequence: Fade out loader -> Reveal Content
             tl.to("#preloader", {
                 duration: 0.8,
                 yPercent: -100,
@@ -289,6 +281,7 @@
                 stagger: 0.1,
                 ease: "back.out"
             }, "-=0.3")
+            // Ensure ALL cards including newsletters animate
             .from(".tilt-card", {
                 duration: 0.8,
                 y: 50,
@@ -298,20 +291,16 @@
             }, "-=0.2");
         }
 
-        // 2. 3D TILT EFFECT FOR CARDS (Vanilla JS)
+        // 2. 3D TILT EFFECT
         const cards = document.querySelectorAll('.tilt-card');
-
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
-                // Calculate percentage
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-                
-                const rotateX = ((y - centerY) / centerY) * -10; // Max rotation deg
+                const rotateX = ((y - centerY) / centerY) * -10;
                 const rotateY = ((x - centerX) / centerX) * 10;
 
                 card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
@@ -322,24 +311,46 @@
                 card.style.transition = 'transform 0.5s ease';
             });
             
-            // Remove transition during movement for smoothness
             card.addEventListener('mouseenter', () => {
                 card.style.transition = 'none';
             });
         });
 
-        // 3. CANVAS BACKGROUND (Optimized Network Mesh)
+        // 3. INTERACTIVE PARTICLES (FIXED)
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
         
-        // Fintech/Cyber Colors
+        // Interaction variables
+        let mouseX = -9999;
+        let mouseY = -9999;
+
         const config = {
             particleCount: window.innerWidth < 768 ? 40 : 80,
             color: 'rgba(0, 240, 255, ',
-            connDist: 150
+            connDist: 150,
+            mouseRadius: 150 // Distance particles react to mouse
         };
+
+        // Track Mouse
+        window.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Track Touch
+        window.addEventListener('touchmove', e => {
+            if(e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            mouseX = -9999;
+            mouseY = -9999;
+        });
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -357,10 +368,30 @@
                 this.size = Math.random() * 1.5 + 0.5;
             }
             update() {
+                // Normal movement
                 this.x += this.vx;
                 this.y += this.vy;
+
+                // Bounce off edges
                 if(this.x < 0 || this.x > width) this.vx *= -1;
                 if(this.y < 0 || this.y > height) this.vy *= -1;
+
+                // INTERACTION: Repulse from mouse
+                let dx = mouseX - this.x;
+                let dy = mouseY - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+
+                if (distance < config.mouseRadius) {
+                    const forceDirectionX = dx / distance;
+                    const forceDirectionY = dy / distance;
+                    const force = (config.mouseRadius - distance) / config.mouseRadius;
+                    
+                    const directionX = forceDirectionX * force * 2;
+                    const directionY = forceDirectionY * force * 2;
+                    
+                    this.x -= directionX;
+                    this.y -= directionY;
+                }
             }
             draw() {
                 ctx.beginPath();
