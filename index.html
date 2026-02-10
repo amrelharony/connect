@@ -143,10 +143,10 @@
         </div>
 
         <div class="flex gap-6 mt-8 mb-10" id="social-row">
-            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="text-gray-400 hover:text-white hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
-            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="text-gray-400 hover:text-green-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
-            <a href="https://t.me/Amrmelharony" target="_blank" class="text-gray-400 hover:text-blue-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
-            <a href="mailto:a.elharony@gmail.com" class="text-gray-400 hover:text-yellow-400 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="social-icon text-gray-400 hover:text-white hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="social-icon text-gray-400 hover:text-green-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" class="social-icon text-gray-400 hover:text-blue-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="social-icon text-gray-400 hover:text-yellow-400 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
         </div>
 
         <div class="w-full space-y-4 perspective-1000">
@@ -231,13 +231,11 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // 1. LOADING SEQUENCE (GSAP)
         const tl = gsap.timeline();
         let count = 0;
         const counterEl = document.getElementById('counter');
         const progressEl = document.getElementById('progress-bar');
         
-        // Fast loader for better UX
         const loadingInterval = setInterval(() => {
             count += Math.floor(Math.random() * 5) + 2;
             if(count > 100) count = 100;
@@ -252,7 +250,6 @@
         }, 25); 
 
         function finishLoading() {
-            // Unlock scrolling explicitly
             document.body.style.overflowY = 'auto'; 
             document.body.style.overflowX = 'hidden';
 
@@ -285,25 +282,26 @@
                 y: 10,
                 stagger: 0.1
             }, "-=0.4")
-            .from("#social-row a", {
+            
+            // --- FIX FOR ICONS ---
+            .from(".social-icon", {
                 duration: 0.5,
                 scale: 0,
                 stagger: 0.1,
-                ease: "back.out"
+                ease: "back.out",
+                clearProps: "all" // CRITICAL FIX: Removes stuck styles
             }, "-=0.3")
             
-            // --- FIX: SEQUENCED ANIMATIONS ---
-            
-            // 1. Animate Main Links (Top 3)
+            // --- FIX FOR MAIN LINKS ---
             .from(".main-link", {
                 duration: 0.8,
                 y: 50,
                 opacity: 0,
                 stagger: 0.15,
-                ease: "power3.out"
+                ease: "power3.out",
+                clearProps: "all" 
             }, "-=0.2")
 
-            // 2. Animate Divider explicitly
             .from("#newsletter-divider", {
                 duration: 0.8,
                 opacity: 0,
@@ -311,22 +309,29 @@
                 ease: "power2.out"
             }, "-=0.5")
 
-            // 3. Animate Newsletters with FIX (clearProps)
+            // --- FIX FOR NEWSLETTERS ---
             .from(".newsletter-card", {
                 duration: 0.8,
                 y: 30,
                 opacity: 0,
                 stagger: 0.1,
                 ease: "power3.out",
-                clearProps: "all" // FIX 1: Removes inline styles after animation
+                clearProps: "all" 
             }, "-=0.2");
 
-            // FIX 2: Safety Fallback - Ensure visibility
+            // --- SAFETY NET (Runs after animation to guarantee visibility) ---
             tl.eventCallback("onComplete", () => {
-                document.querySelectorAll('.newsletter-card').forEach(el => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'none';
-                });
+                const forceVisible = (selector) => {
+                    document.querySelectorAll(selector).forEach(el => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                        el.style.visibility = 'visible';
+                    });
+                };
+
+                forceVisible('.social-icon');
+                forceVisible('.main-link');
+                forceVisible('.newsletter-card');
             });
         }
 
