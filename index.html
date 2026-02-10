@@ -3,276 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amr Elharony | Linktree</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Amr Elharony | Fintech Executive</title>
     
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        fintech: {
+                            dark: '#0a0f1c',   /* Deep Navy Background */
+                            card: 'rgba(255, 255, 255, 0.03)', /* Glass Effect */
+                            border: 'rgba(255, 255, 255, 0.1)',
+                            accent: '#00D1FF', /* Cyber Blue */
+                            gold: '#FFD700'    /* Premium Gold */
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --bg-color: #F3F3F1;
-            --text-color: #1e1e1e;
-            --button-bg: #FFFFFF;
-            --button-hover: #FBFBFB;
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-bottom: 40px;
+            background-color: #0a0f1c;
+            overflow-x: hidden;
         }
-
-        .container {
-            width: 100%;
-            max-width: 680px;
-            padding: 40px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .profile-section {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .profile-img {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 16px;
-            background-color: #ddd; /* Placeholder color if image missing */
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .profile-bio {
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 1.5;
-            color: #1e1e1e;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 24px;
-            margin-top: 24px;
-            margin-bottom: 32px;
-            justify-content: center;
-        }
-
-        .social-icons a {
-            color: #1e1e1e;
-            font-size: 26px;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-
-        .social-icons a:hover {
-            transform: scale(1.1);
-        }
-
-        .links-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .section-header {
-            text-align: center;
-            font-size: 16px;
-            font-weight: 700;
-            margin: 24px 0 8px 0;
-            color: #1e1e1e;
-        }
-
-        .link-btn {
-            background-color: var(--button-bg);
-            color: var(--text-color);
-            text-decoration: none;
-            padding: 4px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            display: flex;
-            align-items: center;
-            min-height: 64px;
-            position: relative;
-        }
-
-        .link-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            background-color: var(--button-hover);
-        }
-
-        .link-thumb {
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            margin-left: 4px;
-            overflow: hidden;
-            flex-shrink: 0;
-            background-color: #eee; /* Light gray background for transparency */
-        }
-
-        .link-thumb img {
+        
+        /* The Animated Background Canvas */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: block;
+            z-index: -1;
+            opacity: 0.6;
         }
 
-        /* Fallback icon styling if image breaks */
-        .link-thumb i.fallback {
-            font-size: 24px;
-            color: #888;
-            display: none; /* Hidden by default */
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: var(--tw-colors-fintech-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--tw-colors-fintech-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .link-text {
-            flex-grow: 1;
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 0 10px;
-        }
-
-        .link-options {
-            width: 40px;
-            display: flex;
-            justify-content: center;
-            color: #999;
-            font-size: 14px;
-        }
-
-        /* Copyright Section Styling */
-        .copyright {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 13px;
-            color: #888;
-            font-weight: 500;
-            width: 100%;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0; /* Subtle line separator */
+        /* Hover Glow Effect */
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(0, 209, 255, 0.3);
+            border-color: rgba(0, 209, 255, 0.5);
         }
     </style>
 </head>
-<body>
+<body class="text-white antialiased min-h-screen flex flex-col items-center">
 
-    <div class="container">
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <!-- Added onerror to show a default user icon if image fails -->
-            <img src="profile.jpg" alt="Amr Elharony" class="profile-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-            <i class="fa-solid fa-circle-user" style="font-size: 96px; color: #ccc; margin-bottom: 16px; display: none;"></i>
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center">
+        
+        <div class="relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse-slow"></div>
             
-            <h1 class="profile-name">Amr Elharony</h1>
-            <p class="profile-bio">Agile Delivery Lead |<br>Mentor | Fintech Speaker</p>
-        </div>
-
-        <!-- Social Icons Header -->
-        <div class="social-icons">
-            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-            <a href="https://www.linkedin.com/in/amrmelharony?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-            <a href="https://t.me/Amrmelharony" target="_blank"><i class="fa-brands fa-telegram"></i></a>
-            <a href="https://calendly.com/amrmelharony/30min" target="_blank"><i class="fa-solid fa-globe"></i></a>
-            <a href="mailto:a.elharony@gmail.com"><i class="fa-regular fa-envelope"></i></a>
-        </div>
-
-        <div class="links-wrapper">
+            <div class="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl">
+                <img src="profile.jpg" alt="Amr Elharony" class="w-full h-full object-cover transform transition duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-full h-full bg-slate-800 flex items-center justify-center hidden">
+                    <i class="fa-solid fa-user text-4xl text-slate-500"></i>
+                </div>
+            </div>
             
-            <!-- Link 1: Fintech Bilinguals -->
-            <a href="https://www.linkedin.com/company/fintech-bilinguals/about/?viewAsMember=true" class="link-btn" target="_blank">
-                <div class="link-thumb">
-                    <img src="linkedin.png" alt="LinkedIn" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
-                    <!-- Fallback Icon if image fails -->
-                    <i class="fa-brands fa-linkedin fallback"></i>
+            <div class="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full p-1.5 shadow-lg border-2 border-[#0a0f1c]">
+                <i class="fa-solid fa-check text-xs"></i>
+            </div>
+        </div>
+
+        <h1 class="mt-6 text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500 text-center">
+            Amr Elharony
+        </h1>
+        
+        <p class="mt-2 text-sm text-gray-400 font-mono tracking-wide bg-white/5 px-3 py-1 rounded-full border border-white/5">
+            AGILE • DATA • FINTECH
+        </p>
+
+        <div class="flex gap-6 mt-8 mb-10">
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="text-gray-400 hover:text-white transform hover:scale-125 transition duration-300">
+                <i class="fa-brands fa-linkedin text-2xl"></i>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="text-gray-400 hover:text-green-400 transform hover:scale-125 transition duration-300">
+                <i class="fa-brands fa-whatsapp text-2xl"></i>
+            </a>
+            <a href="https://t.me/Amrmelharony" target="_blank" class="text-gray-400 hover:text-blue-400 transform hover:scale-125 transition duration-300">
+                <i class="fa-brands fa-telegram text-2xl"></i>
+            </a>
+            <a href="mailto:a.elharony@gmail.com" class="text-gray-400 hover:text-yellow-400 transform hover:scale-125 transition duration-300">
+                <i class="fa-solid fa-envelope text-2xl"></i>
+            </a>
+        </div>
+
+        <div class="w-full space-y-4">
+            
+            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" 
+               class="glass-card flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover-glow group">
+                <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-cyan-500/20 transition-colors">
+                    <img src="be.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <i class="fa-solid fa-building-columns text-cyan-400 text-xl hidden"></i>
                 </div>
-                <span class="link-text">Fintech Bilinguals</span>
-                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-100 group-hover:text-cyan-400 transition-colors">Fintech Bilinguals</h3>
+                    <p class="text-xs text-gray-500">Community & Leadership</p>
+                </div>
+                <i class="fa-solid fa-arrow-right text-gray-600 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
             </a>
 
-            <!-- Link 2: Get Mentored -->
-            <a href="https://adplist.org/mentors/amr-elharony" class="link-btn" target="_blank">
-                <div class="link-thumb">
-                    <img src="smiley.jpg" alt="Mentored" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
-                    <i class="fa-regular fa-face-smile fallback"></i>
+            <a href="https://adplist.org/mentors/amr-elharony" target="_blank"
+               class="glass-card flex items-center p-4 rounded-xl transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover-glow group">
+                <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-purple-500/20 transition-colors">
+                    <img src="smiley.jpg" class="w-8 h-8 rounded-md object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <i class="fa-solid fa-user-graduate text-purple-400 text-xl hidden"></i>
                 </div>
-                <span class="link-text">Get Mentored for Free!</span>
-                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-100 group-hover:text-purple-400 transition-colors">Get Mentored</h3>
+                    <p class="text-xs text-gray-500">1:1 Agile Coaching</p>
+                </div>
+                <i class="fa-solid fa-arrow-right text-gray-600 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
             </a>
 
-            <!-- Section Header -->
-            <div class="section-header">Linkedin Newsletters</div>
+            <div class="flex items-center gap-4 my-6 opacity-50">
+                <div class="h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent w-full"></div>
+                <span class="text-xs font-mono text-gray-400 whitespace-nowrap">LATEST INSIGHTS</span>
+                <div class="h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent w-full"></div>
+            </div>
 
-            <!-- Link 3 -->
-            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" class="link-btn" target="_blank">
-                <div class="link-thumb">
-                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
-                    <i class="fa-solid fa-newspaper fallback"></i>
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank"
+               class="glass-card flex items-center p-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover-glow group">
+                <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-rocket text-yellow-500"></i>
                 </div>
-                <span class="link-text">LevelUp Your Leadership</span>
-                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-sm text-gray-200">LevelUp Leadership</h3>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600"></i>
             </a>
-
-            <!-- Link 4 -->
-            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" class="link-btn" target="_blank">
-                <div class="link-thumb">
-                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
-                    <i class="fa-solid fa-newspaper fallback"></i>
+            
+            <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank"
+               class="glass-card flex items-center p-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover-glow group">
+                <div class="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-microchip text-blue-500"></i>
                 </div>
-                <span class="link-text">LevelUp Your Business</span>
-                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
-            </a>
-
-            <!-- Link 5 -->
-            <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" class="link-btn" target="_blank">
-                <div class="link-thumb">
-                    <img src="logo.jpg" alt="AE Logo" onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='block';">
-                    <i class="fa-solid fa-newspaper fallback"></i>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-sm text-gray-200">LevelUp Your Tech</h3>
                 </div>
-                <span class="link-text">LevelUp Your Tech</span>
-                <div class="link-options"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600"></i>
             </a>
 
         </div>
 
-        <!-- NEW COPYRIGHT SECTION -->
-        <div class="copyright">
-            &copy; <span id="year"></span> Amr Elharony. All Rights Reserved.
-        </div>
+        <footer class="mt-16 text-center text-xs text-gray-600">
+            <p>&copy; <span id="year"></span> Amr Elharony</p>
+            <p class="mt-1 opacity-50">Powered by Vercel & React Logic</p>
+        </footer>
 
     </div>
 
-    <!-- Script to set current year automatically -->
     <script>
-        document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
+        // Set Year
+        document.getElementById('year').textContent = new Date().getFullYear();
 
+        // Particle Animation System
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        // Fintech Node Config
+        const properties = {
+            particleColor: 'rgba(0, 209, 255, 1)', // Cyan nodes
+            lineColor: 'rgba(0, 209, 255, 0.15)',  // Faint lines
+            particleCount: 60,
+            connectionDistance: 150,
+            speed: 0.5
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * properties.speed;
+                this.vy = (Math.random() - 0.5) * properties.speed;
+                this.size = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = properties.particleColor;
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < properties.particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Draw Connections (The "Network" effect)
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+
+                    if (distance < properties.connectionDistance) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = properties.lineColor;
+                        ctx.lineWidth = 1 - (distance / properties.connectionDistance);
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resize();
+            init();
+        });
+
+        resize();
+        init();
+        animate();
+    </script>
 </body>
 </html>
