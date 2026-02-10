@@ -311,14 +311,23 @@
                 ease: "power2.out"
             }, "-=0.5")
 
-            // 3. Animate Newsletters explicitly (guarantees visibility)
+            // 3. Animate Newsletters with FIX (clearProps)
             .from(".newsletter-card", {
                 duration: 0.8,
                 y: 30,
                 opacity: 0,
                 stagger: 0.1,
-                ease: "power3.out"
+                ease: "power3.out",
+                clearProps: "all" // FIX 1: Removes inline styles after animation
             }, "-=0.2");
+
+            // FIX 2: Safety Fallback - Ensure visibility
+            tl.eventCallback("onComplete", () => {
+                document.querySelectorAll('.newsletter-card').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                });
+            });
         }
 
         // 2. 3D TILT EFFECT
