@@ -223,7 +223,7 @@
         </div>
         
         <footer class="mt-16 text-center opacity-30 hover:opacity-100 transition-opacity duration-500">
-            <p class="text-[10px] font-mono text-cyan-400">&copy; <span id="year"></span> SYSTEM: ONLINE</p>
+            <p class="text-[10px] font-mono text-cyan-400">&copy; <span id="year"></span> Amr Elharony</p>
         </footer>
 
     </div>
@@ -289,7 +289,7 @@
                 scale: 0,
                 stagger: 0.1,
                 ease: "back.out",
-                clearProps: "all" // CRITICAL FIX: Removes stuck styles
+                clearProps: "all"
             }, "-=0.3")
             
             // --- FIX FOR MAIN LINKS ---
@@ -319,7 +319,7 @@
                 clearProps: "all" 
             }, "-=0.2");
 
-            // --- SAFETY NET (Runs after animation to guarantee visibility) ---
+            // --- SAFETY NET ---
             tl.eventCallback("onComplete", () => {
                 const forceVisible = (selector) => {
                     document.querySelectorAll(selector).forEach(el => {
