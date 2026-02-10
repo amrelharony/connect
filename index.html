@@ -7,25 +7,28 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'] 
+                    },
                     colors: {
                         fintech: {
-                            dark: '#0f172a',   /* Slate 900 */
-                            card: 'rgba(30, 41, 59, 0.4)', /* Glass */
-                            cyan: '#06b6d4',
-                            gold: '#f59e0b'
+                            dark: '#0B0F19',   
+                            card: 'rgba(255, 255, 255, 0.03)', 
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            cyan: '#00F0FF',
+                            gold: '#FFD700'
                         }
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -34,11 +37,55 @@
 
     <style>
         body {
-            background-color: #0f172a;
-            overflow-x: hidden;
-            touch-action: pan-y; /* Allow vertical scroll but capture horizontal */
+            background-color: #0B0F19;
+            overflow: hidden; /* Locked during loading */
         }
         
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0B0F19;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: #00F0FF;
+            box-shadow: 0 0 10px #00F0FF;
+        }
+
+        /* Glass Cards with 3D Preservation */
+        .glass-card {
+            background: var(--tw-colors-fintech-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--tw-colors-fintech-border);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        /* Interactive Background */
         #canvas-bg {
             position: fixed;
             top: 0;
@@ -48,304 +95,313 @@
             z-index: -1;
         }
 
-        /* Glassmorphism */
-        .glass-card {
-            background: var(--tw-colors-fintech-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .hover-glow:hover {
-            border-color: rgba(6, 182, 212, 0.5);
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        /* Tech Glow */
+        .tech-glow {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
         }
     </style>
 </head>
 <body class="text-white antialiased min-h-screen flex flex-col items-center">
 
+    <div id="preloader">
+        <div class="font-mono text-xs text-cyan-400 tracking-widest mb-2">ESTABLISHING SECURE CONNECTION</div>
+        <div class="text-4xl font-bold font-mono text-white" id="counter">0%</div>
+        <div class="loader-bar">
+            <div class="loader-progress" id="progress-bar"></div>
+        </div>
+    </div>
+
     <canvas id="canvas-bg"></canvas>
 
-    <div class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center">
+    <div id="main-content" class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center opacity-0 translate-y-4">
         
-        <div class="relative group cursor-pointer">
-            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-            <div class="relative w-32 h-32 rounded-full overflow-hidden border-2 border-slate-800">
+        <div class="relative group cursor-pointer perspective-container">
+            <div class="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur opacity-20 group-hover:opacity-70 transition duration-1000 animate-pulse"></div>
+            
+            <div class="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/10 z-10" id="profile-img">
                 <img src="profile.jpg" alt="Amr Elharony" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="w-full h-full bg-slate-700 flex items-center justify-center hidden">
-                    <i class="fa-solid fa-user text-4xl"></i>
+                <div class="w-full h-full bg-slate-800 flex items-center justify-center hidden">
+                    <i class="fa-solid fa-user text-4xl text-slate-500"></i>
                 </div>
             </div>
-            <div class="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full p-1.5 border-2 border-slate-900 shadow-lg">
+            
+            <div class="absolute bottom-1 right-1 bg-cyan-500 text-black font-bold rounded-full p-1.5 border-4 border-[#0B0F19] z-20 shadow-xl">
                 <i class="fa-solid fa-check text-[10px]"></i>
             </div>
         </div>
 
-        <h1 class="mt-6 text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-            Amr Elharony
+        <h1 class="mt-8 text-3xl font-extrabold text-center tracking-tight" id="hero-name">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">Amr Elharony</span>
         </h1>
         
-        <p class="mt-2 text-center text-sm text-cyan-400 font-medium tracking-wide">
-            Delivery Lead | Mentor | Fintech Author & Speaker
-        </p>
-
-        <div class="flex gap-6 mt-6 mb-8">
-            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="hover:text-cyan-400 transition transform hover:scale-110"><i class="fa-brands fa-linkedin text-2xl"></i></a>
-            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="hover:text-green-400 transition transform hover:scale-110"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
-            <a href="https://t.me/Amrmelharony" target="_blank" class="hover:text-blue-400 transition transform hover:scale-110"><i class="fa-brands fa-telegram text-2xl"></i></a>
-            <a href="mailto:a.elharony@gmail.com" class="hover:text-yellow-400 transition transform hover:scale-110"><i class="fa-solid fa-envelope text-2xl"></i></a>
+        <div class="mt-2 flex flex-wrap justify-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400 uppercase opacity-80" id="hero-role">
+            <span class="bg-cyan-900/20 px-2 py-1 rounded border border-cyan-500/20">Fintech Author</span>
+            <span class="bg-cyan-900/20 px-2 py-1 rounded border border-cyan-500/20">Delivery Lead</span>
+            <span class="bg-cyan-900/20 px-2 py-1 rounded border border-cyan-500/20">Speaker</span>
         </div>
 
-        <div class="w-full space-y-4">
+        <div class="flex gap-6 mt-8 mb-10" id="social-row">
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="text-gray-400 hover:text-white hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="text-gray-400 hover:text-green-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" class="text-gray-400 hover:text-blue-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="text-gray-400 hover:text-yellow-400 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
+        </div>
+
+        <div class="w-full space-y-4 perspective-1000">
             
-            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" 
-               class="glass-card flex items-center p-4 rounded-xl hover:bg-white/5 hover:-translate-y-1 hover-glow transition-all duration-300 group">
-                <div class="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mr-4 group-hover:bg-cyan-900/30">
+            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
                     <img src="be.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <i class="fa-solid fa-book-open text-cyan-400 text-xl hidden"></i>
+                    <i class="fa-solid fa-book text-cyan-400 text-xl hidden"></i>
                 </div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-gray-100 group-hover:text-cyan-400 transition-colors">The Bilingual Executive</h3>
-                    <p class="text-xs text-gray-400">My Book</p>
+                <div class="flex-1 z-10">
+                    <h3 class="font-bold text-white group-hover:text-cyan-400 transition-colors">The Bilingual Executive</h3>
+                    <p class="text-xs text-gray-400 font-mono mt-0.5">My Book</p>
                 </div>
-                <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-white"></i>
+                <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                    <i class="fa-solid fa-arrow-right text-cyan-400"></i>
+                </div>
             </a>
 
-            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" 
-               class="glass-card flex items-center p-4 rounded-xl hover:bg-white/5 hover:-translate-y-1 hover-glow transition-all duration-300 group">
-                <div class="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mr-4 group-hover:bg-blue-900/30">
+            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
                     <img src="fb.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <i class="fa-solid fa-users text-blue-400 text-xl hidden"></i>
                 </div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-gray-100 group-hover:text-blue-400 transition-colors">Fintech Bilinguals</h3>
-                    <p class="text-xs text-gray-400">Join the Community</p>
+                <div class="flex-1 z-10">
+                    <h3 class="font-bold text-white group-hover:text-blue-400 transition-colors">Fintech Bilinguals</h3>
+                    <p class="text-xs text-gray-400 font-mono mt-0.5">Join the Community</p>
                 </div>
-                <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-white"></i>
+                <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                    <i class="fa-solid fa-arrow-right text-blue-400"></i>
+                </div>
             </a>
 
-            <a href="https://adplist.org/mentors/amr-elharony" target="_blank"
-               class="glass-card flex items-center p-4 rounded-xl hover:bg-white/5 hover:-translate-y-1 hover-glow transition-all duration-300 group">
-                <div class="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mr-4 group-hover:bg-purple-900/30">
-                    <img src="smiley.jpg" class="w-8 h-8 rounded-md object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
+                    <img src="smiley.jpg" class="w-8 h-8 rounded-lg object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <i class="fa-solid fa-graduation-cap text-purple-400 text-xl hidden"></i>
                 </div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-gray-100 group-hover:text-purple-400 transition-colors">Get Mentored</h3>
-                    <p class="text-xs text-gray-400">Free 1:1 Agile Coaching</p>
+                <div class="flex-1 z-10">
+                    <h3 class="font-bold text-white group-hover:text-purple-400 transition-colors">Get Mentored</h3>
+                    <p class="text-xs text-gray-400 font-mono mt-0.5">Free 1:1 Agile Coaching</p>
                 </div>
-                <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-white"></i>
+                <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                    <i class="fa-solid fa-arrow-right text-purple-400"></i>
+                </div>
             </a>
-            
-             <div class="text-xs font-mono text-gray-500 text-center pt-4 tracking-widest uppercase">Linkedin Newsletters</div>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank"
-                class="glass-card flex items-center p-3 rounded-lg hover:bg-white/5 transition-all duration-300 group">
-                 <div class="w-8 h-8 flex items-center justify-center mr-3">
-                     <i class="fa-solid fa-chart-line text-yellow-500"></i>
-                 </div>
-                 <div class="flex-1">
-                     <h3 class="font-medium text-sm text-gray-200">LevelUp Your Leadership</h3>
-                 </div>
-                 <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600"></i>
-             </a>
+            <div class="flex items-center gap-4 my-8 opacity-40">
+                <div class="h-px bg-white w-full"></div>
+                <span class="text-[10px] font-mono tracking-widest whitespace-nowrap text-cyan-400">NEWSLETTERS</span>
+                <div class="h-px bg-white w-full"></div>
+            </div>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank"
-                class="glass-card flex items-center p-3 rounded-lg hover:bg-white/5 transition-all duration-300 group">
-                 <div class="w-8 h-8 flex items-center justify-center mr-3">
-                     <i class="fa-solid fa-briefcase text-green-500"></i>
-                 </div>
-                 <div class="flex-1">
-                     <h3 class="font-medium text-sm text-gray-200">LevelUp Your Business</h3>
-                 </div>
-                 <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600"></i>
-             </a>
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+                <i class="fa-solid fa-chart-line text-yellow-500 w-8 text-center"></i>
+                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Leadership</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+            </a>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank"
-                class="glass-card flex items-center p-3 rounded-lg hover:bg-white/5 transition-all duration-300 group">
-                 <div class="w-8 h-8 flex items-center justify-center mr-3">
-                     <i class="fa-solid fa-microchip text-cyan-500"></i>
-                 </div>
-                 <div class="flex-1">
-                     <h3 class="font-medium text-sm text-gray-200">LevelUp Your Tech</h3>
-                 </div>
-                 <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600"></i>
-             </a>
+            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+                <i class="fa-solid fa-briefcase text-green-500 w-8 text-center"></i>
+                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Business</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+            </a>
+
+             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+                <i class="fa-solid fa-microchip text-cyan-500 w-8 text-center"></i>
+                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Tech</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+            </a>
 
         </div>
-
-        <footer class="mt-12 text-center text-[10px] text-gray-600">
-            <p>&copy; <span id="year"></span> Amr Elharony</p>
+        
+        <footer class="mt-16 text-center opacity-30 hover:opacity-100 transition-opacity duration-500">
+            <p class="text-[10px] font-mono text-cyan-400">&copy; <span id="year"></span> SYSTEM: ONLINE</p>
         </footer>
+
     </div>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
+        // 1. LOADING SEQUENCE (GSAP)
+        const tl = gsap.timeline();
+
+        // Simulate Loading Counter
+        let count = 0;
+        const counterEl = document.getElementById('counter');
+        const progressEl = document.getElementById('progress-bar');
+        
+        const loadingInterval = setInterval(() => {
+            count += Math.floor(Math.random() * 5) + 1;
+            if(count > 100) count = 100;
+            
+            counterEl.innerText = count + '%';
+            progressEl.style.width = count + '%';
+
+            if(count === 100) {
+                clearInterval(loadingInterval);
+                finishLoading();
+            }
+        }, 30); // Speed of loader
+
+        function finishLoading() {
+            // Unlock scrolling
+            document.body.style.overflow = 'auto';
+
+            // Sequence: Fade out loader -> Reveal Content
+            tl.to("#preloader", {
+                duration: 0.8,
+                yPercent: -100,
+                ease: "power4.inOut"
+            })
+            .to("#main-content", {
+                duration: 0.1,
+                opacity: 1,
+                y: 0
+            }, "-=0.4")
+            .from("#profile-img", {
+                duration: 1,
+                scale: 0,
+                rotation: -180,
+                ease: "back.out(1.7)"
+            })
+            .from("#hero-name", {
+                duration: 0.8,
+                y: 20,
+                opacity: 0,
+                ease: "power2.out"
+            }, "-=0.5")
+            .from("#hero-role span", {
+                duration: 0.5,
+                opacity: 0,
+                y: 10,
+                stagger: 0.1
+            }, "-=0.3")
+            .from("#social-row a", {
+                duration: 0.5,
+                scale: 0,
+                stagger: 0.1,
+                ease: "back.out"
+            }, "-=0.3")
+            .from(".tilt-card", {
+                duration: 0.8,
+                y: 50,
+                opacity: 0,
+                stagger: 0.1,
+                ease: "power3.out"
+            }, "-=0.2");
+        }
+
+        // 2. 3D TILT EFFECT FOR CARDS (Vanilla JS)
+        const cards = document.querySelectorAll('.tilt-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Calculate percentage
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // Max rotation deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                card.style.transition = 'transform 0.5s ease';
+            });
+            
+            // Remove transition during movement for smoothness
+            card.addEventListener('mouseenter', () => {
+                card.style.transition = 'none';
+            });
+        });
+
+        // 3. CANVAS BACKGROUND (Optimized Network Mesh)
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
-        
         let width, height;
         let particles = [];
         
-        // INTERACTION VARIABLES
-        let mouseX = -9999;
-        let mouseY = -9999;
-        let gyroX = 0;
-        let gyroY = 0;
-        let isMobile = false;
-
-        // Configuration
+        // Fintech/Cyber Colors
         const config = {
-            particleCount: 70,
-            connectionDist: 140,
-            speed: 0.3,
-            color: 'rgba(6, 182, 212, ', // Cyan base
-            mouseRadius: 150, // Distance mouse/touch affects particles
-            gyroSensitivity: 0.5 // How much tilt moves particles
+            particleCount: window.innerWidth < 768 ? 40 : 80,
+            color: 'rgba(0, 240, 255, ',
+            connDist: 150
         };
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            isMobile = width < 768;
-            config.particleCount = isMobile ? 45 : 70; // Fewer particles on mobile for performance
-            initParticles(); 
+            config.particleCount = window.innerWidth < 768 ? 40 : 80;
+            initParticles();
         }
-
-        // MOUSE TRACKING (Desktop)
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        // TOUCH TRACKING (Mobile Interaction)
-        window.addEventListener('touchmove', (e) => {
-            if(e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-
-        window.addEventListener('touchstart', (e) => {
-            if(e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-
-        window.addEventListener('touchend', () => {
-            // Move "mouse" off screen when touch ends so particles drift back
-            mouseX = -9999;
-            mouseY = -9999;
-        });
-
-        // GYROSCOPE TRACKING
-        window.addEventListener('deviceorientation', (e) => {
-            if(e.beta !== null && e.gamma !== null) {
-                gyroX = e.gamma * config.gyroSensitivity; 
-                gyroY = e.beta * config.gyroSensitivity;
-            }
-        });
 
         class Particle {
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * config.speed;
-                this.vy = (Math.random() - 0.5) * config.speed;
-                this.size = Math.random() * 2 + 1;
-                this.baseX = this.x;
-                this.baseY = this.y;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 1.5 + 0.5;
             }
-
             update() {
-                // 1. Standard Movement
                 this.x += this.vx;
                 this.y += this.vy;
-
-                // 2. Boundary Bounce
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-
-                // 3. GYROSCOPE EFFECT (Mobile Tilt)
-                if (isMobile) {
-                    this.x += gyroX * 0.05;
-                    this.y += gyroY * 0.05;
-                    
-                    // Wrap around screen on hard tilt
-                    if(this.x > width) this.x = 0;
-                    if(this.x < 0) this.x = width;
-                    if(this.y > height) this.y = 0;
-                    if(this.y < 0) this.y = height;
-                }
-
-                // 4. MOUSE/TOUCH REPULSION (Works on BOTH now)
-                let dx = mouseX - this.x;
-                let dy = mouseY - this.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-
-                if (distance < config.mouseRadius) {
-                    const forceDirectionX = dx / distance;
-                    const forceDirectionY = dy / distance;
-                    const force = (config.mouseRadius - distance) / config.mouseRadius;
-                    
-                    // Gentle push away from cursor/finger
-                    const directionX = forceDirectionX * force * 3; // Increased force slightly
-                    const directionY = forceDirectionY * force * 3;
-                    
-                    this.x -= directionX;
-                    this.y -= directionY;
-                }
+                if(this.x < 0 || this.x > width) this.vx *= -1;
+                if(this.y < 0 || this.y > height) this.vy *= -1;
             }
-
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = config.color + '0.7)';
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.fillStyle = config.color + '0.5)';
                 ctx.fill();
             }
         }
 
         function initParticles() {
             particles = [];
-            for (let i = 0; i < config.particleCount; i++) {
-                particles.push(new Particle());
-            }
+            for(let i=0; i<config.particleCount; i++) particles.push(new Particle());
         }
 
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            
-            for (let i = 0; i < particles.length; i++) {
-                let p = particles[i];
+        function animateBg() {
+            ctx.clearRect(0,0,width,height);
+            particles.forEach((p, i) => {
                 p.update();
                 p.draw();
-
-                // Draw Connections
-                for (let j = i; j < particles.length; j++) {
-                    let p2 = particles[j];
-                    let dx = p.x - p2.x;
-                    let dy = p.y - p2.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-
-                    if (dist < config.connectionDist) {
+                for(let j=i; j<particles.length; j++) {
+                    const dx = p.x - particles[j].x;
+                    const dy = p.y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx+dy*dy);
+                    if(dist < config.connDist) {
                         ctx.beginPath();
-                        ctx.strokeStyle = config.color + (1 - dist/config.connectionDist) * 0.2 + ')';
+                        ctx.strokeStyle = config.color + (1 - dist/config.connDist)*0.15 + ')';
                         ctx.lineWidth = 0.5;
                         ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
                         ctx.stroke();
                     }
                 }
-            }
-            requestAnimationFrame(animate);
+            });
+            requestAnimationFrame(animateBg);
         }
 
         window.addEventListener('resize', resize);
         resize();
-        animate();
+        initParticles();
+        animateBg();
+
     </script>
 </body>
 </html>
