@@ -20,6 +20,7 @@
 
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { 
@@ -29,8 +30,7 @@
                     colors: {
                         fintech: {
                             dark: '#0B0F19',   
-                            card: 'rgba(255, 255, 255, 0.03)', 
-                            border: 'rgba(255, 255, 255, 0.08)',
+                            light: '#F8FAFC',
                             cyan: '#00F0FF',
                             gold: '#FFD700'
                         }
@@ -41,32 +41,59 @@
     </script>
 
     <style>
+        :root {
+            /* DARK MODE DEFAULTS */
+            --bg-color: #0B0F19;
+            --text-main: #ffffff;
+            --text-sub: #9ca3af;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(255, 255, 255, 0.1);
+            --icon-box: rgba(255, 255, 255, 0.05);
+            --particle-color: 0, 240, 255; /* Cyan */
+        }
+
+        .light-mode {
+            /* LIGHT MODE OVERRIDES */
+            --bg-color: #F8FAFC;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --card-bg: rgba(255, 255, 255, 0.6);
+            --card-border: rgba(226, 232, 240, 0.8);
+            --card-hover: rgba(255, 255, 255, 0.9);
+            --icon-box: rgba(15, 23, 42, 0.05);
+            --particle-color: 15, 23, 42; /* Slate 900 */
+        }
+
         body {
-            background-color: #0B0F19;
-            overflow: hidden; /* Locked during loading */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden; 
             touch-action: pan-y;
+            transition: background-color 0.5s ease, color 0.5s ease;
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Preloader Styles */
+        /* Preloader */
         #preloader {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0B0F19;
+            background: var(--bg-color);
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            transition: background-color 0.5s ease;
         }
 
         .loader-bar {
             width: 200px;
             height: 2px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(125,125,125,0.2);
             margin-top: 20px;
             position: relative;
             overflow: hidden;
@@ -84,15 +111,31 @@
 
         /* Glass Cards */
         .glass-card {
-            background: var(--tw-colors-fintech-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--tw-colors-fintech-border);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
             transform-style: preserve-3d;
             perspective: 1000px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: background 0.3s, border 0.3s, transform 0.3s;
+        }
+
+        .glass-card:hover {
+            background: var(--card-hover);
         }
         
-        /* Interactive Background */
+        /* Icon Boxes inside cards */
+        .icon-box {
+            background: var(--icon-box);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Subtext */
+        .text-sub {
+            color: var(--text-sub);
+        }
+
         #canvas-bg {
             position: fixed;
             top: 0;
@@ -102,11 +145,11 @@
             z-index: -1;
         }
 
-        /* --- NEW: FLIP CARD LOGIC --- */
+        /* Flip Logic */
         .flip-container {
             perspective: 1000px;
-            width: 128px; /* w-32 */
-            height: 128px; /* h-32 */
+            width: 128px; 
+            height: 128px; 
         }
         .flip-inner {
             position: relative;
@@ -137,13 +180,41 @@
             justify-content: center;
             border: 4px solid #00F0FF;
         }
+
+        /* Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
-<body class="text-white antialiased min-h-screen flex flex-col items-center">
+<body class="antialiased min-h-screen flex flex-col items-center">
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+        <i class="fa-solid fa-sun" id="theme-icon"></i>
+    </button>
 
     <div id="preloader">
         <div class="font-mono text-xs text-cyan-400 tracking-widest mb-2">ESTABLISHING CONNECTION</div>
-        <div class="text-4xl font-bold font-mono text-white" id="counter">0%</div>
+        <div class="text-4xl font-bold font-mono" style="color: var(--text-main)" id="counter">0%</div>
         <div class="loader-bar">
             <div class="loader-progress" id="progress-bar"></div>
         </div>
@@ -179,13 +250,14 @@
             </div>
             
             <div class="absolute bottom-0 right-0 bg-cyan-500 text-black font-bold rounded-full p-1.5 border-4 border-[#0B0F19] z-20 shadow-xl pointer-events-none">
-                <i class="fa-solid fa-qrcode text-[10px]"></i> </div>
+                <i class="fa-solid fa-qrcode text-[10px]"></i>
+            </div>
         </div>
         
         <p class="text-[9px] text-gray-500 font-mono mb-6 mt-1 opacity-60">TAP PHOTO TO CONNECT</p>
 
         <h1 class="text-3xl font-extrabold text-center tracking-tight" id="hero-name">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">Amr Elharony</span>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Amr Elharony</span>
         </h1>
         
         <div class="mt-2 flex flex-wrap justify-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400 uppercase opacity-80" id="hero-role">
@@ -195,23 +267,23 @@
         </div>
 
         <div class="flex gap-6 mt-8 mb-10" id="social-row">
-            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="social-icon text-gray-400 hover:text-white hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
-            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="social-icon text-gray-400 hover:text-green-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
-            <a href="https://t.me/Amrmelharony" target="_blank" class="social-icon text-gray-400 hover:text-blue-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
-            <a href="mailto:a.elharony@gmail.com" class="social-icon text-gray-400 hover:text-yellow-400 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="social-icon text-sub hover:text-cyan-500 hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="social-icon text-sub hover:text-green-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" class="social-icon text-sub hover:text-blue-400 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="social-icon text-sub hover:text-yellow-400 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
         </div>
 
         <div class="w-full space-y-4 perspective-1000">
             
             <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
+                <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="be.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <i class="fa-solid fa-book text-cyan-400 text-xl hidden"></i>
                 </div>
                 <div class="flex-1 z-10">
-                    <h3 class="font-bold text-white group-hover:text-cyan-400 transition-colors">The Bilingual Executive</h3>
-                    <p class="text-xs text-gray-400 font-mono mt-0.5">My Book</p>
+                    <h3 class="font-bold transition-colors" style="color: var(--text-main)">The Bilingual Executive</h3>
+                    <p class="text-xs font-mono mt-0.5 text-sub">My Book</p>
                 </div>
                 <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                     <i class="fa-solid fa-arrow-right text-cyan-400"></i>
@@ -220,13 +292,13 @@
 
             <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
+                <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="fb.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <i class="fa-solid fa-users text-blue-400 text-xl hidden"></i>
                 </div>
                 <div class="flex-1 z-10">
-                    <h3 class="font-bold text-white group-hover:text-blue-400 transition-colors">Fintech Bilinguals</h3>
-                    <p class="text-xs text-gray-400 font-mono mt-0.5">Join the Community</p>
+                    <h3 class="font-bold transition-colors" style="color: var(--text-main)">Fintech Bilinguals</h3>
+                    <p class="text-xs font-mono mt-0.5 text-sub">Join the Community</p>
                 </div>
                 <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                     <i class="fa-solid fa-arrow-right text-blue-400"></i>
@@ -235,13 +307,13 @@
 
             <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mr-4 shadow-inner border border-white/5 z-10">
+                <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="smiley.jpg" class="w-8 h-8 rounded-lg object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <i class="fa-solid fa-graduation-cap text-purple-400 text-xl hidden"></i>
                 </div>
                 <div class="flex-1 z-10">
-                    <h3 class="font-bold text-white group-hover:text-purple-400 transition-colors">Get Mentored</h3>
-                    <p class="text-xs text-gray-400 font-mono mt-0.5">Free 1:1 Agile Coaching</p>
+                    <h3 class="font-bold transition-colors" style="color: var(--text-main)">Get Mentored</h3>
+                    <p class="text-xs font-mono mt-0.5 text-sub">Free 1:1 Agile Coaching</p>
                 </div>
                 <div class="z-10 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                     <i class="fa-solid fa-arrow-right text-purple-400"></i>
@@ -249,33 +321,33 @@
             </a>
 
             <div id="newsletter-divider" class="flex items-center gap-4 my-8 opacity-40">
-                <div class="h-px bg-white w-full"></div>
+                <div class="h-px w-full" style="background-color: var(--text-sub)"></div>
                 <span class="text-[10px] font-mono tracking-widest whitespace-nowrap text-cyan-400">NEWSLETTERS</span>
-                <div class="h-px bg-white w-full"></div>
+                <div class="h-px w-full" style="background-color: var(--text-sub)"></div>
             </div>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-chart-line text-yellow-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Leadership</span>
-                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Leadership</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-briefcase text-green-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Business</span>
-                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Business</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center hover:bg-white/5 transition duration-300">
+             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-microchip text-cyan-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-gray-300">LevelUp Your Tech</span>
-                <i class="fa-solid fa-external-link-alt text-xs text-gray-600"></i>
+                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Tech</span>
+                <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
         </div>
         
         <footer class="mt-16 text-center opacity-30 hover:opacity-100 transition-opacity duration-500">
-            <p class="text-[10px] font-mono text-cyan-400">&copy; <span id="year"></span> Amr Elharony</p>
+            <p class="text-[10px] font-mono text-sub">&copy; <span id="year"></span> Amr Elharony</p>
         </footer>
 
     </div>
@@ -283,16 +355,39 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- NEW: FLIP CARD LOGIC ---
+        // --- THEME LOGIC ---
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+                config.color = 'rgba(15, 23, 42, '; // Dark Blue particles
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+                config.color = 'rgba(0, 240, 255, '; // Cyan particles
+            }
+            initParticles(); // Redraw particles with new color
+        }
+
+        // Check Local Storage
+        if (localStorage.getItem('theme') === 'light') {
+            toggleTheme();
+        }
+
+        // --- FLIP CARD LOGIC ---
         function toggleFlip() {
             const card = document.getElementById('flip-card');
             card.classList.toggle('flipped');
         }
 
-        // --- NEW: LIVE TIME LOGIC (CAIRO) ---
+        // --- LIVE TIME LOGIC ---
         function updateStatus() {
             const date = new Date();
-            // Get time in Cairo
             const cairoTime = date.toLocaleString("en-US", {timeZone: "Africa/Cairo", hour: "numeric", hour12: false});
             const hour = parseInt(cairoTime);
             
@@ -301,31 +396,26 @@
             const ping = document.getElementById('status-ping');
             const text = document.getElementById('status-text');
 
-            // Make visible after load
             badge.style.opacity = '1';
             badge.style.transform = 'translateY(0)';
 
             if (hour >= 9 && hour < 17) {
-                // Working Hours
                 text.innerText = "CAIRO: BUILDING FINTECH 🏦";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-green-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75";
             } else if (hour >= 17 && hour < 23) {
-                // Mentoring / Writing
                 text.innerText = "CAIRO: MENTORING / WRITING ✍️";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-purple-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75";
             } else {
-                // Sleeping / Recharging
                 text.innerText = "CAIRO: RECHARGING 🔋";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-orange-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75";
             }
         }
+        setTimeout(updateStatus, 1500);
 
-        // Run status check
-        setTimeout(updateStatus, 1500); // Delay slightly so it pops in after loader
-
+        // --- GSAP LOADER ---
         const tl = gsap.timeline();
         let count = 0;
         const counterEl = document.getElementById('counter');
@@ -334,7 +424,6 @@
         const loadingInterval = setInterval(() => {
             count += Math.floor(Math.random() * 5) + 2;
             if(count > 100) count = 100;
-            
             counterEl.innerText = count + '%';
             progressEl.style.width = count + '%';
 
@@ -348,73 +437,16 @@
             document.body.style.overflowY = 'auto'; 
             document.body.style.overflowX = 'hidden';
 
-            tl.to("#preloader", {
-                duration: 0.8,
-                yPercent: -100,
-                ease: "power4.inOut"
-            })
-            .to("#main-content", {
-                duration: 0.2,
-                opacity: 1,
-                y: 0
-            }, "-=0.4")
-            .from("#profile-section", {
-                duration: 1,
-                scale: 0.5,
-                opacity: 0,
-                rotation: -10,
-                ease: "back.out(1.7)"
-            })
-            .from("#hero-name", {
-                duration: 0.8,
-                y: 20,
-                opacity: 0,
-                ease: "power2.out"
-            }, "-=0.6")
-            .from("#hero-role span", {
-                duration: 0.5,
-                opacity: 0,
-                y: 10,
-                stagger: 0.1
-            }, "-=0.4")
-            
-            // --- FIX FOR ICONS ---
-            .from(".social-icon", {
-                duration: 0.5,
-                scale: 0,
-                stagger: 0.1,
-                ease: "back.out",
-                clearProps: "all"
-            }, "-=0.3")
-            
-            // --- FIX FOR MAIN LINKS ---
-            .from(".main-link", {
-                duration: 0.8,
-                y: 50,
-                opacity: 0,
-                stagger: 0.15,
-                ease: "power3.out",
-                clearProps: "all" 
-            }, "-=0.2")
+            tl.to("#preloader", { duration: 0.8, yPercent: -100, ease: "power4.inOut" })
+            .to("#main-content", { duration: 0.2, opacity: 1, y: 0 }, "-=0.4")
+            .from("#profile-section", { duration: 1, scale: 0.5, opacity: 0, rotation: -10, ease: "back.out(1.7)" })
+            .from("#hero-name", { duration: 0.8, y: 20, opacity: 0, ease: "power2.out" }, "-=0.6")
+            .from("#hero-role span", { duration: 0.5, opacity: 0, y: 10, stagger: 0.1 }, "-=0.4")
+            .from(".social-icon", { duration: 0.5, scale: 0, stagger: 0.1, ease: "back.out", clearProps: "all" }, "-=0.3")
+            .from(".main-link", { duration: 0.8, y: 50, opacity: 0, stagger: 0.15, ease: "power3.out", clearProps: "all" }, "-=0.2")
+            .from("#newsletter-divider", { duration: 0.8, opacity: 0, scaleX: 0, ease: "power2.out" }, "-=0.5")
+            .from(".newsletter-card", { duration: 0.8, y: 30, opacity: 0, stagger: 0.1, ease: "power3.out", clearProps: "all" }, "-=0.2");
 
-            .from("#newsletter-divider", {
-                duration: 0.8,
-                opacity: 0,
-                scaleX: 0,
-                ease: "power2.out"
-            }, "-=0.5")
-
-            // --- FIX FOR NEWSLETTERS ---
-            .from(".newsletter-card", {
-                duration: 0.8,
-                y: 30,
-                opacity: 0,
-                stagger: 0.1,
-                ease: "power3.out",
-                clearProps: "all" 
-            }, "-=0.2");
-
-            // --- SAFETY NET ---
             tl.eventCallback("onComplete", () => {
                 const forceVisible = (selector) => {
                     document.querySelectorAll(selector).forEach(el => {
@@ -423,14 +455,13 @@
                         el.style.visibility = 'visible';
                     });
                 };
-
                 forceVisible('.social-icon');
                 forceVisible('.main-link');
                 forceVisible('.newsletter-card');
             });
         }
 
-        // 2. 3D TILT EFFECT
+        // --- 3D TILT ---
         const cards = document.querySelectorAll('.tilt-card');
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -441,21 +472,16 @@
                 const centerY = rect.height / 2;
                 const rotateX = ((y - centerY) / centerY) * -10;
                 const rotateY = ((x - centerX) / centerX) * 10;
-
                 card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
             });
-
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
                 card.style.transition = 'transform 0.5s ease';
             });
-            
-            card.addEventListener('mouseenter', () => {
-                card.style.transition = 'none';
-            });
+            card.addEventListener('mouseenter', () => card.style.transition = 'none');
         });
 
-        // 3. GYROSCOPE & INTERACTIVE PARTICLES
+        // --- GYRO & PARTICLES ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -467,52 +493,34 @@
 
         const config = {
             particleCount: window.innerWidth < 768 ? 40 : 80,
-            color: 'rgba(0, 240, 255, ',
+            color: 'rgba(0, 240, 255, ', // Default Dark Mode Color
             connDist: 150,
             mouseRadius: 150
         };
 
-        // --- GYRO LOGIC ---
         function handleOrientation(e) {
             if (e.gamma !== null && e.beta !== null) {
-                gyroX = e.gamma; // Left/Right tilt
-                gyroY = e.beta;  // Front/Back tilt
+                gyroX = e.gamma; 
+                gyroY = e.beta; 
             }
         }
 
-        // Permission for iOS 13+
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             document.body.addEventListener('touchstart', function initGyro() {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        }
-                    })
-                    .catch(console.error);
+                DeviceOrientationEvent.requestPermission().then(response => {
+                    if (response === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+                }).catch(console.error);
                 document.body.removeEventListener('touchstart', initGyro);
             }, { once: true });
         } else {
-            // Android & Older iOS
             window.addEventListener('deviceorientation', handleOrientation);
         }
 
-        window.addEventListener('mousemove', e => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        window.addEventListener('touchmove', e => {
-            if(e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
+        window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+        window.addEventListener('touchmove', e => { 
+            if(e.touches.length > 0) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; }
         }, {passive: false});
-
-        window.addEventListener('touchend', () => {
-            mouseX = -9999;
-            mouseY = -9999;
-        });
+        window.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; });
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -530,31 +538,17 @@
                 this.size = Math.random() * 1.5 + 0.5;
             }
             update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                // Gyroscope Influence
-                this.x += gyroX * 0.05;
-                this.y += gyroY * 0.05;
+                this.x += this.vx; this.y += this.vy;
+                this.x += gyroX * 0.05; this.y += gyroY * 0.05;
+                if(this.x < 0) this.x = width; if(this.x > width) this.x = 0;
+                if(this.y < 0) this.y = height; if(this.y > height) this.y = 0;
 
-                // Screen Wrap
-                if(this.x < 0) this.x = width;
-                if(this.x > width) this.x = 0;
-                if(this.y < 0) this.y = height;
-                if(this.y > height) this.y = 0;
-
-                // Mouse/Touch Interaction
-                let dx = mouseX - this.x;
-                let dy = mouseY - this.y;
+                let dx = mouseX - this.x; let dy = mouseY - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
                 if (distance < config.mouseRadius) {
-                    const forceDirectionX = dx / distance;
-                    const forceDirectionY = dy / distance;
                     const force = (config.mouseRadius - distance) / config.mouseRadius;
-                    const directionX = forceDirectionX * force * 3;
-                    const directionY = forceDirectionY * force * 3;
-                    this.x -= directionX;
-                    this.y -= directionY;
+                    this.x -= (dx/distance) * force * 3;
+                    this.y -= (dy/distance) * force * 3;
                 }
             }
             draw() {
@@ -573,18 +567,15 @@
         function animateBg() {
             ctx.clearRect(0,0,width,height);
             particles.forEach((p, i) => {
-                p.update();
-                p.draw();
+                p.update(); p.draw();
                 for(let j=i; j<particles.length; j++) {
-                    const dx = p.x - particles[j].x;
-                    const dy = p.y - particles[j].y;
+                    const dx = p.x - particles[j].x; const dy = p.y - particles[j].y;
                     const dist = Math.sqrt(dx*dx+dy*dy);
                     if(dist < config.connDist) {
                         ctx.beginPath();
                         ctx.strokeStyle = config.color + (1 - dist/config.connDist)*0.15 + ')';
                         ctx.lineWidth = 0.5;
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y);
                         ctx.stroke();
                     }
                 }
@@ -596,7 +587,6 @@
         resize();
         initParticles();
         animateBg();
-
     </script>
 </body>
 </html>
