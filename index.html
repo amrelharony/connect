@@ -43,7 +43,6 @@
 
     <style>
         :root {
-            /* DARK MODE DEFAULTS */
             --bg-color: #0B0F19;
             --text-main: #ffffff;
             --text-sub: #9ca3af;
@@ -51,18 +50,20 @@
             --card-border: rgba(255, 255, 255, 0.08);
             --card-hover: rgba(255, 255, 255, 0.1);
             --icon-box: rgba(255, 255, 255, 0.05);
-            --particle-color: 0, 240, 255; /* Cyan */
-            
-            /* Glowing Cyan for Dark Mode */
+            --particle-color: 0, 240, 255;
             --name-gradient-1: #00F0FF; 
             --name-gradient-2: #3B82F6; 
             --tag-bg: rgba(8, 145, 178, 0.2);
             --tag-border: rgba(6, 182, 212, 0.2);
             --tag-text: #22d3ee;
+            --aurora-1: rgba(0, 240, 255, 0.15);
+            --aurora-2: rgba(59, 130, 246, 0.1);
+            --aurora-3: rgba(139, 92, 246, 0.08);
+            --glow-color: rgba(0, 240, 255, 0.3);
+            --ripple-color: rgba(0, 240, 255, 0.15);
         }
 
         .light-mode {
-            /* LIGHT MODE OVERRIDES */
             --bg-color: #F8FAFC;
             --text-main: #0f172a;
             --text-sub: #475569;
@@ -70,14 +71,17 @@
             --card-border: rgba(226, 232, 240, 0.8);
             --card-hover: rgba(255, 255, 255, 0.9);
             --icon-box: rgba(15, 23, 42, 0.05);
-            --particle-color: 15, 23, 42; /* Slate 900 */
-            
-            /* Navy Blue for Light Mode */
-            --name-gradient-1: #1e3a8a; /* Deep Navy */
-            --name-gradient-2: #0f172a; /* Dark Slate */
-            --tag-bg: rgba(30, 58, 138, 0.08); /* Light Navy tint */
+            --particle-color: 15, 23, 42;
+            --name-gradient-1: #1e3a8a;
+            --name-gradient-2: #0f172a;
+            --tag-bg: rgba(30, 58, 138, 0.08);
             --tag-border: rgba(30, 58, 138, 0.25);
-            --tag-text: #1e3a8a; /* Solid Navy */
+            --tag-text: #1e3a8a;
+            --aurora-1: rgba(30, 58, 138, 0.08);
+            --aurora-2: rgba(59, 130, 246, 0.06);
+            --aurora-3: rgba(139, 92, 246, 0.04);
+            --glow-color: rgba(30, 58, 138, 0.15);
+            --ripple-color: rgba(30, 58, 138, 0.08);
         }
 
         body {
@@ -89,13 +93,105 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Dynamic Text Colors */
+        /* ===== MAGNETIC CURSOR ===== */
+        .cursor-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--name-gradient-1);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            mix-blend-mode: difference;
+            transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+        .cursor-ring {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid var(--name-gradient-1);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            opacity: 0.5;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        height 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        opacity 0.3s,
+                        border-color 0.3s;
+        }
+        .cursor-ring.hovering {
+            width: 60px;
+            height: 60px;
+            opacity: 0.8;
+            border-color: #00F0FF;
+        }
+        .cursor-dot.hovering {
+            width: 4px;
+            height: 4px;
+            background: #00F0FF;
+        }
+
+        @media (pointer: coarse) {
+            .cursor-dot, .cursor-ring { display: none; }
+        }
+
+        /* ===== AURORA BACKGROUND ===== */
+        .aurora-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0;
+            animation: auroraFloat 20s ease-in-out infinite;
+        }
+        .aurora-blob:nth-child(1) {
+            width: 600px; height: 600px;
+            background: var(--aurora-1);
+            top: -20%; left: -10%;
+            animation-delay: 0s;
+            animation-duration: 18s;
+        }
+        .aurora-blob:nth-child(2) {
+            width: 500px; height: 500px;
+            background: var(--aurora-2);
+            top: 40%; right: -15%;
+            animation-delay: -6s;
+            animation-duration: 22s;
+        }
+        .aurora-blob:nth-child(3) {
+            width: 400px; height: 400px;
+            background: var(--aurora-3);
+            bottom: -10%; left: 20%;
+            animation-delay: -12s;
+            animation-duration: 25s;
+        }
+
+        @keyframes auroraFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            25% { transform: translate(80px, -60px) scale(1.15); opacity: 0.8; }
+            50% { transform: translate(-40px, 40px) scale(0.9); opacity: 0.5; }
+            75% { transform: translate(60px, 80px) scale(1.1); opacity: 0.7; }
+        }
+
+        /* ===== DYNAMIC TEXT ===== */
         .dynamic-name {
-            background-image: linear-gradient(to right, var(--name-gradient-1), var(--name-gradient-2));
+            background-image: linear-gradient(135deg, var(--name-gradient-1), var(--name-gradient-2), var(--name-gradient-1));
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
             transition: all 0.5s ease;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .dynamic-tag {
@@ -104,14 +200,24 @@
             color: var(--tag-text);
             transition: all 0.5s ease;
         }
-        
-        /* Preloader */
+
+        /* ===== TEXT SCRAMBLE ===== */
+        .scramble-text {
+            display: inline-block;
+        }
+        .scramble-char {
+            display: inline-block;
+            transition: opacity 0.05s;
+        }
+        .scramble-char.scrambling {
+            opacity: 0.6;
+        }
+
+        /* ===== PRELOADER ===== */
         #preloader {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: var(--bg-color);
             z-index: 9999;
             display: flex;
@@ -128,19 +234,54 @@
             margin-top: 20px;
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
         }
 
         .loader-progress {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             height: 100%;
             width: 0%;
-            background: #00F0FF;
-            box-shadow: 0 0 10px #00F0FF;
+            background: linear-gradient(90deg, #00F0FF, #3B82F6);
+            box-shadow: 0 0 15px #00F0FF, 0 0 30px rgba(0, 240, 255, 0.3);
+            border-radius: 2px;
         }
 
-        /* Glass Cards */
+        /* Loader glitch text */
+        .loader-text {
+            position: relative;
+        }
+        .loader-text::before,
+        .loader-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+        .loader-text::before {
+            animation: glitch1 2s infinite;
+            color: #00F0FF;
+            clip-path: inset(0 0 65% 0);
+        }
+        .loader-text::after {
+            animation: glitch2 2s infinite;
+            color: #3B82F6;
+            clip-path: inset(35% 0 0 0);
+        }
+        @keyframes glitch1 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 1px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, 2px); }
+        }
+        @keyframes glitch2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, -1px); }
+            40% { transform: translate(-2px, 1px); }
+            60% { transform: translate(1px, -2px); }
+        }
+
+        /* ===== GLASS CARDS ===== */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
@@ -149,34 +290,62 @@
             transform-style: preserve-3d;
             perspective: 1000px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: background 0.3s, border 0.3s, transform 0.3s;
+            transition: background 0.3s, border 0.3s, transform 0.3s, box-shadow 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--ripple-color), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
         }
 
         .glass-card:hover {
             background: var(--card-hover);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 0 20px var(--glow-color);
         }
-        
-        /* Icon Boxes inside cards */
+
+        /* ===== CARD SPOTLIGHT EFFECT ===== */
+        .card-spotlight {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 0;
+            border-radius: inherit;
+        }
+        .glass-card:hover .card-spotlight {
+            opacity: 1;
+        }
+
         .icon-box {
             background: var(--icon-box);
             border: 1px solid var(--card-border);
         }
 
-        /* Subtext */
         .text-sub {
             color: var(--text-sub);
         }
 
         #canvas-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
         }
 
-        /* Flip Logic */
+        /* ===== FLIP CARD ===== */
         .flip-container {
             perspective: 1000px;
             width: 128px; 
@@ -184,10 +353,9 @@
         }
         .flip-inner {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             text-align: center;
-            transition: transform 0.8s;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transform-style: preserve-3d;
         }
         .flip-inner.flipped {
@@ -195,8 +363,7 @@
         }
         .flip-front, .flip-back {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             border-radius: 9999px;
@@ -212,18 +379,65 @@
             border: 4px solid #00F0FF;
         }
 
-        /* Toggle Button */
+        /* ===== PROFILE RING ANIMATION ===== */
+        .profile-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 9999px;
+            padding: 3px;
+            background: conic-gradient(from 0deg, #00F0FF, #3B82F6, #8B5CF6, #00F0FF);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: profileRingSpin 4s linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes profileRingSpin {
+            to { transform: rotate(360deg); }
+        }
+        .profile-ring:hover {
+            opacity: 1;
+        }
+
+        /* ===== FLOATING PARTICLES AROUND PROFILE ===== */
+        .orbit-particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: #00F0FF;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #00F0FF;
+            animation: orbit 6s linear infinite;
+        }
+        .orbit-particle:nth-child(2) {
+            animation-duration: 8s;
+            animation-delay: -2s;
+            width: 3px; height: 3px;
+            background: #3B82F6;
+            box-shadow: 0 0 6px #3B82F6;
+        }
+        .orbit-particle:nth-child(3) {
+            animation-duration: 10s;
+            animation-delay: -5s;
+            width: 2px; height: 2px;
+            background: #8B5CF6;
+            box-shadow: 0 0 6px #8B5CF6;
+        }
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+        }
+
+        /* ===== THEME TOGGLE ===== */
         .theme-toggle {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 20px; right: 20px;
             z-index: 100;
             background: var(--card-bg);
             backdrop-filter: blur(10px);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -233,18 +447,128 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .theme-toggle:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* ===== STAGGERED REVEAL ===== */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-up.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RIPPLE ON CLICK ===== */
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-effect .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--ripple-color);
+            transform: scale(0);
+            animation: rippleAnim 0.6s linear;
+            pointer-events: none;
+            z-index: 5;
+        }
+        @keyframes rippleAnim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* ===== NEWSLETTER HOVER UNDERLINE ===== */
+        .newsletter-card .underline-anim {
+            position: relative;
+        }
+        .newsletter-card .underline-anim::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0;
+            width: 0; height: 1px;
+            background: var(--tag-text);
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .newsletter-card:hover .underline-anim::after {
+            width: 100%;
+        }
+
+        /* ===== SCROLL INDICATOR ===== */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .scroll-indicator.visible {
+            opacity: 0.5;
+        }
+        .scroll-indicator:hover {
+            opacity: 1;
+        }
+        .scroll-mouse {
+            width: 22px; height: 34px;
+            border: 2px solid var(--text-sub);
+            border-radius: 11px;
+            position: relative;
+        }
+        .scroll-dot {
+            width: 3px; height: 6px;
+            background: var(--text-sub);
+            border-radius: 2px;
+            position: absolute;
+            top: 6px; left: 50%;
+            transform: translateX(-50%);
+            animation: scrollBounce 1.5s ease-in-out infinite;
+        }
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            50% { transform: translateX(-50%) translateY(12px); opacity: 0.2; }
+        }
+
+        /* ===== TYPEWRITER FOR STATUS ===== */
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--tag-text);
+            animation: blink 0.8s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { border-color: var(--tag-text); }
+            50% { border-color: transparent; }
+        }
+
+        /* ===== SMOOTH PARALLAX SECTIONS ===== */
+        .parallax-section {
+            will-change: transform;
         }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col items-center">
+
+    <!-- CUSTOM CURSOR (Desktop only) -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- AURORA BG -->
+    <div class="aurora-bg" id="aurora-bg">
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+    </div>
 
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
         <i class="fa-solid fa-moon" id="theme-icon"></i>
     </button>
 
     <div id="preloader">
-        <div class="font-mono text-xs text-cyan-400 tracking-widest mb-2">ESTABLISHING CONNECTION</div>
+        <div class="loader-text font-mono text-xs text-cyan-400 tracking-widest mb-2" data-text="ESTABLISHING CONNECTION">ESTABLISHING CONNECTION</div>
         <div class="text-4xl font-bold font-mono" style="color: var(--text-main)" id="counter">0%</div>
         <div class="loader-bar">
             <div class="loader-progress" id="progress-bar"></div>
@@ -253,6 +577,13 @@
 
     <canvas id="canvas-bg"></canvas>
 
+    <!-- SCROLL INDICATOR -->
+    <div class="scroll-indicator" id="scroll-indicator">
+        <div class="scroll-mouse">
+            <div class="scroll-dot"></div>
+        </div>
+    </div>
+
     <div id="main-content" class="w-full max-w-lg px-6 py-12 relative z-10 flex flex-col items-center opacity-0 translate-y-4 pb-32">
         
         <div id="status-badge" class="mb-6 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center gap-2 backdrop-blur-sm opacity-0 transform -translate-y-4 transition-all duration-500">
@@ -260,11 +591,17 @@
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" id="status-ping"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" id="status-dot"></span>
             </span>
-            <span class="text-[10px] font-mono tracking-wide text-white uppercase" id="status-text">Locating...</span>
+            <span class="text-[10px] font-mono tracking-wide text-white uppercase typewriter" id="status-text">Locating...</span>
         </div>
 
         <div class="relative group cursor-pointer perspective-container mb-2" id="profile-section" onclick="toggleFlip()">
-            <div class="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur opacity-20 group-hover:opacity-70 transition duration-1000 animate-pulse"></div>
+            <!-- Spinning ring -->
+            <div class="profile-ring"></div>
+            
+            <!-- Orbiting particles -->
+            <div class="orbit-particle" style="top:50%;left:50%;"></div>
+            <div class="orbit-particle" style="top:50%;left:50%;"></div>
+            <div class="orbit-particle" style="top:50%;left:50%;"></div>
             
             <div class="flip-container">
                 <div class="flip-inner" id="flip-card">
@@ -288,7 +625,7 @@
         <p class="text-[9px] text-gray-500 font-mono mb-6 mt-1 opacity-60">TAP PHOTO TO CONNECT</p>
 
         <h1 class="text-3xl font-extrabold text-center tracking-tight" id="hero-name">
-            <span class="dynamic-name">Amr Elharony</span>
+            <span class="dynamic-name scramble-text" id="name-scramble">Amr Elharony</span>
         </h1>
         
         <div class="mt-2 flex flex-wrap justify-center gap-2 text-[10px] font-mono tracking-widest uppercase opacity-90" id="hero-role">
@@ -298,15 +635,16 @@
         </div>
 
         <div class="flex gap-6 mt-8 mb-10" id="social-row">
-            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="social-icon text-sub hover:text-cyan-500 hover:scale-125 transition duration-300"><i class="fa-brands fa-linkedin text-2xl"></i></a>
-            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="social-icon text-sub hover:text-green-500 hover:scale-125 transition duration-300"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
-            <a href="https://t.me/Amrmelharony" target="_blank" class="social-icon text-sub hover:text-blue-500 hover:scale-125 transition duration-300"><i class="fa-brands fa-telegram text-2xl"></i></a>
-            <a href="mailto:a.elharony@gmail.com" class="social-icon text-sub hover:text-yellow-500 hover:scale-125 transition duration-300"><i class="fa-solid fa-envelope text-2xl"></i></a>
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="social-icon text-sub hover:text-cyan-500 hover:scale-125 transition duration-300 magnetic-element"><i class="fa-brands fa-linkedin text-2xl"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="social-icon text-sub hover:text-green-500 hover:scale-125 transition duration-300 magnetic-element"><i class="fa-brands fa-whatsapp text-2xl"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" class="social-icon text-sub hover:text-blue-500 hover:scale-125 transition duration-300 magnetic-element"><i class="fa-brands fa-telegram text-2xl"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="social-icon text-sub hover:text-yellow-500 hover:scale-125 transition duration-300 magnetic-element"><i class="fa-solid fa-envelope text-2xl"></i></a>
         </div>
 
         <div class="w-full space-y-4 perspective-1000">
             
-            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="tilt-card main-link glass-card ripple-effect flex items-center p-4 rounded-2xl group relative overflow-hidden reveal-up">
+                <div class="card-spotlight"></div>
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="be.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -321,7 +659,8 @@
                 </div>
             </a>
 
-            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="tilt-card main-link glass-card ripple-effect flex items-center p-4 rounded-2xl group relative overflow-hidden reveal-up">
+                <div class="card-spotlight"></div>
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="fb.png" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -336,7 +675,8 @@
                 </div>
             </a>
 
-            <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card main-link glass-card flex items-center p-4 rounded-2xl group relative overflow-hidden">
+            <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="tilt-card main-link glass-card ripple-effect flex items-center p-4 rounded-2xl group relative overflow-hidden reveal-up">
+                <div class="card-spotlight"></div>
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                 <div class="w-12 h-12 icon-box rounded-xl flex items-center justify-center mr-4 shadow-inner z-10">
                     <img src="smiley.jpg" class="w-8 h-8 rounded-lg object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -351,27 +691,27 @@
                 </div>
             </a>
 
-            <div id="newsletter-divider" class="flex items-center gap-4 my-8 opacity-40">
+            <div id="newsletter-divider" class="flex items-center gap-4 my-8 opacity-40 reveal-up">
                 <div class="h-px w-full" style="background-color: var(--text-sub)"></div>
                 <span class="text-[10px] font-mono tracking-widest whitespace-nowrap text-cyan-500">NEWSLETTERS</span>
                 <div class="h-px w-full" style="background-color: var(--text-sub)"></div>
             </div>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="tilt-card newsletter-card glass-card ripple-effect p-3 rounded-xl flex items-center transition duration-300 reveal-up">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-chart-line text-yellow-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Leadership</span>
+                <span class="flex-1 text-sm font-medium text-sub underline-anim">LevelUp Your Leadership</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
-            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="tilt-card newsletter-card glass-card ripple-effect p-3 rounded-xl flex items-center transition duration-300 reveal-up">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-briefcase text-green-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Business</span>
+                <span class="flex-1 text-sm font-medium text-sub underline-anim">LevelUp Your Business</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
-             <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card newsletter-card glass-card p-3 rounded-xl flex items-center transition duration-300">
+            <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="tilt-card newsletter-card glass-card ripple-effect p-3 rounded-xl flex items-center transition duration-300 reveal-up">
                 <div class="w-8 flex justify-center"><i class="fa-solid fa-microchip text-cyan-500"></i></div>
-                <span class="flex-1 text-sm font-medium text-sub">LevelUp Your Tech</span>
+                <span class="flex-1 text-sm font-medium text-sub underline-anim">LevelUp Your Tech</span>
                 <i class="fa-solid fa-external-link-alt text-xs text-sub opacity-50"></i>
             </a>
 
@@ -386,21 +726,189 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- THEME & TIME LOGIC ---
+        // ===================================================================
+        // 1. CUSTOM MAGNETIC CURSOR (Desktop)
+        // ===================================================================
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+        let cursorX = 0, cursorY = 0;
+        let ringX = 0, ringY = 0;
+        const isDesktop = window.matchMedia('(pointer: fine)').matches;
+
+        if (isDesktop) {
+            document.addEventListener('mousemove', (e) => {
+                cursorX = e.clientX;
+                cursorY = e.clientY;
+                cursorDot.style.left = cursorX - 4 + 'px';
+                cursorDot.style.top = cursorY - 4 + 'px';
+            });
+
+            function animateCursorRing() {
+                ringX += (cursorX - ringX) * 0.15;
+                ringY += (cursorY - ringY) * 0.15;
+                cursorRing.style.left = ringX - 20 + 'px';
+                cursorRing.style.top = ringY - 20 + 'px';
+                requestAnimationFrame(animateCursorRing);
+            }
+            animateCursorRing();
+
+            // Hover detection for interactive elements
+            const hoverTargets = 'a, button, .tilt-card, .flip-container, .magnetic-element';
+            document.addEventListener('mouseover', (e) => {
+                if (e.target.closest(hoverTargets)) {
+                    cursorRing.classList.add('hovering');
+                    cursorDot.classList.add('hovering');
+                }
+            });
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.closest(hoverTargets)) {
+                    cursorRing.classList.remove('hovering');
+                    cursorDot.classList.remove('hovering');
+                }
+            });
+
+            // Magnetic pull on social icons
+            document.querySelectorAll('.magnetic-element').forEach(el => {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const dx = (e.clientX - cx) * 0.3;
+                    const dy = (e.clientY - cy) * 0.3;
+                    el.style.transform = `translate(${dx}px, ${dy}px) scale(1.15)`;
+                });
+                el.addEventListener('mouseleave', () => {
+                    el.style.transform = '';
+                    el.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+                    setTimeout(() => el.style.transition = '', 400);
+                });
+            });
+        }
+
+        // ===================================================================
+        // 2. TEXT SCRAMBLE EFFECT
+        // ===================================================================
+        class TextScramble {
+            constructor(el) {
+                this.el = el;
+                this.chars = '!<>-_\\/[]{}—=+*^?#________';
+                this.frame = 0;
+                this.queue = [];
+                this.resolve = null;
+            }
+            setText(newText) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                return new Promise((resolve) => {
+                    this.resolve = resolve;
+                    this.queue = [];
+                    for (let i = 0; i < length; i++) {
+                        const from = oldText[i] || '';
+                        const to = newText[i] || '';
+                        const start = Math.floor(Math.random() * 20);
+                        const end = start + Math.floor(Math.random() * 20);
+                        this.queue.push({ from, to, start, end });
+                    }
+                    cancelAnimationFrame(this.frameRequest);
+                    this.frame = 0;
+                    this.update();
+                });
+            }
+            update() {
+                let output = '';
+                let complete = 0;
+                for (let i = 0, n = this.queue.length; i < n; i++) {
+                    let { from, to, start, end, char } = this.queue[i];
+                    if (this.frame >= end) {
+                        complete++;
+                        output += to;
+                    } else if (this.frame >= start) {
+                        if (!char || Math.random() < 0.28) {
+                            char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                            this.queue[i].char = char;
+                        }
+                        output += `<span class="scramble-char scrambling" style="color: var(--name-gradient-1)">${char}</span>`;
+                    } else {
+                        output += from;
+                    }
+                }
+                this.el.innerHTML = output;
+                if (complete === this.queue.length) {
+                    this.resolve();
+                } else {
+                    this.frameRequest = requestAnimationFrame(() => this.update());
+                    this.frame++;
+                }
+            }
+        }
+
+        // ===================================================================
+        // 3. CARD SPOTLIGHT (mouse-following glow)
+        // ===================================================================
+        document.querySelectorAll('.glass-card').forEach(card => {
+            const spotlight = card.querySelector('.card-spotlight');
+            if (!spotlight) return;
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                spotlight.style.background = `radial-gradient(300px circle at ${x}px ${y}px, var(--glow-color), transparent 60%)`;
+            });
+        });
+
+        // ===================================================================
+        // 4. RIPPLE ON CLICK
+        // ===================================================================
+        document.querySelectorAll('.ripple-effect').forEach(el => {
+            el.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+                this.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
+        });
+
+        // ===================================================================
+        // 5. PARTICLE CONFIG (hoisted for theme access)
+        // ===================================================================
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        let mouseX = -9999;
+        let mouseY = -9999;
+        let gyroX = 0;
+        let gyroY = 0;
+
+        const config = {
+            particleCount: window.innerWidth < 768 ? 40 : 80,
+            color: document.body.classList.contains('light-mode') ? 'rgba(15, 23, 42, ' : 'rgba(0, 240, 255, ',
+            connDist: 150,
+            mouseRadius: 180
+        };
+
+        // ===================================================================
+        // 6. THEME & TIME LOGIC
+        // ===================================================================
         function applyTheme(mode) {
             const icon = document.getElementById('theme-icon');
             if (mode === 'light') {
                 document.body.classList.add('light-mode');
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
-                config.color = 'rgba(15, 23, 42, '; // Navy particles
+                config.color = 'rgba(15, 23, 42, ';
             } else {
                 document.body.classList.remove('light-mode');
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
-                config.color = 'rgba(0, 240, 255, '; // Cyan particles
+                config.color = 'rgba(0, 240, 255, ';
             }
-            if(particles.length > 0) initParticles(); // Redraw if already loaded
+            if(particles.length > 0) initParticles();
         }
 
         function toggleTheme() {
@@ -410,25 +918,44 @@
             applyTheme(newMode);
         }
 
-        // Auto-detect based on local time (6 AM to 6 PM is light mode)
         const savedTheme = localStorage.getItem('theme');
         const currentHour = new Date().getHours();
         
         if (savedTheme) {
-            applyTheme(savedTheme); // Respect manual choice
+            applyTheme(savedTheme);
         } else {
-            // Auto switch based on user's night/day
             const autoMode = (currentHour >= 6 && currentHour < 18) ? 'light' : 'dark';
             applyTheme(autoMode);
         }
 
-        // --- FLIP CARD LOGIC ---
+        // ===================================================================
+        // 6. FLIP CARD
+        // ===================================================================
         function toggleFlip() {
             const card = document.getElementById('flip-card');
             card.classList.toggle('flipped');
         }
 
-        // --- LIVE TIME LOGIC ---
+        // ===================================================================
+        // 7. STATUS WITH TYPEWRITER
+        // ===================================================================
+        function typewriterEffect(el, text, speed = 30) {
+            el.textContent = '';
+            el.classList.add('typewriter');
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    el.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    // Remove cursor after typing done
+                    setTimeout(() => el.classList.remove('typewriter'), 1500);
+                }
+            }
+            type();
+        }
+
         function updateStatus() {
             const date = new Date();
             const cairoTime = date.toLocaleString("en-US", {timeZone: "Africa/Cairo", hour: "numeric", hour12: false});
@@ -442,23 +969,27 @@
             badge.style.opacity = '1';
             badge.style.transform = 'translateY(0)';
 
+            let statusMsg;
             if (hour >= 9 && hour < 17) {
-                text.innerText = "CAIRO: BUILDING FINTECH 🏦";
+                statusMsg = "CAIRO: BUILDING FINTECH 🏦";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-green-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75";
             } else if (hour >= 17 && hour < 23) {
-                text.innerText = "CAIRO: MENTORING / WRITING ✍️";
+                statusMsg = "CAIRO: MENTORING / WRITING ✍️";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-purple-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75";
             } else {
-                text.innerText = "CAIRO: RECHARGING 🔋";
+                statusMsg = "CAIRO: RECHARGING 🔋";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 bg-orange-500";
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75";
             }
+            typewriterEffect(text, statusMsg, 40);
         }
         setTimeout(updateStatus, 1500);
 
-        // --- GSAP LOADER ---
+        // ===================================================================
+        // 8. GSAP LOADER + REVEAL ANIMATIONS
+        // ===================================================================
         const tl = gsap.timeline();
         let count = 0;
         const counterEl = document.getElementById('counter');
@@ -482,19 +1013,59 @@
 
             tl.to("#preloader", { duration: 0.8, yPercent: -100, ease: "power4.inOut" })
             .to("#main-content", { duration: 0.2, opacity: 1, y: 0 }, "-=0.4")
-            .from("#profile-section", { duration: 1, scale: 0.5, opacity: 0, rotation: -10, ease: "back.out(1.7)" })
-            .from("#hero-name", { duration: 0.8, y: 20, opacity: 0, ease: "power2.out" }, "-=0.6")
-            .from("#hero-role span", { duration: 0.5, opacity: 0, y: 10, stagger: 0.1 }, "-=0.4")
-            .from(".social-icon", { duration: 0.5, scale: 0, stagger: 0.1, ease: "back.out", clearProps: "all" }, "-=0.3")
-            .from(".main-link", { duration: 0.8, y: 50, opacity: 0, stagger: 0.15, ease: "power3.out", clearProps: "all" }, "-=0.2")
-            .from("#newsletter-divider", { duration: 0.8, opacity: 0, scaleX: 0, ease: "power2.out" }, "-=0.5")
-            .from(".newsletter-card", { duration: 0.8, y: 30, opacity: 0, stagger: 0.1, ease: "power3.out", clearProps: "all" }, "-=0.2");
+            .from("#profile-section", { 
+                duration: 1.2, 
+                scale: 0, 
+                opacity: 0, 
+                rotation: -180, 
+                ease: "elastic.out(1, 0.5)" 
+            })
+            .from("#hero-name", { 
+                duration: 0.8, 
+                y: 30, 
+                opacity: 0, 
+                ease: "power2.out",
+                onComplete: () => {
+                    // Trigger text scramble after name appears
+                    const scrambleEl = document.getElementById('name-scramble');
+                    const scrambler = new TextScramble(scrambleEl);
+                    scrambler.setText('Amr Elharony');
+                }
+            }, "-=0.6")
+            .from("#hero-role span", { 
+                duration: 0.6, 
+                opacity: 0, 
+                y: 15, 
+                scale: 0.8,
+                stagger: 0.12, 
+                ease: "back.out(2)" 
+            }, "-=0.3")
+            .from(".social-icon", { 
+                duration: 0.6, 
+                scale: 0, 
+                rotation: 180,
+                stagger: 0.08, 
+                ease: "back.out(3)", 
+                clearProps: "all" 
+            }, "-=0.3")
+            .add(() => {
+                // Reveal cards with staggered IntersectionObserver-style
+                const reveals = document.querySelectorAll('.reveal-up');
+                reveals.forEach((el, i) => {
+                    setTimeout(() => el.classList.add('revealed'), i * 120);
+                });
+            }, "-=0.1")
+            .add(() => {
+                // Show scroll indicator after everything loads
+                setTimeout(() => {
+                    document.getElementById('scroll-indicator').classList.add('visible');
+                }, 1000);
+            });
 
             tl.eventCallback("onComplete", () => {
                 const forceVisible = (selector) => {
                     document.querySelectorAll(selector).forEach(el => {
                         el.style.opacity = '1';
-                        el.style.transform = 'none';
                         el.style.visibility = 'visible';
                     });
                 };
@@ -504,42 +1075,59 @@
             });
         }
 
-        // --- 3D TILT ---
+        // Hide scroll indicator when user scrolls
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            const indicator = document.getElementById('scroll-indicator');
+            if (window.scrollY > 50) {
+                indicator.classList.remove('visible');
+            }
+        });
+
+        // ===================================================================
+        // 9. 3D TILT WITH SPRING PHYSICS
+        // ===================================================================
         const cards = document.querySelectorAll('.tilt-card');
         cards.forEach(card => {
+            let currentRotateX = 0, currentRotateY = 0;
+            let targetRotateX = 0, targetRotateY = 0;
+
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                targetRotateX = ((y - centerY) / centerY) * -12;
+                targetRotateY = ((x - centerX) / centerX) * 12;
             });
+
             card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-                card.style.transition = 'transform 0.5s ease';
+                targetRotateX = 0;
+                targetRotateY = 0;
             });
-            card.addEventListener('mouseenter', () => card.style.transition = 'none');
+
+            function springTilt() {
+                // Spring interpolation for smooth feel
+                currentRotateX += (targetRotateX - currentRotateX) * 0.1;
+                currentRotateY += (targetRotateY - currentRotateY) * 0.1;
+                
+                const isMoving = Math.abs(targetRotateX - currentRotateX) > 0.01 || 
+                                 Math.abs(targetRotateY - currentRotateY) > 0.01;
+                
+                if (isMoving || targetRotateX !== 0 || targetRotateY !== 0) {
+                    card.style.transform = `perspective(1000px) rotateX(${currentRotateX}deg) rotateY(${currentRotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                } else {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                }
+                requestAnimationFrame(springTilt);
+            }
+            springTilt();
         });
 
-        // --- GYRO & PARTICLES ---
-        const canvas = document.getElementById('canvas-bg');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
-        let mouseX = -9999;
-        let mouseY = -9999;
-        let gyroX = 0;
-        let gyroY = 0;
-
-        const config = {
-            particleCount: window.innerWidth < 768 ? 40 : 80,
-            color: document.body.classList.contains('light-mode') ? 'rgba(15, 23, 42, ' : 'rgba(0, 240, 255, ',
-            connDist: 150,
-            mouseRadius: 150
-        };
+        // ===================================================================
+        // 10. PARTICLE NETWORK + GYRO
+        // ===================================================================
 
         function handleOrientation(e) {
             if (e.gamma !== null && e.beta !== null) {
@@ -579,12 +1167,18 @@
                 this.vx = (Math.random() - 0.5) * 0.5;
                 this.vy = (Math.random() - 0.5) * 0.5;
                 this.size = Math.random() * 1.5 + 0.5;
+                this.pulsePhase = Math.random() * Math.PI * 2;
+                this.pulseSpeed = 0.02 + Math.random() * 0.02;
             }
             update() {
                 this.x += this.vx; this.y += this.vy;
                 this.x += gyroX * 0.05; this.y += gyroY * 0.05;
                 if(this.x < 0) this.x = width; if(this.x > width) this.x = 0;
                 if(this.y < 0) this.y = height; if(this.y > height) this.y = 0;
+
+                // Pulse size
+                this.pulsePhase += this.pulseSpeed;
+                this.currentSize = this.size + Math.sin(this.pulsePhase) * 0.3;
 
                 let dx = mouseX - this.x; let dy = mouseY - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
@@ -596,8 +1190,14 @@
             }
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.arc(this.x, this.y, this.currentSize, 0, Math.PI*2);
                 ctx.fillStyle = config.color + '0.5)';
+                ctx.fill();
+                
+                // Soft glow
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentSize * 2, 0, Math.PI*2);
+                ctx.fillStyle = config.color + '0.08)';
                 ctx.fill();
             }
         }
@@ -611,7 +1211,7 @@
             ctx.clearRect(0,0,width,height);
             particles.forEach((p, i) => {
                 p.update(); p.draw();
-                for(let j=i; j<particles.length; j++) {
+                for(let j=i+1; j<particles.length; j++) {
                     const dx = p.x - particles[j].x; const dy = p.y - particles[j].y;
                     const dist = Math.sqrt(dx*dx+dy*dy);
                     if(dist < config.connDist) {
@@ -630,6 +1230,19 @@
         resize();
         initParticles();
         animateBg();
+
+        // ===================================================================
+        // 11. PARALLAX ON SCROLL (aurora blobs move)
+        // ===================================================================
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const blobs = document.querySelectorAll('.aurora-blob');
+            blobs.forEach((blob, i) => {
+                const speed = (i + 1) * 0.08;
+                blob.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+        });
+
     </script>
 </body>
 </html>
