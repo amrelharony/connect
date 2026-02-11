@@ -196,15 +196,34 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .ne{font-size:10px;opacity:.3;transition:opacity .3s}
 .nl:hover .ne{opacity:.7}
 
-/* VCARD BUTTON */
-.vcb{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;margin-bottom:8px}
-.vcb:hover,.vcb:focus-visible{transform:translateY(-2px);box-shadow:0 8px 24px -4px var(--glowS);outline:none}
+/* CTA BUTTON (shared base) */
+.vcb{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,background .4s;margin-bottom:4px;text-decoration:none}
+.vcb:hover,.vcb:focus-visible{transform:translateY(-2px);box-shadow:0 8px 24px -4px var(--glowS);outline:none;color:var(--bg)}
 .vcb:active{transform:translateY(0) scale(.98)}
 .vcb i{font-size:14px;transition:transform .3s}
 .vcb:hover i{transform:translateY(2px)}
 .vcb-shim{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none}
 .vcb:hover .vcb-shim{animation:shm .8s ease forwards}
 .vcb-done{background:linear-gradient(135deg,#22c55e,#16a34a)!important}
+
+/* HIDDEN CONTACT SECTION (revealed by shake) */
+#contactSecret{max-height:0;overflow:hidden;opacity:0;transition:max-height .6s cubic-bezier(.16,1,.3,1),opacity .5s,margin .4s;margin:0}
+#contactSecret.revealed{max-height:200px;opacity:1;margin:8px 0 4px}
+#contactSecret .sr{margin:8px 0 12px}
+
+/* SHAKE HINT (hidden by default, shown when nearby) */
+.shake-hint{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);opacity:.25;text-align:center;transition:opacity .4s;margin-bottom:4px;display:none}
+.shake-hint.shaking{opacity:.6;animation:shakeHintPulse 1s ease-in-out infinite}
+.shake-hint.unlocked{opacity:.8;color:var(--accent)}
+@keyframes shakeHintPulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+/* Desktop nearby hint */
+.desk-hint{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);opacity:.2;text-align:center;margin-top:2px;margin-bottom:4px;display:none}
+
+/* SHAKE PROGRESS BAR */
+.shake-bar{width:100%;height:2px;border-radius:1px;background:var(--border);margin:4px 0 0;overflow:hidden;opacity:0;transition:opacity .3s}
+.shake-bar.active{opacity:1}
+.shake-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:1px;transition:width .15s linear}
 
 .foot{text-align:center;margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.25;transition:opacity .3s}
 .foot:hover{opacity:.7}
@@ -254,19 +273,39 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <div class="imp-item"><div class="imp-num" id="impNum3">6+</div><div class="imp-label">Panel Stages</div></div>
     </div>
 
-    <div class="sr rv" id="srow">
-        <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
-        <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
-        <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
-        <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
+    <!-- Default CTA: Book a Call -->
+    <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener" class="vcb rv" id="calBtn">
+        <div class="vcb-shim"></div>
+        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+        <span>Book a 30-Min Call</span>
+    </a>
+
+    <!-- Shake hint (mobile, shown only when nearby) -->
+    <div class="shake-hint" id="shakeHint">
+        <i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i>
+        Met me in person? Shake your phone
+    </div>
+    <div class="shake-bar" id="shakeBar"><div class="shake-fill" id="shakeFill"></div></div>
+    <!-- Desktop hint (shown only when nearby on desktop) -->
+    <div class="desk-hint" id="deskHint">
+        <i class="fa-solid fa-keyboard" aria-hidden="true" style="margin-right:4px;"></i>
+        Met me? Press <strong style="color:var(--accent);">S</strong> to save my contact
     </div>
 
-    <!-- vCard Download -->
-    <button class="vcb rv" id="vcBtn" onclick="downloadVCard()">
-        <div class="vcb-shim"></div>
-        <i class="fa-solid fa-address-card" aria-hidden="true"></i>
-        <span id="vcTxt">Save Contact</span>
-    </button>
+    <!-- Hidden contact section (revealed by shake / desktop shortcut) -->
+    <div id="contactSecret">
+        <div class="sr" id="srow">
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
+        </div>
+        <button class="vcb" id="vcBtn" onclick="downloadVCard()">
+            <div class="vcb-shim"></div>
+            <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+            <span id="vcTxt">Save Contact</span>
+        </button>
+    </div>
 
     <div style="display:flex;flex-direction:column;gap:12px;">
         <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">My Book</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
@@ -351,11 +390,6 @@ if(D&&!reducedMotion){
     const hs='a,button,.pf,.lk,.nl';
     document.addEventListener('mouseover',e=>{if(e.target.closest(hs))dot.classList.add('hov');});
     document.addEventListener('mouseout',e=>{if(e.target.closest(hs))dot.classList.remove('hov');});
-    // Magnetic social
-    document.querySelectorAll('.si').forEach(el=>{
-        el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;});
-        el.addEventListener('mouseleave',()=>{el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';el.style.transform='';setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);});
-    });
     // Card spotlight + 3D tilt
     document.querySelectorAll('.lk').forEach(card=>{
         const sp=card.querySelector('.ls');
@@ -372,9 +406,6 @@ if(D&&!reducedMotion){
         })();
     });
 }
-
-// Social hover colors
-document.querySelectorAll('.si').forEach(el=>{const c=el.dataset.c;el.addEventListener('mouseenter',()=>el.style.color=c);el.addEventListener('mouseleave',()=>el.style.color='');});
 
 // ═══ THEME ═══
 function applyTheme(m){
@@ -451,8 +482,6 @@ function launch(){
     document.querySelectorAll('.rv').forEach((el,i)=>{gsap.to(el,{opacity:1,y:0,duration:.9,delay:.8+i*.08,ease:'power3.out',onComplete:()=>done(el)});});
     // Name scramble
     setTimeout(()=>new Scr(document.getElementById('hname')).run('Amr Elharony'),1400);
-    // Social bounce
-    document.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.6,delay:1.2+i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
     // Role tags pop
     document.querySelectorAll('.rt').forEach((t,i)=>{gsap.from(t,{scale:.7,opacity:0,y:10,duration:.5,delay:1.1+i*.1,ease:'back.out(2)',onComplete:()=>{gsap.set(t,{clearProps:'all'});t.style.opacity='1';}});});
     // Cards dramatic entrance
@@ -460,6 +489,129 @@ function launch(){
     // Newsletter cards slide in
     document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
 }
+
+// ═══ PROXIMITY-GATED CONTACT REVEAL ═══
+// Combo: IP geolocation (Cairo ~20km) + secret URL param (?s=1)
+let contactRevealed=false;
+let isNearby=false;
+const isMobile=window.matchMedia('(pointer:coarse)').matches;
+
+function revealContact(){
+    if(contactRevealed)return;
+    contactRevealed=true;
+    const secret=document.getElementById('contactSecret');
+    const hint=document.getElementById('shakeHint');
+    const deskHint=document.getElementById('deskHint');
+    const bar=document.getElementById('shakeBar');
+    secret.classList.add('revealed');
+    if(hint){hint.classList.remove('shaking');hint.classList.add('unlocked');hint.innerHTML='<i class="fa-solid fa-lock-open" style="margin-right:4px;"></i> UNLOCKED';}
+    if(bar)bar.classList.remove('active');
+    // Re-init social hover colors
+    secret.querySelectorAll('.si').forEach(el=>{
+        const c=el.dataset.c;
+        el.addEventListener('mouseenter',()=>el.style.color=c);
+        el.addEventListener('mouseleave',()=>el.style.color='');
+    });
+    // Animate social icons in
+    secret.querySelectorAll('.si').forEach((s,i)=>{
+        gsap.from(s,{scale:0,rotation:90,duration:.5,delay:i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});
+    });
+    // Magnetic social (desktop)
+    if(D&&!reducedMotion){
+        secret.querySelectorAll('.si').forEach(el=>{
+            el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;});
+            el.addEventListener('mouseleave',()=>{el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';el.style.transform='';setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);});
+        });
+    }
+    // Haptic
+    if(navigator.vibrate)navigator.vibrate([100,50,100]);
+    // Hide hints after 3s
+    setTimeout(()=>{
+        [hint,deskHint].forEach(h=>{if(h){h.style.opacity='0';setTimeout(()=>h.style.display='none',400);}});
+    },3000);
+}
+
+// Show appropriate hint based on device type
+function enableNearbyHints(){
+    isNearby=true;
+    if(isMobile){
+        document.getElementById('shakeHint').style.display='block';
+        initShake();
+    }else{
+        document.getElementById('deskHint').style.display='block';
+    }
+}
+
+// ── Check 1: Secret URL param → instant reveal
+if(new URLSearchParams(location.search).has('s')){
+    // ?s=1 in URL → immediately reveal contact (for QR/NFC handout)
+    // Wait for launch to finish, then reveal
+    setTimeout(()=>revealContact(),3500);
+}else{
+    // ── Check 2: IP geolocation → Cairo proximity
+    // Cairo coordinates: 30.0444, 31.2357; ~20km radius
+    const CAIRO_LAT=30.0444,CAIRO_LNG=31.2357,RADIUS_KM=25;
+    function haversineKm(lat1,lon1,lat2,lon2){
+        const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+        const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+    // Use free IP geolocation (no permission needed, no API key)
+    fetch('https://ip-api.com/json/?fields=lat,lon,city,status',{mode:'cors'})
+        .then(r=>r.json())
+        .then(data=>{
+            if(data.status==='success'){
+                const dist=haversineKm(data.lat,data.lon,CAIRO_LAT,CAIRO_LNG);
+                if(dist<=RADIUS_KM)enableNearbyHints();
+            }
+        })
+        .catch(()=>{/* API failed — safe default: hide hints */});
+}
+
+// ── Shake detection (only initialized when nearby + mobile)
+function initShake(){
+    const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;
+    let shakeStart=0,shaking=false;
+    const hint=document.getElementById('shakeHint');
+    const bar=document.getElementById('shakeBar');
+    const fill=document.getElementById('shakeFill');
+
+    function handleMotion(e){
+        if(contactRevealed)return;
+        const acc=e.accelerationIncludingGravity;
+        if(!acc)return;
+        const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z);
+        const accelNet=Math.abs(total-9.81);
+        if(accelNet>SHAKE_THRESHOLD){
+            if(!shaking){shaking=true;shakeStart=Date.now();hint.classList.add('shaking');bar.classList.add('active');}
+            const elapsed=Date.now()-shakeStart;
+            const progress=Math.min(elapsed/SHAKE_DURATION*100,100);
+            fill.style.width=progress+'%';
+            if(elapsed>=SHAKE_DURATION){
+                window.removeEventListener('devicemotion',handleMotion);
+                fill.style.width='100%';
+                revealContact();
+            }
+        }else{
+            if(shaking){shaking=false;shakeStart=0;hint.classList.remove('shaking');bar.classList.remove('active');fill.style.width='0%';}
+        }
+    }
+    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+        document.body.addEventListener('touchstart',function reqPerm(){
+            DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});
+            document.body.removeEventListener('touchstart',reqPerm);
+        },{once:true});
+    }else if(typeof DeviceMotionEvent!=='undefined'){
+        window.addEventListener('devicemotion',handleMotion);
+    }
+}
+
+// ── Desktop: "S" key only works if nearby
+document.addEventListener('keydown',e=>{
+    if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT'){
+        revealContact();
+    }
+});
 
 // ═══ VCARD DOWNLOAD ═══
 window.downloadVCard=function(){
