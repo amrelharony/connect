@@ -332,8 +332,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <a href="https://adplist.org/mentors/amr-elharony" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="smiley.jpg" style="border-radius:8px;" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-graduation-cap fbi" style="color:var(--accent3);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Get Mentored</div><div class="lsu">Free 1:1 Agile Coaching</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
     </div>
 
-    <div class="reading-card rv"><div class="reading-icon"><i class="fa-solid fa-book-open"></i></div><div class="reading-meta"><div class="reading-label">Currently Reading</div><div class="reading-title">Team Topologies</div><div class="reading-author">Matthew Skelton & Manuel Pais</div></div></div>
-
     <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
     <div class="tl-wrap rv"><div class="tl-line"></div>
         <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent);"></div><div class="tl-yr">2026</div><div class="tl-txt"><strong>Author, Founder & Data Leader</strong></div></div>
@@ -370,7 +368,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         </div>
     </div>
 
-    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:32px;margin-bottom:24px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
+    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:16px;margin-bottom:24px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
 
     <div class="visitor-count" id="visitorCount"></div>
     <div class="streak" id="streakCount"></div>
@@ -516,7 +514,7 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
 function initShake(){const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;let shakeStart=0,shaking=false;const hint=document.getElementById('shakeHint'),bar=document.getElementById('shakeBar'),fill=document.getElementById('shakeFill');
 function handleMotion(e){if(contactRevealed)return;const acc=e.accelerationIncludingGravity;if(!acc)return;const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z),accelNet=Math.abs(total-9.81);
 if(accelNet>SHAKE_THRESHOLD){if(!shaking){shaking=true;shakeStart=Date.now();hint.classList.add('shaking');bar.classList.add('active');}const elapsed=Date.now()-shakeStart,progress=Math.min(elapsed/SHAKE_DURATION*100,100);fill.style.width=progress+'%';if(elapsed>=SHAKE_DURATION){window.removeEventListener('devicemotion',handleMotion);fill.style.width='100%';revealContact();}}else{if(shaking){shaking=false;shakeStart=0;hint.classList.remove('shaking');bar.classList.remove('active');fill.style.width='0%';}}}
-if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){document.body.addEventListener('touchstart',function rp(){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});document.body.removeEventListener('touchstart',rp);},{once:true});}else if(typeof DeviceMotionEvent!=='undefined'){window.addEventListener('devicemotion',handleMotion);}}
+if(typeof DeviceMotionEvent!undefined&&typeof DeviceMotionEvent.requestPermission==='function'){document.body.addEventListener('touchstart',function rp(){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});document.body.removeEventListener('touchstart',rp);},{once:true});}else if(typeof DeviceMotionEvent!=='undefined'){window.addEventListener('devicemotion',handleMotion);}}
 document.addEventListener('keydown',e=>{if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
 
 // ═══ VCARD ═══
