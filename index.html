@@ -4,6 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Amr Elharony | Delivery Lead | Mentor | Fintech Author & Speaker</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="Amr Elharony — Scrum Master at Banque Misr, FinTech author, and globally recognized mentor. Bridging banking and technology to deliver measurable digital transformation across MENA.">
+    <meta name="author" content="Amr Elharony">
+    <link rel="canonical" href="https://amrelharony.com">
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content="profile">
+    <meta property="og:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
+    <meta property="og:description" content="Bridging banking and technology to deliver measurable digital transformation. Author of The Bilingual Executive. 1,000+ mentoring minutes on ADPList.">
+    <meta property="og:url" content="https://amrelharony.com">
+    <meta property="og:image" content="https://amrelharony.com/profile.jpg">
+    <meta property="og:site_name" content="Amr Elharony">
+    <meta property="profile:first_name" content="Amr">
+    <meta property="profile:last_name" content="Elharony">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
+    <meta name="twitter:description" content="Bridging banking and technology to deliver measurable digital transformation across MENA.">
+    <meta name="twitter:image" content="https://amrelharony.com/profile.jpg">
+
+    <!-- Structured Data (Person Schema) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Amr Elharony",
+        "url": "https://amrelharony.com",
+        "image": "https://amrelharony.com/profile.jpg",
+        "jobTitle": "Scrum Master",
+        "worksFor": {"@type": "Organization", "name": "Banque Misr"},
+        "description": "Delivery Lead, Mentor, FinTech Author & Speaker bridging banking and technology across MENA.",
+        "alumniOf": [
+            {"@type": "CollegeOrUniversity", "name": "Helwan University Cairo"},
+            {"@type": "CollegeOrUniversity", "name": "Frankfurt School of Finance & Management"}
+        ],
+        "knowsAbout": ["FinTech", "Agile", "Scrum", "Digital Transformation", "Data Analytics", "Banking"],
+        "sameAs": [
+            "https://www.linkedin.com/in/amrmelharony",
+            "https://t.me/Amrmelharony",
+            "https://adplist.org/mentors/amr-elharony"
+        ]
+    }
+    </script>
+
     <script>window.va=window.va||function(){(window.va.q=window.va.q||[]).push(arguments);};</script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +62,15 @@
 .light-mode{--bg:#f4f6fb;--bg2:#fff;--text:#0a0f1a;--sub:#5a6578;--accent:#0066ff;--accent2:#4f46e5;--accent3:#9333ea;--card:rgba(255,255,255,0.7);--border:rgba(0,0,0,0.06);--cardH:rgba(255,255,255,0.95);--glow:rgba(0,102,255,0.08);--glowS:rgba(0,102,255,0.2)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-tap-highlight-color:transparent;transition:background .6s,color .6s}
+
+/* Reduced Motion */
+@media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
+    #preloader{display:none!important}
+    #app{opacity:1!important}
+    .rv{opacity:1!important;transform:none!important}
+    body{overflow:auto!important;overflow-x:hidden!important}
+}
 
 /* PRELOADER */
 #preloader{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background .6s}
@@ -51,7 +106,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 /* THEME BTN */
 .tbtn{position:fixed;top:16px;right:16px;z-index:100;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .3s}
-.tbtn:hover{color:var(--accent);border-color:var(--accent);transform:rotate(20deg) scale(1.05)}
+.tbtn:hover,.tbtn:focus-visible{color:var(--accent);border-color:var(--accent);transform:rotate(20deg) scale(1.05);outline:none}
 
 /* APP */
 #app{position:relative;z-index:2;width:100%;max-width:480px;margin:0 auto;padding:48px 24px 120px;opacity:0}
@@ -87,22 +142,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 @keyframes ns{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .sg{color:var(--accent);opacity:.5}
 
+/* VALUE PROP */
+.vp{text-align:center;font-size:14px;color:var(--sub);line-height:1.6;margin:12px 0 4px;max-width:380px;margin-left:auto;margin-right:auto}
+.vp strong{color:var(--text);font-weight:600}
+
 /* ROLES */
 .rl{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:10px}
 .rt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:4px;background:var(--card);border:1px solid var(--border);color:var(--sub);backdrop-filter:blur(10px);transition:all .3s}
 .rt:hover{border-color:var(--accent);color:var(--accent)}
 
+/* IMPACT STRIP */
+.imp{display:flex;justify-content:center;gap:24px;margin:20px 0 4px;flex-wrap:wrap}
+.imp-item{text-align:center}
+.imp-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);line-height:1.2}
+.imp-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px}
+
 /* SOCIAL */
-.sr{display:flex;gap:20px;justify-content:center;margin:28px 0 32px}
+.sr{display:flex;gap:20px;justify-content:center;margin:24px 0 28px}
 .si{color:var(--sub);font-size:20px;transition:color .3s,transform .3s cubic-bezier(.16,1,.3,1);position:relative;text-decoration:none}
-.si:hover{transform:translateY(-3px)}
+.si:hover,.si:focus-visible{transform:translateY(-3px);outline:none}
 .si::after{content:'';position:absolute;bottom:-6px;left:50%;width:0;height:2px;background:var(--accent);border-radius:1px;transform:translateX(-50%);transition:width .3s cubic-bezier(.16,1,.3,1)}
-.si:hover::after{width:20px}
+.si:hover::after,.si:focus-visible::after{width:20px}
 
 /* LINK CARDS */
 .lk{display:flex;align-items:center;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);text-decoration:none;color:var(--text);position:relative;overflow:hidden;transition:background .3s,border-color .3s,transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s;will-change:transform}
-.lk:hover{background:var(--cardH);border-color:rgba(0,225,255,.12);box-shadow:0 8px 32px -8px var(--glow),0 0 0 1px var(--border)}
-.light-mode .lk:hover{border-color:rgba(0,102,255,.15);box-shadow:0 8px 32px -8px rgba(0,0,0,.08)}
+.lk:hover,.lk:focus-visible{background:var(--cardH);border-color:rgba(0,225,255,.12);box-shadow:0 8px 32px -8px var(--glow),0 0 0 1px var(--border);outline:none}
+.light-mode .lk:hover,.light-mode .lk:focus-visible{border-color:rgba(0,102,255,.15);box-shadow:0 8px 32px -8px rgba(0,0,0,.08)}
 .ls{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:0}
 .lk:hover .ls{opacity:1}
 .lm{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,var(--glow) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none;z-index:1}
@@ -123,7 +188,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .ndl{flex:1;height:1px;background:var(--sub)}
 .ndt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);white-space:nowrap}
 .nl{display:flex;align-items:center;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);text-decoration:none;color:var(--sub);font-size:13px;font-weight:500;position:relative;overflow:hidden;transition:background .3s,color .3s,border-color .3s,transform .3s cubic-bezier(.16,1,.3,1)}
-.nl:hover{background:var(--cardH);color:var(--text);transform:translateX(4px)}
+.nl:hover,.nl:focus-visible{background:var(--cardH);color:var(--text);transform:translateX(4px);outline:none}
 .ni{width:28px;display:flex;justify-content:center;flex-shrink:0;font-size:14px}
 .nlb{flex:1;position:relative}
 .nlb::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--accent);transition:width .4s cubic-bezier(.16,1,.3,1)}
@@ -133,7 +198,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 /* VCARD BUTTON */
 .vcb{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;margin-bottom:8px}
-.vcb:hover{transform:translateY(-2px);box-shadow:0 8px 24px -4px var(--glowS)}
+.vcb:hover,.vcb:focus-visible{transform:translateY(-2px);box-shadow:0 8px 24px -4px var(--glowS);outline:none}
 .vcb:active{transform:translateY(0) scale(.98)}
 .vcb i{font-size:14px;transition:transform .3s}
 .vcb:hover i{transform:translateY(2px)}
@@ -151,10 +216,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <div class="cg" id="cg"></div>
 <div class="cd" id="cdd"></div>
 <div class="mesh"><div class="b1"></div><div class="b2"></div><div class="b3"></div></div>
-<canvas id="bgC"></canvas>
-<button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
+<canvas id="bgC" aria-hidden="true"></canvas>
+<button class="tbtn" id="tbtn" aria-label="Toggle light and dark theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
 
-<div id="preloader">
+<div id="preloader" role="status" aria-label="Loading">
     <div class="pre-line" id="preLine">ESTABLISHING CONNECTION</div>
     <div class="pre-ctr" id="preCtr">0</div>
     <div class="pre-bar" id="preBar"><div class="pre-fill" id="preFill"></div></div>
@@ -163,44 +228,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 <div id="app">
     <div class="rv" style="display:flex;justify-content:center;">
-        <div class="st"><span class="sd" id="sdot" style="background:#22c55e;"></span><span id="stxt">LOCATING...</span></div>
+        <div class="st"><span class="sd" id="sdot" style="background:#22c55e;" aria-hidden="true"></span><span id="stxt">LOCATING...</span></div>
     </div>
-    <div class="pf rv" id="pfw" onclick="toggleFlip()">
-        <svg viewBox="0 0 136 136"><circle cx="68" cy="68" r="66" stroke="var(--accent)" opacity=".3"/><circle cx="68" cy="68" r="66" stroke="var(--accent2)" opacity=".2" stroke-dasharray="4 10" style="animation-direction:reverse;animation-duration:18s"/></svg>
+    <div class="pf rv" id="pfw" role="button" tabindex="0" aria-label="Flip to show QR code" onclick="toggleFlip()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFlip();}">
+        <svg viewBox="0 0 136 136" aria-hidden="true"><circle cx="68" cy="68" r="66" stroke="var(--accent)" opacity=".3"/><circle cx="68" cy="68" r="66" stroke="var(--accent2)" opacity=".2" stroke-dasharray="4 10" style="animation-direction:reverse;animation-duration:18s"/></svg>
         <div class="pfi"><div class="fc"><div class="fi" id="fc">
-            <div class="ff"><img src="profile.jpg" alt="Amr Elharony" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div style="width:100%;height:100%;background:var(--bg2);display:none;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:36px;color:var(--sub);"></i></div></div>
-            <div class="fb"><img id="qri" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=00e1ff&bgcolor=06080f" alt="QR" style="width:80%;height:80%;object-fit:contain;"></div>
+            <div class="ff"><img src="profile.jpg" alt="Amr Elharony" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div style="width:100%;height:100%;background:var(--bg2);display:none;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:36px;color:var(--sub);" aria-hidden="true"></i></div></div>
+            <div class="fb"><img id="qri" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=00e1ff&bgcolor=06080f" alt="QR code linking to amrelharony.com" style="width:80%;height:80%;object-fit:contain;"></div>
         </div></div></div>
-        <div class="qb"><i class="fa-solid fa-qrcode"></i></div>
+        <div class="qb" aria-hidden="true"><i class="fa-solid fa-qrcode"></i></div>
     </div>
     <div class="ph rv">TAP PHOTO FOR QR</div>
+
     <h1 class="hn rv"><span class="ng" id="hname">Amr Elharony</span></h1>
-    <div class="rl rv" id="rtags"><span class="rt">Delivery Lead</span><span class="rt">Mentor</span><span class="rt">Fintech Author & Speaker</span></div>
+
+    <!-- Value Proposition -->
+    <p class="vp rv">I help <strong>banks and FinTech teams</strong> ship digital products faster through <strong>agile delivery, data-driven decisions</strong>, and bridging the gap between business and technology.</p>
+
+    <div class="rl rv" id="rtags"><span class="role rt">Delivery Lead</span><span class="role rt">Mentor</span><span class="role rt">Fintech Author & Speaker</span></div>
+
+    <!-- Impact Strip -->
+    <div class="imp rv" aria-label="Key achievements">
+        <div class="imp-item"><div class="imp-num" id="impNum1">9+</div><div class="imp-label">Years in Banking</div></div>
+        <div class="imp-item"><div class="imp-num" id="impNum2">1,000+</div><div class="imp-label">Mentoring Mins</div></div>
+        <div class="imp-item"><div class="imp-num" id="impNum3">6+</div><div class="imp-label">Panel Stages</div></div>
+    </div>
+
     <div class="sr rv" id="srow">
-        <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" class="si" data-c="#0077b5"><i class="fa-brands fa-linkedin"></i></a>
-        <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" class="si" data-c="#25d366"><i class="fa-brands fa-whatsapp"></i></a>
-        <a href="https://t.me/Amrmelharony" target="_blank" class="si" data-c="#0088cc"><i class="fa-brands fa-telegram"></i></a>
-        <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335"><i class="fa-solid fa-envelope"></i></a>
+        <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
+        <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
+        <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
+        <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
     </div>
 
     <!-- vCard Download -->
     <button class="vcb rv" id="vcBtn" onclick="downloadVCard()">
         <div class="vcb-shim"></div>
-        <i class="fa-solid fa-address-card"></i>
+        <i class="fa-solid fa-address-card" aria-hidden="true"></i>
         <span id="vcTxt">Save Contact</span>
     </button>
 
     <div style="display:flex;flex-direction:column;gap:12px;">
-        <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">My Book</div></div><div class="la"><i class="fa-solid fa-arrow-right"></i></div></a>
-        <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="fb.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-users fbi" style="color:var(--accent2);"></i></div><div class="lb"><div class="lt">Fintech Bilinguals</div><div class="lsu">Join the Community</div></div><div class="la"><i class="fa-solid fa-arrow-right"></i></div></a>
-        <a href="https://adplist.org/mentors/amr-elharony" target="_blank" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="smiley.jpg" style="border-radius:8px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-graduation-cap fbi" style="color:var(--accent3);"></i></div><div class="lb"><div class="lt">Get Mentored</div><div class="lsu">Free 1:1 Agile Coaching</div></div><div class="la"><i class="fa-solid fa-arrow-right"></i></div></a>
+        <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">My Book</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
+        <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="fb.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-users fbi" style="color:var(--accent2);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Fintech Bilinguals</div><div class="lsu">Join the Community</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
+        <a href="https://adplist.org/mentors/amr-elharony" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="smiley.jpg" style="border-radius:8px;" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-graduation-cap fbi" style="color:var(--accent3);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Get Mentored</div><div class="lsu">Free 1:1 Agile Coaching</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
     </div>
 
     <div class="nd rv"><div class="ndl"></div><div class="ndt">NEWSLETTERS</div><div class="ndl"></div></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" class="nl rv"><div class="ni"><i class="fa-solid fa-chart-line" style="color:#eab308;"></i></div><span class="nlb">LevelUp Your Leadership</span><i class="fa-solid fa-external-link-alt ne"></i></a>
-        <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" class="nl rv"><div class="ni"><i class="fa-solid fa-briefcase" style="color:#22c55e;"></i></div><span class="nlb">LevelUp Your Business</span><i class="fa-solid fa-external-link-alt ne"></i></a>
-        <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" class="nl rv"><div class="ni"><i class="fa-solid fa-microchip" style="color:var(--accent);"></i></div><span class="nlb">LevelUp Your Tech</span><i class="fa-solid fa-external-link-alt ne"></i></a>
+        <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-chart-line" style="color:#eab308;" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Leadership</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-briefcase" style="color:#22c55e;" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Business</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-microchip" style="color:var(--accent);" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Tech</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
     </div>
     <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
 </div>
@@ -210,8 +288,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 'use strict';
 document.getElementById('yr').textContent=new Date().getFullYear();
 const D=window.matchMedia('(pointer:fine)').matches;
+const reducedMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+const isRepeatVisit=!!localStorage.getItem('visited');
+localStorage.setItem('visited','1');
 
-// ═══ PARTICLES ═══
+// ═══ PARTICLES (deferred until idle) ═══
 const cv=document.getElementById('bgC'),cx=cv.getContext('2d');
 let W,H,pts=[],mouse={x:-9999,y:-9999},gy={x:0,y:0};
 const PC=D?90:45,CD=140,MR=200;
@@ -242,7 +323,13 @@ function drawP(){
     }}requestAnimationFrame(drawP);
 }
 function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;if(!pts.length)initP();}
-addEventListener('resize',rsz);rsz();initP();drawP();
+addEventListener('resize',rsz);rsz();
+
+// Defer particle init until after preloader
+function startParticles(){initP();drawP();}
+if(reducedMotion){/* skip particles entirely */}
+else if('requestIdleCallback' in window){requestIdleCallback(startParticles);}
+else{setTimeout(startParticles,100);}
 
 addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
 addEventListener('touchmove',e=>{if(e.touches[0]){mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;}},{passive:true});
@@ -256,7 +343,7 @@ if(typeof DeviceOrientationEvent!=='undefined'){
 function oG(e){if(e.gamma!=null)gy.x=e.gamma;if(e.beta!=null)gy.y=e.beta;}
 
 // ═══ CURSOR ═══
-if(D){
+if(D&&!reducedMotion){
     const dot=document.getElementById('cdd'),glo=document.getElementById('cg');
     let gx=0,gy2=0;
     document.addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';glo.classList.add('on');});
@@ -314,6 +401,7 @@ function updStatus(){
     else if(h>=17&&h<23){msg="CAIRO · MENTORING";col="#a855f7";}
     else{msg="CAIRO · RECHARGING";col="#f97316";}
     dot.style.background=col;
+    if(reducedMotion){txt.textContent=msg;return;}
     txt.textContent='';let i=0;
     (function t(){if(i<msg.length){txt.textContent+=msg[i];i++;setTimeout(t,35);}})();
 }
@@ -322,6 +410,7 @@ function updStatus(){
 class Scr{
     constructor(el){this.el=el;this.ch='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';}
     run(text){
+        if(reducedMotion){this.el.innerHTML=`<span class="ng">${text}</span>`;return;}
         const q=[];for(let i=0;i<text.length;i++)q.push({to:text[i],start:Math.floor(Math.random()*15),end:Math.floor(Math.random()*15)+15+i*2,c:null});
         let f=0;const u=()=>{let o='',done=0;
             for(let i=0;i<q.length;i++){const x=q[i];if(f>=x.end){o+=x.to;done++;}else if(f>=x.start){if(!x.c||Math.random()<.3)x.c=this.ch[Math.floor(Math.random()*this.ch.length)];o+=`<span class="sg">${x.c}</span>`;}else o+='';}
@@ -330,21 +419,23 @@ class Scr{
     }
 }
 
-// ═══ CINEMATIC PRELOADER ═══
+// ═══ PRELOADER (capped at ~1.5s; skip on repeat visit) ═══
 const stages=['RESOLVING DNS','ESTABLISHING TLS','LOADING MODULES','DECRYPTING PAYLOAD','RENDERING INTERFACE','READY'];
-gsap.to('#preLine',{opacity:1,duration:.4,delay:.2});
-gsap.to('#preCtr',{opacity:1,duration:.4,delay:.4});
-gsap.to('#preBar',{opacity:1,duration:.4,delay:.5});
-gsap.to('#preStg',{opacity:1,duration:.4,delay:.6});
+const SPEED=isRepeatVisit?8:4; // faster increment on repeat
+
+gsap.to('#preLine',{opacity:1,duration:.3,delay:.1});
+gsap.to('#preCtr',{opacity:1,duration:.3,delay:.2});
+gsap.to('#preBar',{opacity:1,duration:.3,delay:.3});
+gsap.to('#preStg',{opacity:1,duration:.3,delay:.35});
 
 let prog=0;
 const li=setInterval(()=>{
-    prog=Math.min(100,prog+Math.random()*4+1);const p=Math.round(prog);
+    prog=Math.min(100,prog+Math.random()*SPEED+1.5);const p=Math.round(prog);
     document.getElementById('preCtr').textContent=p;
     document.getElementById('preFill').style.width=p+'%';
     document.getElementById('preStg').textContent=stages[Math.min(stages.length-1,Math.floor(p/100*stages.length))];
-    if(p>=100){clearInterval(li);setTimeout(launch,300);}
-},30);
+    if(p>=100){clearInterval(li);setTimeout(launch,isRepeatVisit?100:300);}
+},isRepeatVisit?20:30);
 
 function done(el){el.classList.remove('rv');el.style.opacity='';el.style.transform='';gsap.set(el,{clearProps:'all'});el.style.opacity='1';el.style.transform='none';}
 
@@ -352,50 +443,42 @@ function launch(){
     const pre=document.getElementById('preloader'),app=document.getElementById('app');
     gsap.to('#preCtr',{scale:1.3,opacity:0,duration:.3,ease:'power2.in'});
     gsap.to(['#preLine','#preBar','#preStg'],{opacity:0,duration:.2});
-    // Cinematic wipe
     pre.style.clipPath='inset(0 0 0% 0)';
     gsap.to(pre,{clipPath:'inset(0 0 100% 0)',duration:.9,delay:.3,ease:'power4.inOut',onComplete:()=>{pre.style.display='none';document.body.style.overflow='auto';document.body.style.overflowX='hidden';}});
     gsap.to(app,{opacity:1,duration:.5,delay:.6});
     setTimeout(updStatus,800);
     // Staggered reveals
-    document.querySelectorAll('.rv').forEach((el,i)=>{gsap.to(el,{opacity:1,y:0,duration:.9,delay:.8+i*.1,ease:'power3.out',onComplete:()=>done(el)});});
+    document.querySelectorAll('.rv').forEach((el,i)=>{gsap.to(el,{opacity:1,y:0,duration:.9,delay:.8+i*.08,ease:'power3.out',onComplete:()=>done(el)});});
     // Name scramble
-    setTimeout(()=>new Scr(document.getElementById('hname')).run('Amr Elharony'),1600);
+    setTimeout(()=>new Scr(document.getElementById('hname')).run('Amr Elharony'),1400);
     // Social bounce
-    document.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.6,delay:1.4+i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
+    document.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.6,delay:1.2+i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
     // Role tags pop
-    document.querySelectorAll('.rt').forEach((t,i)=>{gsap.from(t,{scale:.7,opacity:0,y:10,duration:.5,delay:1.3+i*.1,ease:'back.out(2)',onComplete:()=>{gsap.set(t,{clearProps:'all'});t.style.opacity='1';}});});
+    document.querySelectorAll('.rt').forEach((t,i)=>{gsap.from(t,{scale:.7,opacity:0,y:10,duration:.5,delay:1.1+i*.1,ease:'back.out(2)',onComplete:()=>{gsap.set(t,{clearProps:'all'});t.style.opacity='1';}});});
     // Cards dramatic entrance
-    document.querySelectorAll('.lk').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,y:50,scale:.92,rotateX:10,filter:'blur(6px)'},{opacity:1,y:0,scale:1,rotateX:0,filter:'blur(0px)',duration:.8,delay:1.6+i*.15,ease:'power3.out',onComplete:()=>done(c)});});
+    document.querySelectorAll('.lk').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,y:50,scale:.92,rotateX:10,filter:'blur(6px)'},{opacity:1,y:0,scale:1,rotateX:0,filter:'blur(0px)',duration:.8,delay:1.4+i*.12,ease:'power3.out',onComplete:()=>done(c)});});
     // Newsletter cards slide in
-    document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2.2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
+    document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
 }
 
 // ═══ VCARD DOWNLOAD ═══
 window.downloadVCard=function(){
     const vcard=[
-        'BEGIN:VCARD',
-        'VERSION:3.0',
-        'N:Elharony;Amr;;;',
-        'FN:Amr Elharony',
+        'BEGIN:VCARD','VERSION:3.0','N:Elharony;Amr;;;','FN:Amr Elharony',
         'TITLE:Delivery Lead | Mentor | Fintech Author & Speaker',
-        'TEL;TYPE=CELL:+201114260806',
+        'ORG:Banque Misr','TEL;TYPE=CELL:+201114260806',
         'EMAIL;TYPE=INTERNET:a.elharony@gmail.com',
-        'URL:https://amrelharony.com',
-        'URL:https://bilingualexecutive.amrelharony.com/',
+        'URL:https://amrelharony.com','URL:https://bilingualexecutive.amrelharony.com/',
         'URL:https://www.linkedin.com/in/amrmelharony',
         'X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/amrmelharony',
         'X-SOCIALPROFILE;TYPE=telegram:https://t.me/Amrmelharony',
-        'NOTE:Delivery Lead \\| Mentor \\| Fintech Author & Speaker. Author of "The Bilingual Executive". Founder of Fintech Bilinguals community.',
+        'NOTE:Scrum Master at Banque Misr. Author of "The Bilingual Executive". 1000+ mentoring minutes on ADPList. DBA in Digital Transformation from Helwan University.',
         'END:VCARD'
     ].join('\r\n');
     const blob=new Blob([vcard],{type:'text/vcard;charset=utf-8'});
     const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download='Amr_Elharony.vcf';
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);URL.revokeObjectURL(url);
-    // Feedback
+    const a=document.createElement('a');a.href=url;a.download='Amr_Elharony.vcf';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
     const btn=document.getElementById('vcBtn'),txt=document.getElementById('vcTxt'),icon=btn.querySelector('i');
     btn.classList.add('vcb-done');icon.className='fa-solid fa-check';txt.textContent='SAVED!';
     setTimeout(()=>{btn.classList.remove('vcb-done');icon.className='fa-solid fa-address-card';txt.textContent='Save Contact';},2500);
@@ -408,10 +491,12 @@ addEventListener('scroll',()=>{
 },{passive:true});
 
 // ═══ PARALLAX ═══
-addEventListener('scroll',()=>{
-    const y=scrollY;
-    document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${y*(i+1)*.06}px)`;});
-},{passive:true});
+if(!reducedMotion){
+    addEventListener('scroll',()=>{
+        const y=scrollY;
+        document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${y*(i+1)*.06}px)`;});
+    },{passive:true});
+}
 
 })();
 </script>
