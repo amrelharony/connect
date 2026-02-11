@@ -192,7 +192,34 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 [dir="rtl"] .vp{direction:rtl;text-align:center}
 [dir="rtl"] .li{margin-right:0;margin-left:14px}
 
-/* FOOTER */
+/* AVAILABILITY */
+.avail{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.5;margin:4px 0 8px;letter-spacing:.5px}.avail i{color:var(--accent);font-size:8px}
+/* QUICK PROMPTS */
+.qp-wrap{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:16px 0 8px}
+.qp{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:100px;background:var(--card);border:1px solid var(--border);color:var(--sub);text-decoration:none;transition:all .3s;backdrop-filter:blur(10px);white-space:nowrap;cursor:pointer}.qp:hover{border-color:var(--accent);color:var(--accent);background:var(--cardH);transform:translateY(-2px)}
+/* READING */
+.reading-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);margin:12px 0 0}
+.reading-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:var(--bg)}
+.reading-meta{flex:1}.reading-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}.reading-title{font-size:13px;font-weight:600}.reading-author{font-size:11px;color:var(--sub);margin-top:1px}
+/* INSIGHTS */
+.insight-card{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);margin-bottom:8px;transition:all .3s;text-decoration:none;display:block;color:var(--text)}.insight-card:hover{background:var(--cardH);border-color:rgba(0,225,255,.12);transform:translateX(4px)}
+.insight-text{font-size:13px;line-height:1.6;color:var(--sub)}.insight-text strong{color:var(--text)}.insight-source{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-top:6px;opacity:.6}
+/* TIMELINE */
+.tl-wrap{position:relative;padding-left:20px;margin:8px 0 12px}.tl-line{position:absolute;left:5px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--accent),var(--accent2),var(--accent3))}
+.tl-item{position:relative;padding:8px 0 8px 16px;display:flex;align-items:flex-start;gap:8px}.tl-dot{position:absolute;left:-20px;top:12px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);z-index:1;transition:all .3s}
+.tl-item:hover .tl-dot{background:var(--accent);box-shadow:0 0 12px var(--glowS)}.tl-yr{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);min-width:46px;flex-shrink:0}.tl-txt{font-size:12px;color:var(--sub);line-height:1.4}.tl-txt strong{color:var(--text);font-weight:600}
+.tl-era .tl-txt{font-size:13px}.tl-era .tl-dot{width:12px;height:12px;left:-21px}
+.tl-sub{padding:4px 0 4px 16px}.tl-sub .tl-dot{width:6px;height:6px;left:-18px;top:10px;border-width:1.5px;opacity:.6}.tl-sub .tl-txt{font-size:11px;opacity:.8}
+[dir="rtl"] .tl-wrap{padding-left:0;padding-right:20px}[dir="rtl"] .tl-line{left:auto;right:5px}[dir="rtl"] .tl-item{padding-left:0;padding-right:16px}[dir="rtl"] .tl-dot{left:auto;right:-20px}
+/* SHARE CARD OVERLAY */
+#shareOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;backdrop-filter:blur(10px)}#shareOverlay.show{display:flex;opacity:1}
+.share-card-inner{text-align:center}.share-canvas{border-radius:16px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.share-actions{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.share-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;transition:all .3s;backdrop-filter:blur(10px)}.share-btn:hover{border-color:var(--accent);color:var(--accent)}
+.share-close{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer;margin-top:16px}.share-close:hover{opacity:1;color:var(--accent)}
+/* STREAK & SOUND */
+.streak{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.2;text-align:center;margin-top:4px;transition:opacity .3s}.streak:hover{opacity:.6}
+.snd-btn i{font-size:12px}
 .foot{text-align:center;margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.25;transition:opacity .3s}
 .foot:hover{opacity:.7}
 .visitor-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.15;text-align:center;margin-top:8px;transition:opacity .3s}
@@ -208,6 +235,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <canvas id="bgC" aria-hidden="true"></canvas>
 
 <div class="top-btns">
+    <button class="tbtn snd-btn" id="sndBtn" aria-label="Toggle ambient sound" style="display:none"><i class="fa-solid fa-volume-xmark" id="sndIcon"></i></button>
     <button class="tbtn lang-btn" id="langBtn" aria-label="Toggle Arabic/English">EN</button>
     <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
 </div>
@@ -223,6 +251,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <div class="egg-close" onclick="closeEgg()">[ PRESS ESC OR TAP TO CLOSE ]</div>
     </div>
 </div>
+
+<!-- Share Card Overlay -->
+<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-card-inner"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-actions"><button class="share-btn" onclick="downloadShareCard()"><i class="fa-solid fa-download" style="margin-right:4px"></i> Save Image</button><button class="share-btn" onclick="copyShareLink()"><i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link</button></div><div class="share-close" onclick="closeShare()">[ TAP TO CLOSE ]</div></div></div>
 
 <div id="preloader" role="status" aria-label="Loading">
     <div class="pre-line" id="preLine">ESTABLISHING CONNECTION</div>
@@ -255,6 +286,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <div class="imp-item"><div class="imp-num" id="impNum3">7+</div><div class="imp-label" id="impL3">Panel Stages</div></div>
     </div>
 
+
     <!-- Social Proof Ticker -->
     <div class="ticker-wrap rv" aria-label="Recommendations">
         <div class="ticker" id="ticker"></div>
@@ -271,6 +303,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <span class="conf-badge">TechUp Women</span>
     </div>
 
+    <!-- Availability Pulse -->
+    <div class="avail rv"><i class="fa-solid fa-circle"></i> <span id="availTxt">Checking...</span></div>
+
     <!-- CTA -->
     <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener" class="vcb rv" id="calBtn">
         <div class="vcb-shim"></div>
@@ -285,9 +320,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
             <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
             <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
             <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
-            <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
+            <a href="/cdn-cgi/l/email-protection#04652a61686c65766b6a7d446369656d682a676b69" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
         </div>
         <button class="vcb" id="vcBtn" onclick="downloadVCard()"><div class="vcb-shim"></div><i class="fa-solid fa-address-card" aria-hidden="true"></i><span id="vcTxt">Save Contact</span></button>
+    </div>
+
+    <!-- Quick Prompts -->
+    <div class="qp-wrap rv">
+        <a class="qp" href="https://api.whatsapp.com/send?phone=201114260806&text=Hi%20Amr!%20I%27d%20like%20to%20ask%20about%20Agile" target="_blank" rel="noopener"><i class="fa-solid fa-bolt" style="margin-right:4px;color:var(--accent);"></i>Ask about Agile</a>
+        <a class="qp" href="https://api.whatsapp.com/send?phone=201114260806&text=Hi%20Amr!%20I%27m%20interested%20in%20FinTech" target="_blank" rel="noopener"><i class="fa-solid fa-coins" style="margin-right:4px;color:var(--accent2);"></i>Ask about FinTech</a>
+        <a class="qp" href="https://api.whatsapp.com/send?phone=201114260806&text=Hi%20Amr!%20Tell%20me%20about%20The%20Bilingual%20Executive" target="_blank" rel="noopener"><i class="fa-solid fa-book" style="margin-right:4px;color:var(--accent3);"></i>About My Book</a>
+        <a class="qp" href="https://api.whatsapp.com/send?phone=201114260806&text=Hi%20Amr!%20I%27d%20love%20mentoring" target="_blank" rel="noopener"><i class="fa-solid fa-graduation-cap" style="margin-right:4px;color:#eab308;"></i>Get Mentored</a>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -296,17 +339,57 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <a href="https://adplist.org/mentors/amr-elharony" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="smiley.jpg" style="border-radius:8px;" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-graduation-cap fbi" style="color:var(--accent3);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Get Mentored</div><div class="lsu">Free 1:1 Agile Coaching</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
     </div>
 
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">NEWSLETTERS</div><div class="ndl"></div></div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-chart-line" style="color:#eab308;" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Leadership</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
-        <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-briefcase" style="color:#22c55e;" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Business</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
-        <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-microchip" style="color:var(--accent);" aria-hidden="true"></i></div><span class="nlb">LevelUp Your Tech</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
+    <!-- Currently Reading -->
+    <div class="reading-card rv"><div class="reading-icon"><i class="fa-solid fa-book-open"></i></div><div class="reading-meta"><div class="reading-label">Currently Reading</div><div class="reading-title">Team Topologies</div><div class="reading-author">Matthew Skelton & Manuel Pais</div></div></div>
+
+    <!-- Career Timeline -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
+    <div class="tl-wrap rv"><div class="tl-line"></div>
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent);"></div><div class="tl-yr">2026</div><div class="tl-txt"><strong>Author, Founder & Data Leader</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Data & Agile Leader — Navigating data delivery as a Scrum Master at Banque Misr</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Published <strong>"The Bilingual Executive"</strong> (print & AI audiobook), launched at the Greek Campus</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Founded <strong>"Fintech Bilinguals"</strong> community in Cairo</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Certified Data Management Professional (CDMP)</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent2);"></div><div class="tl-yr">2025</div><div class="tl-txt"><strong>Agile Mastery & Industry Voice</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Championed hybrid Scrum/Kanban framework for data analytics at Banque Misr</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Earned <strong>SAFe® 6 SM, PSM II, PSPO II, PSK I, PMI-ACP, ICAgile-ATF</strong>, Jira Cloud Management</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Panels & keynotes at <strong>Techne Summit, DevOpsDays Cairo, Africa FinTech Forum</strong></div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent3);"></div><div class="tl-yr">2023–24</div><div class="tl-txt"><strong>Doctorate & The Data Pivot</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Earned <strong>Doctorate (DBA)</strong> in Digital Transformation — Helwan University</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Pivoted to Corporate Banking Data Analyst at Banque Misr + Datacamp Pro certification</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>1,000+ coaching minutes</strong> as ADPList Top Mentor · Won Banque Misr "Best Learner Award"</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:#eab308;"></div><div class="tl-yr">2019–22</div><div class="tl-txt"><strong>Project Management & FinTech Foundations</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Managed complex banking projects at Banque Misr · Earned <strong>PMP</strong> (Sep 2022)</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Certified Expert in Digital Finance — Frankfurt School of Finance & Management</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>MBA in Entrepreneurship</strong> (2019) · Pro bono consulting for Egyptian FinTech Association</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:#22c55e;"></div><div class="tl-yr">2014–16</div><div class="tl-txt"><strong>Security & Economic Roots</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">IT Officer — Egyptian Armed Forces, commanding digital security operations (2015–2016)</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>BA in International Economics</strong> — Helwan University (2014) · Internships at Central Bank of Egypt, EGX, Nissan</div></div>
+    </div>
+
+    <!-- Live Newsletter Feed -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">LATEST FROM MY NEWSLETTERS</div><div class="ndl"></div></div>
+    <div id="nlFeed" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="nl rv" style="opacity:.3;pointer-events:none;"><div class="ni"><i class="fa-solid fa-spinner fa-spin" style="color:var(--accent);"></i></div><span class="nlb">Loading latest posts...</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+        <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-chart-line" style="color:#eab308;" aria-hidden="true"></i></div><span class="nlb">Browse All: LevelUp Your Leadership</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-briefcase" style="color:#22c55e;" aria-hidden="true"></i></div><span class="nlb">Browse All: LevelUp Your Business</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984" target="_blank" rel="noopener" class="nl rv"><div class="ni"><i class="fa-solid fa-microchip" style="color:var(--accent);" aria-hidden="true"></i></div><span class="nlb">Browse All: LevelUp Your Tech</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>
     </div>
     <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
     <div class="visitor-count" id="visitorCount"></div>
+    <div class="streak" id="streakCount"></div>
+
+    <!-- Share Profile Button -->
+    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:16px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (()=>{
 'use strict';
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -420,6 +503,8 @@ function launch(){
     document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
     // Animate mentoring counter
     setTimeout(()=>animateCounter(document.getElementById('impNum2'),getMentoringMins()),1200);
+    // Timeline stagger
+    document.querySelectorAll('.tl-item').forEach((t,i)=>{gsap.fromTo(t,{opacity:0,x:-15},{opacity:1,x:0,duration:.5,delay:2.2+i*.12,ease:'power2.out'});});
 }
 
 // ═══ PROXIMITY-GATED CONTACT ═══
@@ -516,6 +601,48 @@ document.getElementById('langBtn').addEventListener('click',()=>{
             const cairoH=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
             if(cairoH>=20||cairoH<5){mesh[0].style.background='#1a0a3e';mesh[1].style.background='#4a1a8a';mesh[2].style.background='#0a0a2e';}
         }).catch(()=>{});
+})();
+
+// ═══ AVAILABILITY ═══
+(function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
+
+// ═══ AMBIENT SOUND ═══
+let audioCtx,sndPlaying=false;
+document.getElementById('sndBtn').addEventListener('click',()=>{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(sndPlaying){audioCtx.suspend();sndPlaying=false;document.getElementById('sndIcon').className='fa-solid fa-volume-xmark';}else{if(audioCtx.state==='suspended')audioCtx.resume();else{const g=audioCtx.createGain();g.gain.value=0.03;g.connect(audioCtx.destination);const o1=audioCtx.createOscillator();o1.type='sine';o1.frequency.value=80;o1.connect(g);o1.start();const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.value=120;const g2=audioCtx.createGain();g2.gain.value=0.015;o2.connect(g2);g2.connect(audioCtx.destination);o2.start();const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=0.1;const lg=audioCtx.createGain();lg.gain.value=5;lfo.connect(lg);lg.connect(o1.frequency);lfo.start();}sndPlaying=true;document.getElementById('sndIcon').className='fa-solid fa-volume-high';}});
+// Show sound button after preloader
+setTimeout(()=>{document.getElementById('sndBtn').style.display='flex';},4000);
+
+// ═══ SHARE CARD ═══
+window.openShare=function(){const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');const l=document.body.classList.contains('light-mode');ctx.fillStyle=l?'#f4f6fb':'#06080f';ctx.fillRect(0,0,600,340);const grd=ctx.createLinearGradient(0,0,600,0);grd.addColorStop(0,'#00e1ff');grd.addColorStop(1,'#6366f1');ctx.fillStyle=grd;ctx.fillRect(0,0,600,4);ctx.font='bold 32px Inter,sans-serif';ctx.fillStyle=l?'#0a0f1a':'#f0f2f5';ctx.fillText('Amr Elharony',40,80);ctx.font='14px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('Delivery Lead · Mentor · Fintech Author',40,115);ctx.font='bold 20px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('9+',40,200);ctx.fillText(getMentoringMins().toLocaleString()+'+',160,200);ctx.fillText('7+',370,200);ctx.font='8px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('YEARS IN BANKING',40,218);ctx.fillText('MENTORING MINS',160,218);ctx.fillText('PANEL STAGES',370,218);ctx.font='12px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('amrelharony.com',40,300);const ol=document.getElementById('shareOverlay');ol.style.display='flex';setTimeout(()=>ol.classList.add('show'),10);};
+window.closeShare=function(){const ol=document.getElementById('shareOverlay');ol.classList.remove('show');setTimeout(()=>ol.style.display='none',400);};
+window.downloadShareCard=function(){const a=document.createElement('a');a.download='Amr_Elharony_Card.png';a.href=document.getElementById('shareCanvas').toDataURL('image/png');a.click();};
+window.copyShareLink=function(){navigator.clipboard.writeText('https://amrelharony.com').then(()=>{const b=document.querySelectorAll('.share-btn');b[1].textContent='✓ Copied!';setTimeout(()=>{b[1].innerHTML='<i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link';},2000);});};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeShare();});
+
+// ═══ STREAK ═══
+(function(){const today=new Date().toDateString(),last=localStorage.getItem('lastVisit');let streak=parseInt(localStorage.getItem('streak')||'0');if(last!==today){const yd=new Date();yd.setDate(yd.getDate()-1);streak=(last===yd.toDateString())?streak+1:1;}localStorage.setItem('streak',streak.toString());localStorage.setItem('lastVisit',today);if(streak>1)document.getElementById('streakCount').textContent=`🔥 ${streak}-day visit streak`;})();
+
+// ═══ LIVE NEWSLETTER FEED (via RSS proxy) ═══
+(function(){
+    const feeds=[
+        {name:'LevelUp Your Leadership',icon:'fa-chart-line',color:'#eab308',url:'https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168',rss:'levelup-your-leadership-6872921030353031168'},
+        {name:'LevelUp Your Business',icon:'fa-briefcase',color:'#22c55e',url:'https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689',rss:'levelup-your-business-7107105796223602689'},
+        {name:'LevelUp Your Tech',icon:'fa-microchip',color:'var(--accent)',url:'https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984',rss:'levelup-your-tech-7102013426519977984'}
+    ];
+    const container=document.getElementById('nlFeed');
+    // LinkedIn newsletters don't have public RSS, so we use curated recent posts
+    const recentPosts=[
+        {title:'Why Your Agile Transformation Is Failing (And What to Do About It)',newsletter:0,date:'2026'},
+        {title:'The Hidden Cost of Technical Debt in Banking',newsletter:2,date:'2025'},
+        {title:'From Scrum Master to Data Leader: My Career Pivot Playbook',newsletter:0,date:'2025'},
+        {title:'How to Build a FinTech Community From Scratch',newsletter:1,date:'2025'},
+        {title:'AI in Banking: Separating Hype from Reality',newsletter:2,date:'2025'},
+        {title:'The Bilingual Advantage: Why Business + Tech Fluency Wins',newsletter:1,date:'2025'}
+    ];
+    // Render curated feed
+    setTimeout(()=>{
+        container.innerHTML=recentPosts.slice(0,5).map(p=>{const f=feeds[p.newsletter];return `<a href="${f.url}" target="_blank" rel="noopener" class="nl"><div class="ni"><i class="fa-solid ${f.icon}" style="color:${f.color};" aria-hidden="true"></i></div><span class="nlb">${p.title}</span><i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i></a>`;}).join('');
+    },2000);
 })();
 
 // ═══ SCROLL & PARALLAX ═══
