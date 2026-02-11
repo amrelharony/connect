@@ -220,7 +220,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 /* STREAK & SOUND */
 .streak{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.2;text-align:center;margin-top:4px;transition:opacity .3s}.streak:hover{opacity:.6}
 .snd-btn i{font-size:12px}
-.foot{text-align:center;margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.25;transition:opacity .3s}
+.foot{text-align:center;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.25;transition:opacity .3s}
 .foot:hover{opacity:.7}
 .visitor-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.15;text-align:center;margin-top:8px;transition:opacity .3s}
 .visitor-count:hover{opacity:.5}
@@ -362,7 +362,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>BA in International Economics</strong> — Helwan University (2014) · Internships at Central Bank of Egypt, EGX, Nissan</div></div>
     </div>
 
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">LATEST FROM LINKEDIN</div><div class="ndl"></div></div>
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">LATEST ARTICLES</div><div class="ndl"></div></div>
     <div id="linkedinFeed" style="display:flex;flex-direction:column;gap:8px;">
         <div class="nl rv" style="opacity:.3;pointer-events:none;">
             <div class="ni"><i class="fa-solid fa-spinner fa-spin" style="color:var(--accent);"></i></div>
@@ -370,11 +370,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         </div>
     </div>
 
-    <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
+    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:32px;margin-bottom:24px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
+
     <div class="visitor-count" id="visitorCount"></div>
     <div class="streak" id="streakCount"></div>
-
-    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:16px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
+    <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -616,7 +616,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeShare();});
     
     // 1. Go to rss.app, create a feed for your LinkedIn profile URL.
     // 2. Paste the generated RSS link below:
-    const myRssUrl = 'https://rss.app/feeds/9LkeDk2rdq1NPifG.xml'; 
+    const myRssUrl = 'https://rss.app/feeds/YOUR_UNIQUE_ID.xml'; 
     
     const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(myRssUrl)}`;
 
