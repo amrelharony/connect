@@ -344,40 +344,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .game-canvas{border:1px solid #30363d;border-radius:6px;display:block;margin:0 auto}
 .game-score{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8b949e;margin-top:8px}
 .game-hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:#484f58;margin-top:6px}
-/* TESTIMONIAL WALL */
-.test-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:8px 0}
-.test-card{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);transition:all .3s}
-.test-card:hover{border-color:rgba(0,225,255,.1);transform:translateY(-2px)}
-.test-quote{font-size:12px;line-height:1.6;color:var(--sub);font-style:italic;margin-bottom:8px}
-.test-quote::before{content:'"';font-size:24px;color:var(--accent);opacity:.3;font-style:normal;vertical-align:text-top;line-height:.5;margin-right:2px}
-.test-author{display:flex;align-items:center;gap:8px}
-.test-avatar{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;overflow:hidden}
-.test-avatar img{width:100%;height:100%;object-fit:cover}
-.test-info{flex:1}.test-name{font-size:11px;font-weight:600}.test-role{font-size:9px;color:var(--sub)}
-/* SPEAKING TIMELINE */
-.speak-wrap{margin:8px 0 12px}
-.speak-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);margin-bottom:6px;transition:all .3s;text-decoration:none;color:var(--text)}
-.speak-item:hover{border-color:rgba(0,225,255,.1);transform:translateX(4px)}
-.speak-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--bg)}
-.speak-meta{flex:1}.speak-event{font-size:11px;font-weight:600}.speak-talk{font-size:9px;color:var(--sub);margin-top:1px}
-.speak-yr{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--accent);opacity:.6}
-/* STATS DASHBOARD */
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
-.stat-card{padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .3s}
-.stat-card:hover{border-color:rgba(0,225,255,.1);transform:translateY(-2px)}
-.stat-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text);line-height:1}
-.stat-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:4px}
-.stat-icon{font-size:18px;margin-bottom:4px}
-/* BOOK SHOWCASE */
-.book-card{display:flex;gap:14px;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--border);margin:8px 0;backdrop-filter:blur(20px);transition:all .3s}
-.book-card:hover{border-color:rgba(0,225,255,.1)}
-.book-cover{width:70px;height:100px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
-.book-cover img{width:100%;height:100%;object-fit:cover}
-.book-info{flex:1;display:flex;flex-direction:column;gap:4px}
-.book-title-text{font-size:14px;font-weight:700}.book-subtitle{font-size:10px;color:var(--sub)}
-.book-stars{color:#fbbf24;font-size:10px;letter-spacing:1px}
-.book-links{display:flex;gap:6px;margin-top:auto}
-.book-link{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:6px;border:1px solid var(--border);color:var(--sub);text-decoration:none;transition:all .3s}.book-link:hover{border-color:var(--accent);color:var(--accent)}
 /* KEYBOARD SHORTCUTS */
 #shortcutOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(12px);pointer-events:none}
 #shortcutOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -391,7 +357,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 /* CURSOR TRAIL */
 .cursor-particle{position:fixed;pointer-events:none;z-index:9990;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0;transition:none}
 /* PRINT RESUME */
-@media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card,.test-card,.speak-item,.stat-card,.book-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
+@media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
 .print-only{display:none}
 </style>
 </head>
@@ -554,50 +520,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <a href="https://www.datacamp.com/certificate/DA0026927366011" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📈</div><div class="cert-name"><strong>Datacamp Pro</strong>Data Analyst</div><div class="cert-org">Datacamp · 2023</div></a>
         <a href="https://cp.certmetrics.com/atlassian/en/public/badge/c?id=5ecee96d9286180c30565dce&ccat=30&date=2025-11-2" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">⚙️</div><div class="cert-name"><strong>Jira Cloud</strong>Management</div><div class="cert-org">Atlassian · 2025</div></a>
         <a href="https://www.credly.com/users/amr-elharony" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎓</div><div class="cert-name"><strong>DBA</strong>Digital Transform.</div><div class="cert-org">Helwan Univ. · 2023</div></a>
-    </div>
-
-    <!-- Testimonial Wall -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">WHAT PEOPLE SAY</div><div class="ndl"></div></div>
-    <div class="test-grid">
-        <div class="test-card sa sa-right"><div class="test-quote">Amr is a rare talent who challenges, teaches, and leads to drive change. His ability to combine agile mastery with genuine empathy sets him apart.</div><div class="test-author"><div class="test-avatar">🏦</div><div class="test-info"><div class="test-name">Sameh Elebiary</div><div class="test-role">Credit Analyst, Banque Misr</div></div></div></div>
-        <div class="test-card sa sa-left"><div class="test-quote">His deep tech expertise and emotional intelligence make every mentoring session transformative. He doesn't just give advice — he builds capability.</div><div class="test-author"><div class="test-avatar">📊</div><div class="test-info"><div class="test-name">Eslam Youssef</div><div class="test-role">Sr. Data Analyst</div></div></div></div>
-        <div class="test-card sa sa-right"><div class="test-quote">Working with Amr on agile transformation was a masterclass. He translates complex frameworks into practical, actionable strategies that teams actually adopt.</div><div class="test-author"><div class="test-avatar">💼</div><div class="test-info"><div class="test-name">Ahmed Saleh</div><div class="test-role">Product Manager</div></div></div></div>
-        <div class="test-card sa sa-left"><div class="test-quote">Amr's book 'The Bilingual Executive' is a must-read for anyone navigating leadership in a bilingual professional environment. Practical and insightful.</div><div class="test-author"><div class="test-avatar">📖</div><div class="test-info"><div class="test-name">Sara Ibrahim</div><div class="test-role">Executive Coach</div></div></div></div>
-    </div>
-
-    <!-- Speaking Timeline -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">SPEAKING & PANELS</div><div class="ndl"></div></div>
-    <div class="speak-wrap">
-        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-microphone"></i></div><div class="speak-meta"><div class="speak-event">Techne Summit</div><div class="speak-talk">Agile in FinTech: From Frameworks to Real Delivery</div></div><div class="speak-yr">2025</div></div>
-        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-code"></i></div><div class="speak-meta"><div class="speak-event">DevOpsDays Cairo</div><div class="speak-talk">Panel: Bridging Dev and Business in Banking</div></div><div class="speak-yr">2025</div></div>
-        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-building-columns"></i></div><div class="speak-meta"><div class="speak-event">Africa FinTech Forum</div><div class="speak-talk">Digital Transformation in MENA Banking</div></div><div class="speak-yr">2025</div></div>
-        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-rocket"></i></div><div class="speak-meta"><div class="speak-event">Career 180 Summit</div><div class="speak-talk">From IT Officer to FinTech Author: A Non-Linear Career Path</div></div><div class="speak-yr">2024</div></div>
-        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-users"></i></div><div class="speak-meta"><div class="speak-event">Seamless KSA</div><div class="speak-talk">The Bilingual Executive: Leadership Across Cultures</div></div><div class="speak-yr">2024</div></div>
-    </div>
-
-    <!-- Stats Dashboard -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">BY THE NUMBERS</div><div class="ndl"></div></div>
-    <div class="stats-grid">
-        <div class="stat-card sa sa-scale"><div class="stat-icon">☕</div><div class="stat-num" id="statCoffee">0</div><div class="stat-label">Cups of Coffee</div></div>
-        <div class="stat-card sa sa-scale"><div class="stat-icon">📝</div><div class="stat-num" id="statArticles">0</div><div class="stat-label">Articles Published</div></div>
-        <div class="stat-card sa sa-scale"><div class="stat-icon">🎓</div><div class="stat-num" id="statMentees">0</div><div class="stat-label">Mentees Coached</div></div>
-        <div class="stat-card sa sa-scale"><div class="stat-icon">🏆</div><div class="stat-num" id="statCerts">0</div><div class="stat-label">Certifications</div></div>
-    </div>
-
-    <!-- Book Showcase -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">MY BOOK</div><div class="ndl"></div></div>
-    <div class="book-card rv">
-        <div class="book-cover"><img src="be.png" alt="The Bilingual Executive" onerror="this.style.display='none';this.parentElement.textContent='📚'"></div>
-        <div class="book-info">
-            <div class="book-title-text">The Bilingual Executive</div>
-            <div class="book-subtitle">Leadership Communication for a Bilingual World</div>
-            <div class="book-stars">★★★★★ <span style="color:var(--sub);font-family:'JetBrains Mono',monospace;font-size:8px;">5.0</span></div>
-            <div style="font-size:10px;color:var(--sub);line-height:1.4;margin-top:2px;">A practical guide for professionals navigating leadership in bilingual environments. Print, eBook & AI audiobook.</div>
-            <div class="book-links">
-                <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="book-link">Read More</a>
-                <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="book-link">Get the Book</a>
-            </div>
-        </div>
     </div>
 
     <!-- Print-only resume header -->
@@ -1359,10 +1281,7 @@ setInterval(checkSmartCta,5000);
         {sel:'.tl-item.tl-sub',cls:'sa-left'},
         {sel:'.insight-card',cls:'sa-right'},
         {sel:'.reading-card',cls:'sa-right'},
-        {sel:'.rec-card',cls:'sa-right'},
-        {sel:'.test-card',cls:'sa-right'},
-        {sel:'.speak-item',cls:'sa-left'},
-        {sel:'.stat-card',cls:'sa-scale'}
+        {sel:'.rec-card',cls:'sa-right'}
     ];
     targets.forEach(({sel,cls})=>{
         document.querySelectorAll(sel).forEach(el=>{
@@ -1496,28 +1415,6 @@ if(D&&!reducedMotion){
         setTimeout(()=>p.remove(),700);
     });
 }
-
-// ═════════════════════════════════════════════════
-// FEATURE: STATS DASHBOARD (animated counters)
-// ═════════════════════════════════════════════════
-const statsObs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-        if(e.isIntersecting){
-            animStat('statCoffee',3200+Math.floor(Math.random()*200));
-            animStat('statArticles',45+Math.floor((Date.now()-new Date('2023-01-01').getTime())/2592000000)*2);
-            animStat('statMentees',120+Math.floor((Date.now()-new Date('2023-01-01').getTime())/2592000000)*5);
-            animStat('statCerts',12);
-            statsObs.unobserve(e.target);
-        }
-    });
-},{threshold:0.3});
-function animStat(id,target){
-    const el=document.getElementById(id);if(!el)return;
-    if(reducedMotion){el.textContent=target.toLocaleString();return;}
-    let cur=0;const step=Math.max(1,Math.ceil(target/50));
-    const iv=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur.toLocaleString();if(cur>=target)clearInterval(iv);},30);
-}
-setTimeout(()=>{const grid=document.querySelector('.stats-grid');if(grid)statsObs.observe(grid);},4000);
 
 // ═════════════════════════════════════════════════
 // UNIFIED KEYBOARD HANDLER (enhanced)
