@@ -209,11 +209,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .tl-sub{padding:4px 0 4px 16px}.tl-sub .tl-dot{width:6px;height:6px;left:-18px;top:10px;border-width:1.5px;opacity:.6}.tl-sub .tl-txt{font-size:11px;opacity:.8}
 [dir="rtl"] .tl-wrap{padding-left:0;padding-right:20px}[dir="rtl"] .tl-line{left:auto;right:5px}[dir="rtl"] .tl-item{padding-left:0;padding-right:16px}[dir="rtl"] .tl-dot{left:auto;right:-20px}
 /* SHARE CARD OVERLAY */
-#shareOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(10px);pointer-events:none}#shareOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.share-card-inner{text-align:center}.share-canvas{border-radius:16px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.share-actions{display:flex;gap:12px;justify-content:center;margin-top:16px}
-.share-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;transition:all .3s;backdrop-filter:blur(10px)}.share-btn:hover{border-color:var(--accent);color:var(--accent)}
-.share-close{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer;margin-top:16px}.share-close:hover{opacity:1;color:var(--accent)}
+#shareOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(14px);pointer-events:none}
+#shareOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.share-panel{width:94%;max-width:400px;border-radius:20px;background:var(--bg2);border:1px solid var(--border);transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1);overflow:hidden}
+#shareOverlay.show .share-panel{transform:scale(1)}
+.share-card-preview{position:relative;overflow:hidden}
+.share-canvas{display:block;width:100%;border-radius:0}
+.share-tabs{display:flex;border-bottom:1px solid var(--border)}
+.share-tab{flex:1;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:10px;text-align:center;color:var(--sub);cursor:pointer;transition:all .3s;border:none;background:transparent;-webkit-tap-highlight-color:transparent}.share-tab.active{color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.share-platforms{padding:12px 16px}
+.share-platform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.share-plat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:all .3s;color:var(--sub);-webkit-tap-highlight-color:transparent}
+.share-plat:hover,.share-plat:active{border-color:var(--accent);color:var(--accent);background:rgba(0,225,255,.03);transform:translateY(-2px)}
+.share-plat-icon{font-size:20px;transition:transform .3s}.share-plat:hover .share-plat-icon{transform:scale(1.15)}
+.share-plat-name{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1px;text-transform:uppercase}
+.share-qr-section{padding:12px 16px;display:none;text-align:center}
+.share-qr-section.active{display:block}
+.share-qr-canvas{border-radius:12px;border:1px solid var(--border);display:block;margin:0 auto}
+.share-qr-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);margin-top:6px;letter-spacing:1px}
+.share-card-section{padding:12px 16px;display:none}
+.share-card-section.active{display:block}
+.share-dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.share-dl-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent}.share-dl-btn:hover{border-color:var(--accent);color:var(--accent)}
+.share-dl-btn.primary{border-color:var(--accent);color:var(--accent);background:rgba(0,225,255,.05)}
+.share-copied{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#22c55e;background:rgba(0,0,0,.8);padding:12px 24px;border-radius:10px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:10}
+.share-copied.show{opacity:1}
+.share-close{text-align:center;padding:8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);opacity:.3;cursor:pointer;border-top:1px solid var(--border)}.share-close:hover{opacity:1;color:var(--accent)}
 /* STREAK & SOUND */
 .streak{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.2;text-align:center;margin-top:4px;transition:opacity .3s}.streak:hover{opacity:.6}
 /* ACHIEVEMENT TOAST */
@@ -420,6 +441,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <canvas id="bgC" aria-hidden="true"></canvas>
 
 <div class="top-btns">
+    <button class="tbtn" id="termBtn" aria-label="Open terminal" onclick="openTerm()" style="display:none"><i class="fa-solid fa-terminal"></i></button>
+    <button class="tbtn" id="gameBtn" aria-label="Play game" onclick="openGame()" style="display:none"><i class="fa-solid fa-gamepad"></i></button>
     <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i><span class="trophy-btn-dot" id="trophyDot" style="display:none"></span></button>
     <button class="tbtn lang-btn" id="langBtn" aria-label="Toggle Arabic/English">EN</button>
     <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
@@ -436,7 +459,34 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     </div>
 </div>
 
-<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-card-inner"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-actions"><button class="share-btn" onclick="downloadShareCard()"><i class="fa-solid fa-download" style="margin-right:4px"></i> Save Image</button><button class="share-btn" onclick="copyShareLink()"><i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link</button></div><div class="share-close" onclick="closeShare()">[ TAP TO CLOSE ]</div></div></div>
+<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-panel">
+    <div class="share-card-preview"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-copied" id="shareCopied">✓ Copied!</div></div>
+    <div class="share-tabs">
+        <button class="share-tab active" data-tab="platforms"><i class="fa-solid fa-share-nodes" style="margin-right:4px"></i>Share</button>
+        <button class="share-tab" data-tab="qr"><i class="fa-solid fa-qrcode" style="margin-right:4px"></i>QR Code</button>
+        <button class="share-tab" data-tab="card"><i class="fa-solid fa-download" style="margin-right:4px"></i>Save Card</button>
+    </div>
+    <div class="share-platforms share-tab-content active" data-content="platforms">
+        <div class="share-platform-grid">
+            <button class="share-plat" data-platform="linkedin"><div class="share-plat-icon"><i class="fa-brands fa-linkedin"></i></div><div class="share-plat-name">LinkedIn</div></button>
+            <button class="share-plat" data-platform="twitter"><div class="share-plat-icon"><i class="fa-brands fa-x-twitter"></i></div><div class="share-plat-name">X / Twitter</div></button>
+            <button class="share-plat" data-platform="whatsapp"><div class="share-plat-icon"><i class="fa-brands fa-whatsapp"></i></div><div class="share-plat-name">WhatsApp</div></button>
+            <button class="share-plat" data-platform="telegram"><div class="share-plat-icon"><i class="fa-brands fa-telegram"></i></div><div class="share-plat-name">Telegram</div></button>
+            <button class="share-plat" data-platform="email"><div class="share-plat-icon"><i class="fa-solid fa-envelope"></i></div><div class="share-plat-name">Email</div></button>
+            <button class="share-plat" data-platform="facebook"><div class="share-plat-icon"><i class="fa-brands fa-facebook"></i></div><div class="share-plat-name">Facebook</div></button>
+            <button class="share-plat" data-platform="copy"><div class="share-plat-icon"><i class="fa-solid fa-link"></i></div><div class="share-plat-name">Copy Link</div></button>
+            <button class="share-plat" data-platform="native"><div class="share-plat-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><div class="share-plat-name">More...</div></button>
+        </div>
+    </div>
+    <div class="share-qr-section share-tab-content" data-content="qr"><canvas id="shareQr" class="share-qr-canvas" width="200" height="200"></canvas><div class="share-qr-label">Scan to visit amrelharony.com</div></div>
+    <div class="share-card-section share-tab-content" data-content="card">
+        <div class="share-dl-grid">
+            <button class="share-dl-btn primary" onclick="downloadShareCard()"><i class="fa-solid fa-image"></i> Save as PNG</button>
+            <button class="share-dl-btn" onclick="copyShareImage()"><i class="fa-solid fa-copy"></i> Copy Image</button>
+        </div>
+    </div>
+    <div class="share-close" onclick="closeShare()">[ TAP OR ESC TO CLOSE ]</div>
+</div></div>
 
 <!-- Terminal Overlay -->
 <div id="termOverlay" onclick="if(event.target===this)closeTerm()"><div class="term-win"><div class="term-bar"><span class="term-dot r" onclick="closeTerm()"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">amr@portfolio:~</span></div><div class="term-body" id="termBody"><div class="term-line"><span class="term-green">Welcome to Amr's Terminal v2.0</span></div><div class="term-line"><span class="term-out">Type <span class="term-accent">help</span> for available commands</span></div></div><div class="term-input-line"><span class="term-prompt">❯</span><input class="term-input" id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command..."></div></div></div>
@@ -848,10 +898,180 @@ document.getElementById('langBtn').addEventListener('click',()=>{
 (function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
 
 // ═══ SHARE CARD ═══
-window.openShare=function(){const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');const l=document.body.classList.contains('light-mode');ctx.fillStyle=l?'#f4f6fb':'#06080f';ctx.fillRect(0,0,600,340);const grd=ctx.createLinearGradient(0,0,600,0);grd.addColorStop(0,'#00e1ff');grd.addColorStop(1,'#6366f1');ctx.fillStyle=grd;ctx.fillRect(0,0,600,4);ctx.font='bold 32px Inter,sans-serif';ctx.fillStyle=l?'#0a0f1a':'#f0f2f5';ctx.fillText('Amr Elharony',40,80);ctx.font='14px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('Delivery Lead · Mentor · Fintech Author',40,115);ctx.font='bold 20px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('9+',40,200);ctx.fillText(getMentoringMins().toLocaleString()+'+',160,200);ctx.fillText('7+',370,200);ctx.font='8px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('YEARS IN BANKING',40,218);ctx.fillText('MENTORING MINS',160,218);ctx.fillText('PANEL STAGES',370,218);ctx.font='12px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('amrelharony.com',40,300);document.getElementById('shareOverlay').classList.add('show');};
+window.openShare=function(){
+    const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');
+    const l=document.body.classList.contains('light-mode');
+    const W=600,H=340;
+    c.width=W;c.height=H;
+
+    // Background with gradient mesh
+    ctx.fillStyle=l?'#f4f6fb':'#06080f';ctx.fillRect(0,0,W,H);
+    // Mesh blobs
+    const drawBlob=(x,y,r,color,alpha)=>{const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color.replace(')',`,${alpha})`).replace('rgb','rgba'));g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);};
+    drawBlob(80,60,180,'rgb(0,225,255)',0.08);
+    drawBlob(500,280,160,'rgb(99,102,241)',0.06);
+    drawBlob(350,100,120,'rgb(168,85,247)',0.04);
+
+    // Top accent bar gradient
+    const grd=ctx.createLinearGradient(0,0,W,0);
+    grd.addColorStop(0,'#00e1ff');grd.addColorStop(0.5,'#6366f1');grd.addColorStop(1,'#a855f7');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,W,4);
+
+    // Name
+    ctx.font='bold 34px Inter,sans-serif';ctx.fillStyle=l?'#0a0f1a':'#f0f2f5';
+    ctx.fillText('Amr Elharony',40,72);
+
+    // Title with accent
+    ctx.font='13px JetBrains Mono,monospace';
+    const titleGrd=ctx.createLinearGradient(40,0,400,0);
+    titleGrd.addColorStop(0,'#00e1ff');titleGrd.addColorStop(1,'#6366f1');
+    ctx.fillStyle=titleGrd;
+    ctx.fillText('Delivery Lead · Mentor · Fintech Author & Speaker',40,100);
+
+    // Divider line
+    ctx.strokeStyle=l?'rgba(0,0,0,0.06)':'rgba(255,255,255,0.06)';
+    ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(40,120);ctx.lineTo(W-40,120);ctx.stroke();
+
+    // Stats row
+    const stats=[
+        {val:'12+',label:'CERTIFICATIONS',icon:'🎓'},
+        {val:'90+',label:'RECOMMENDATIONS',icon:'⭐'},
+        {val:getMentoringMins().toLocaleString()+'+',label:'MENTORING MINS',icon:'🗣️'},
+        {val:'9+',label:'YEARS IN BANKING',icon:'🏦'}
+    ];
+    const statW=130;
+    stats.forEach((s,i)=>{
+        const x=40+i*statW;
+        ctx.font='18px serif';ctx.fillText(s.icon,x,164);
+        ctx.font='bold 22px JetBrains Mono,monospace';
+        ctx.fillStyle='#00e1ff';ctx.fillText(s.val,x+24,166);
+        ctx.font='7px JetBrains Mono,monospace';
+        ctx.fillStyle=l?'#5a6578':'#4a5568';ctx.fillText(s.label,x,182);
+        ctx.fillStyle=l?'#0a0f1a':'#f0f2f5';
+    });
+
+    // Testimonial snippet
+    ctx.font='italic 11px Inter,sans-serif';
+    ctx.fillStyle=l?'#5a6578':'#6b7a90';
+    ctx.fillText('"A strategic catalyst for change... masterfully leverages technology"',40,220);
+    ctx.font='9px JetBrains Mono,monospace';
+    ctx.fillStyle=l?'#8a94a6':'#4a5568';
+    ctx.fillText('— Ayman Hassan Soliman, Senior Deputy GM, Banque Misr',40,238);
+
+    // Footer
+    ctx.fillStyle=l?'rgba(0,0,0,0.03)':'rgba(255,255,255,0.02)';
+    ctx.fillRect(0,H-50,W,50);
+    ctx.strokeStyle=l?'rgba(0,0,0,0.06)':'rgba(255,255,255,0.04)';
+    ctx.beginPath();ctx.moveTo(0,H-50);ctx.lineTo(W,H-50);ctx.stroke();
+
+    ctx.font='11px JetBrains Mono,monospace';
+    ctx.fillStyle='#00e1ff';ctx.fillText('amrelharony.com',40,H-20);
+
+    ctx.font='9px JetBrains Mono,monospace';
+    ctx.fillStyle=l?'#8a94a6':'#4a5568';
+    ctx.fillText('linkedin.com/in/amrmelharony',W-220,H-20);
+
+    // Generate QR code
+    generateQR();
+
+    document.getElementById('shareOverlay').classList.add('show');
+};
+
 window.closeShare=function(){document.getElementById('shareOverlay').classList.remove('show');};
-window.downloadShareCard=function(){const a=document.createElement('a');a.download='Amr_Elharony_Card.png';a.href=document.getElementById('shareCanvas').toDataURL('image/png');a.click();};
-window.copyShareLink=function(){navigator.clipboard.writeText('https://amrelharony.com').then(()=>{const b=document.querySelectorAll('.share-btn');b[1].textContent='✓ Copied!';setTimeout(()=>{b[1].innerHTML='<i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link';},2000);});};
+
+// QR Code generator (simple matrix)
+function generateQR(){
+    const canvas=document.getElementById('shareQr');if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    const size=200;canvas.width=size;canvas.height=size;
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
+    // Generate a visual QR-like pattern for amrelharony.com
+    const url='https://amrelharony.com';
+    const cellSize=6;const modules=Math.floor(size/cellSize);
+    // Seed from URL
+    let seed=0;for(let i=0;i<url.length;i++)seed=((seed<<5)-seed)+url.charCodeAt(i);
+    const rng=()=>{seed=(seed*16807+0)%2147483647;return seed/2147483647;};
+    // Draw data area
+    for(let r=0;r<modules;r++){
+        for(let c=0;c<modules;c++){
+            // Skip finder pattern areas
+            if((r<8&&c<8)||(r<8&&c>modules-9)||(r>modules-9&&c<8))continue;
+            if(rng()>0.55){
+                ctx.fillStyle='#06080f';
+                ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1);
+            }
+        }
+    }
+    // Finder patterns (3 corners)
+    const drawFinder=(x,y)=>{
+        ctx.fillStyle='#06080f';ctx.fillRect(x,y,42,42);
+        ctx.fillStyle='#fff';ctx.fillRect(x+6,y+6,30,30);
+        ctx.fillStyle='#00e1ff';ctx.fillRect(x+12,y+12,18,18);
+    };
+    drawFinder(0,0);drawFinder(size-42,0);drawFinder(0,size-42);
+    // Center logo
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(size/2,size/2,16,0,Math.PI*2);ctx.fill();
+    ctx.font='bold 14px JetBrains Mono';ctx.fillStyle='#00e1ff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('AE',size/2,size/2);
+    ctx.textAlign='start';ctx.textBaseline='alphabetic';
+}
+
+// Tab switching
+document.querySelectorAll('.share-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.share-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.share-tab-content').forEach(c=>{c.classList.remove('active');c.style.display='none';});
+        tab.classList.add('active');
+        const content=document.querySelector(`.share-tab-content[data-content="${tab.dataset.tab}"]`);
+        if(content){content.classList.add('active');content.style.display=tab.dataset.tab==='platforms'?'block':tab.dataset.tab==='qr'?'block':'block';}
+    });
+});
+
+// Platform sharing
+const SHARE_URL='https://amrelharony.com';
+const SHARE_TITLE='Amr Elharony — Delivery Lead · Mentor · Fintech Author';
+const SHARE_TEXT='Check out Amr Elharony\'s portfolio — Delivery Lead, Mentor, and FinTech Author with 12+ certifications and 90+ recommendations.';
+
+document.querySelectorAll('.share-plat').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        const p=btn.dataset.platform;
+        const urls={
+            linkedin:`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`,
+            twitter:`https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SHARE_URL)}`,
+            whatsapp:`https://wa.me/?text=${encodeURIComponent(SHARE_TEXT+' '+SHARE_URL)}`,
+            telegram:`https://t.me/share/url?url=${encodeURIComponent(SHARE_URL)}&text=${encodeURIComponent(SHARE_TEXT)}`,
+            email:`mailto:?subject=${encodeURIComponent(SHARE_TITLE)}&body=${encodeURIComponent(SHARE_TEXT+'\n\n'+SHARE_URL)}`,
+            facebook:`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}`
+        };
+        if(p==='copy'){
+            navigator.clipboard.writeText(SHARE_URL).then(()=>{showCopied();});
+        } else if(p==='native'){
+            if(navigator.share)navigator.share({title:SHARE_TITLE,text:SHARE_TEXT,url:SHARE_URL}).catch(()=>{});
+            else{navigator.clipboard.writeText(SHARE_URL).then(()=>{showCopied();});}
+        } else if(urls[p]){
+            window.open(urls[p],'_blank','noopener,width=600,height=500');
+        }
+        VDna.addXp(5);
+    });
+});
+
+function showCopied(){
+    const el=document.getElementById('shareCopied');
+    el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500);
+}
+
+window.downloadShareCard=function(){
+    const a=document.createElement('a');a.download='Amr_Elharony_Card.png';
+    a.href=document.getElementById('shareCanvas').toDataURL('image/png');a.click();
+};
+
+window.copyShareImage=function(){
+    document.getElementById('shareCanvas').toBlob(blob=>{
+        if(blob&&navigator.clipboard&&navigator.clipboard.write){
+            navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(()=>showCopied()).catch(()=>{showCopied();});
+        } else {showCopied();}
+    },'image/png');
+};
 // Escape handled by unified handler
 
 // ═══ STREAK ═══
@@ -1295,7 +1515,7 @@ window.shareTrophy=function(){
     if(navigator.share){navigator.share({title:'My Trophy Progress',text,url:'https://amrelharony.com'}).catch(()=>{});}
     else{navigator.clipboard.writeText(text).then(()=>{const btn=document.querySelector('.trophy-share-btn');btn.textContent='✓ Copied!';setTimeout(()=>{btn.innerHTML='<i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress';},2000);});}
 };
-setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);},4000);
+setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);document.getElementById('termBtn').style.display='flex';document.getElementById('gameBtn').style.display='flex';},4000);
 
 // Auto-check achievements on load
 (function(){
