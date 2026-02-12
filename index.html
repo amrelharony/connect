@@ -380,6 +380,32 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .sc-close{text-align:center;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer}.sc-close:hover{opacity:1;color:var(--accent)}
 /* CURSOR TRAIL */
 .cursor-particle{position:fixed;pointer-events:none;z-index:9990;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0;transition:none}
+/* TESTIMONIAL CAROUSEL */
+.tc-section{margin:8px 0 12px}
+.tc-cats{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tc-cats::-webkit-scrollbar{display:none}
+.tc-cat{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .3s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.tc-cat.active{border-color:var(--accent);color:var(--accent);background:rgba(0,225,255,.06)}
+.tc-cat .tc-cat-count{opacity:.4;margin-left:3px}
+.tc-viewport{position:relative;overflow:hidden;min-height:160px}
+.tc-track{display:flex;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.tc-slide{min-width:100%;padding:0 2px;box-sizing:border-box}
+.tc-card{padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);transition:border-color .3s;min-height:130px;display:flex;flex-direction:column}
+.tc-card:hover{border-color:rgba(0,225,255,.1)}
+.tc-quote{font-size:12px;line-height:1.65;color:var(--sub);flex:1;position:relative;padding-left:16px}
+.tc-quote::before{content:'"';position:absolute;left:0;top:-4px;font-size:28px;color:var(--accent);opacity:.25;font-family:Georgia,serif;line-height:1}
+.tc-author{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.tc-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;color:#fff}
+.tc-info{flex:1;min-width:0}.tc-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tc-role{font-size:8px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-cat-badge{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:auto;flex-shrink:0;white-space:nowrap}
+.tc-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
+.tc-arrow{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:10px;-webkit-tap-highlight-color:transparent}.tc-arrow:hover{border-color:var(--accent);color:var(--accent)}
+.tc-dots{display:flex;gap:4px;align-items:center}
+.tc-dot{width:4px;height:4px;border-radius:50%;background:var(--border);transition:all .3s;cursor:pointer}.tc-dot.active{width:16px;border-radius:2px;background:var(--accent)}
+.tc-counter{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--sub);letter-spacing:1px;text-align:center;margin-top:4px;opacity:.4}
+.tc-auto-bar{height:2px;border-radius:1px;background:var(--border);margin-top:6px;overflow:hidden}
+.tc-auto-fill{height:100%;border-radius:1px;background:var(--accent);opacity:.3;width:0%;transition:width 6s linear}
+.tc-auto-fill.running{width:100%}
 /* PRINT RESUME */
 @media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
 .print-only{display:none}
@@ -553,6 +579,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <a href="https://www.datacamp.com/certificate/DA0026927366011" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📈</div><div class="cert-name"><strong>Datacamp Pro</strong>Data Analyst</div><div class="cert-org">Datacamp · 2023</div></a>
         <a href="https://cp.certmetrics.com/atlassian/en/public/badge/c?id=5ecee96d9286180c30565dce&ccat=30&date=2025-11-2" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">⚙️</div><div class="cert-name"><strong>Jira Cloud</strong>Management</div><div class="cert-org">Atlassian · 2025</div></a>
         <a href="https://www.credly.com/users/amr-elharony" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎓</div><div class="cert-name"><strong>DBA</strong>Digital Transform.</div><div class="cert-org">Helwan Univ. · 2023</div></a>
+    </div>
+
+    <!-- Testimonial Carousel -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">WHAT 90+ PEOPLE SAY</div><div class="ndl"></div></div>
+    <div class="tc-section">
+        <div class="tc-cats" id="tcCats"></div>
+        <div class="tc-viewport" id="tcViewport">
+            <div class="tc-track" id="tcTrack"></div>
+        </div>
+        <div class="tc-nav">
+            <button class="tc-arrow" id="tcPrev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="tc-dots" id="tcDots"></div>
+            <button class="tc-arrow" id="tcNext" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="tc-counter" id="tcCounter"></div>
+        <div class="tc-auto-bar"><div class="tc-auto-fill" id="tcAutoFill"></div></div>
     </div>
 
     <!-- Print-only resume header -->
@@ -1367,6 +1409,205 @@ document.getElementById('termInput').addEventListener('keydown',e=>{
     }
 });
 
+
+// ═════════════════════════════════════════════════
+// FEATURE: TESTIMONIAL CAROUSEL (90+ recommendations)
+// ═════════════════════════════════════════════════
+(function(){
+const TC=[
+{c:'strategy',n:'Ayman Hassan Soliman',r:'Senior Deputy GM',q:'A strategic catalyst for change... masterfully leverages technology to engineer fundamental shifts in systems and culture.'},
+{c:'strategy',n:'Alaa Ghaly',r:'Assistant Manager',q:'Rare talent who sees the future of our data landscape... and leads his team to drive that change.'},
+{c:'strategy',n:'Romany Youssef',r:'GTB MIS Manager',q:'Demonstrates remarkable courage in challenging the status quo... catalyzing shifts in both systems and attitude.'},
+{c:'strategy',n:'Ayman El Menawy',r:'Senior Deputy GM',q:'Has a sharp strategic mindset, always seeing the big picture while mastering the details.'},
+{c:'strategy',n:'Ahmed Arafat, MBA',r:'Deputy GM',q:'Transparent and forward-thinking... leads with clarity, empathy, and a relentless focus on driving value.'},
+{c:'strategy',n:'Karima Othman',r:'Project Manager',q:'Expertise in leveraging technology to bring about transformative change... a valuable addition to any bank.'},
+{c:'strategy',n:'Sameh Elebiary',r:'Corporate Credit Analyst',q:'The rare talent who has the ability to challenge, teach, and lead to drive change.'},
+{c:'strategy',n:'Mohamed Taha',r:'Data Steward',q:'A strategic thinker who connects dots across different lines of businesses... You will be mesmerized!'},
+{c:'strategy',n:'Mohamed Badr',r:'Core Banking Support',q:'A creative big thinker whose enthusiasm for financial technology is impressive.'},
+{c:'strategy',n:'Sayed Hamed',r:'Corporate Relationship Manager',q:'He wants to drive positive change... gets the big picture and how to tactically achieve it.'},
+{c:'strategy',n:'Marwa Rashed',r:'ARM Large Corporate',q:'Always looking ahead and thinking about how technology can improve businesses.'},
+{c:'tech',n:'Mohamed Abaza',r:'Lead Data Scientist',q:'Wide knowledge in multidisciplinary topics, almost like a Wikipedia moving on Earth!'},
+{c:'tech',n:'Eslam Youssef',r:'Senior Data Analyst',q:'Working with him was transformative. His deep tech expertise and talent for fintech set him apart.'},
+{c:'tech',n:'Abdelrhman Mabrouk',r:'Corporate Credit Certified',q:'His technical expertise in data analysis was a huge asset... significantly boosted our problem-solving.'},
+{c:'tech',n:'Youssef Saeed',r:'Data Analytics Engineer',q:'Exceptional skills in technology combined with outstanding interpersonal abilities.'},
+{c:'tech',n:'Haitham Adel',r:'Deputy GM',q:'A tech-savvy professional... his passion for technology and innovative problem-solving are valuable assets.'},
+{c:'tech',n:'Ahmed Mostafa',r:'Deputy GM',q:'Excels at solving problems... assimilates the newest concepts in technology & data analytics.'},
+{c:'tech',n:'George Hishmat',r:'Deputy GM',q:'Resourceful, creative problem solver... his ability to explain technical concepts is outstanding.'},
+{c:'tech',n:'Omar Nabhan',r:'DGM',q:'Wide knowledge in all technology aspects related to banking systems... provides outstanding performance.'},
+{c:'tech',n:'Ahmed Refaat',r:'Business Analyst',q:'A hard worker and ambitious person... multi-skilled specially with anything related to technology.'},
+{c:'tech',n:'Amr Refaat',r:'Large Corporate Dept Head',q:'One of the smartest partners I have worked with... multi-skilled especially in technology.'},
+{c:'tech',n:'John Talaat',r:'Assistant Relationship Manager',q:'The Tech guy of our department... keep raising the bar high as always.'},
+{c:'tech',n:'Essam Arsanious',r:'Team Leader',q:'Gifted in the field of technology... strong critical thinking ability to see through complex problems.'},
+{c:'tech',n:'Emam M. SAAD',r:'Treasury & Capital Markets',q:'Highly recommend him as a digitalization and fintech expert... amazing at his job!'},
+{c:'tech',n:'Dina Tony',r:'Senior Corporate RM',q:'The complete package... blend of business acumen and technology skills.'},
+{c:'mentor',n:'ADPList Mentee',r:'Jan 2026',q:'Guided me through complex topics with clarity and efficiency... exceeded my expectations.'},
+{c:'mentor',n:'Ahmed Shewail',r:'Senior Banker',q:'Provided exceptional motivation and problem-solving strategies, which truly helped me tackle my challenges.'},
+{c:'mentor',n:'Hossam Elden Abdelhamed',r:'Data Architect',q:'Very supportive and explained everything clearly... helped me understand my career direction.'},
+{c:'mentor',n:'Alaa Elnakeeb',r:'AI & Data Analytics',q:'Discussed a potential roadmap for becoming a data science engineer... a truly helpful session.'},
+{c:'mentor',n:'Omar Ayoub',r:'Engineering Student',q:'Helped me organize everything step by step and clarified the actions I should take moving forward.'},
+{c:'mentor',n:'Hazem Amr',r:'Data Analyst',q:'Before the session, I felt lost... throughout our discussion, everything became clear.'},
+{c:'mentor',n:'Laila Sami',r:'Student, UOWD',q:'Invaluable guidance on navigating the Egyptian job market and effectively tailoring my CV.'},
+{c:'mentor',n:'Abdelrhman Afify',r:'Data Engineer',q:'Explained things clearly... feeling much more confident and excited to take the next steps.'},
+{c:'mentor',n:'Rabab El Gendy',r:'CS Representative',q:'Walked away with useful knowledge... His sincere willingness to support others stood out.'},
+{c:'mentor',n:'Mohamed Sror',r:'Microfinance Specialist',q:'Exceeded my expectations... helped me organize my thoughts and recognize my next steps.'},
+{c:'mentor',n:'Eman Gahallah',r:'Engineer',q:'Genuinely wants to help others and is generous with his knowledge.'},
+{c:'mentor',n:'Amr Elsharkawy',r:'Student',q:'Clear and practical advice on improving my CV and portfolio.'},
+{c:'mentor',n:'Mazen Hatem',r:'Student',q:'Provided me with numerous resources to help me stay on track in the data field.'},
+{c:'mentor',n:'Malak Soula',r:'Data Scientist',q:'Outstanding and so helpful to guide me to what I should do as a next step.'},
+{c:'mentor',n:'AbdAlrahman Hassan',r:'Student',q:'Shared a lot of information... made me know what I can do to start in data analysis.'},
+{c:'agile',n:'Esmail Eldally',r:'Data Analyst',q:'Outstanding Scrum Master... organized, supportive, and excellent at guiding the team to achieve sprint goals.'},
+{c:'agile',n:'Kareem Amr Khedr',r:'Corporate Credit Analyst',q:'Deep expertise in people management... ability to deal with difficult people is invaluable.'},
+{c:'agile',n:'Mahmoud Saied',r:'ETL Specialist',q:'A mentor and guide who empowers those around him to achieve their full potential.'},
+{c:'agile',n:'Noureldeen Saad',r:'Relationship Manager',q:'Sets an example for everyone... empowers and supports his team and encourages their growth.'},
+{c:'agile',n:'Maha Mohamed',r:'Officer-Account Planning',q:'A true visionary... looks out for each member of his team by empowering them.'},
+{c:'agile',n:'Samar Gaber',r:'Scrum Master',q:'Trustworthy and values-driven... his collaborative approach fosters a positive work environment.'},
+{c:'agile',n:'Amr Hussien',r:'Deputy GM',q:'His coaching mastery comes naturally... full of hope and radiates energy.'},
+{c:'agile',n:'Ahmed Omar',r:'Digital Transformation Office',q:'Does a wonderful job balancing high-stakes responsibilities with a positive attitude.'},
+{c:'agile',n:'Mahmoud Ghazy',r:'Senior Data Governance',q:'Excels at managing challenging situations... consistently brings out the best in people.'},
+{c:'agile',n:'Dr. Haythm EL Hawary',r:'Lead Auditor',q:'The best of employees we have in Banque Misr... smart and patient man.'},
+{c:'results',n:'Omar Mohey',r:'Senior Data Steward',q:'Amr gets things done... delivering outstanding results on even the most complex projects.'},
+{c:'results',n:'Ibrahim Zidan',r:'PMO Manager',q:'Master of solving complex business challenges... turns ideas into impactful solutions.'},
+{c:'results',n:'Mahmoud Tag ElDien',r:'SME Credit Analyst',q:'Combines deep business knowledge with data-driven insights to create measurable impact.'},
+{c:'results',n:'Ola Abdelrahman',r:'Relationship Manager',q:'Amr is always to be trusted to do what he says he will do.'},
+{c:'results',n:'Abd El Rahman Harby',r:'Assistant GM',q:'Consistently went the extra mile... tackled tasks with enthusiasm and professionalism.'},
+{c:'results',n:'Mohamed Magdy',r:'ATM Switch Team Leader',q:'Hyper-analytical and hardworking... Amr has excellent product sense! Simply the best.'},
+{c:'results',n:'Amr Tarek',r:'Relationship Manager',q:'Consistently goes above and beyond to get the job done. Creative thinker and hard worker.'},
+{c:'results',n:'Moataz Hamed',r:'Risk Manager',q:'Hard-working... always motivated and knows what it takes to do the job well.'},
+{c:'results',n:'Tamer Afifi',r:'Head of Emerging Corporate',q:'Approaches every challenge with clarity, creativity, and a solution-oriented mindset.'},
+{c:'results',n:'Ahmed Gomaa',r:'Data Modeling',q:'Excellent, dedicated, and reliable working partner with an outstanding way of thinking.'},
+{c:'team',n:'Walid Gafeer',r:'Senior RM',q:'EQ is off the charts... a knack for improving morale just by being himself.'},
+{c:'team',n:'Amr ELHossiny',r:'Digital Platforms Manager',q:'A game-changer in my life... stepping up as a mentor when I least expected it.'},
+{c:'team',n:'Yehia Sharaf',r:'Relationship Manager',q:'Down to earth and approachable... great at building long lasting connections.'},
+{c:'team',n:'Mohamed Elabasy',r:'Corporate Banking Team Leader',q:'Friendly and easy to talk to... great at connecting with people.'},
+{c:'team',n:'Mahmoud Saeed',r:'Structured Finance Manager',q:'In a word, delightful... unique personal traits and always willing to help.'},
+{c:'team',n:'Mahmoud Hamdy',r:'Assistant RM',q:'Undeniable charisma... one of the best colleagues I have ever known.'},
+{c:'team',n:'Amr Said',r:'Senior RM',q:'Full of energy and passion... his positive vibe rubs off on everyone around him.'},
+{c:'team',n:'Mohamed Fathy',r:'Relationship Manager',q:'Always professional... loves learning and sharing what he knows to help others.'},
+{c:'team',n:'Abdelrahman Badoa Ayad',r:'Data Quality Specialist',q:'Infectious enthusiasm... fosters a cohesive team dynamic.'},
+{c:'team',n:'Ismail Shaaban',r:'Senior Project Manager',q:'Outstanding in professional and personal life... always made sure everyone had support.'},
+{c:'team',n:'Ahmed Dahi',r:'Software Engineer',q:'Knows how to make things happen with a blend of being nice and assertive.'},
+{c:'team',n:'Wael Kammar',r:'Senior RM',q:'So easy to work with. His unique style and humor enhance the effectiveness of his team.'},
+{c:'team',n:'Assem Gamal',r:'Software Developer',q:'Exceptionally motivated... possesses a rare combination of visionary thinking and practicality.'},
+{c:'team',n:'Nada Abdelaziz',r:'Assistant GM',q:'Inspirational and motivating partner... highest degrees of professionalism and integrity.'},
+{c:'team',n:'Mahmoud Ahmed Morsy',r:'Senior RM',q:'Candid, transparent and collaborative... focused on helping others around him.'},
+{c:'team',n:'Ahmed M. Ali',r:'Application Support',q:'Always available to extend help... a very friendly and supportive person.'},
+{c:'team',n:'Mohamed kamal',r:'Corporate RM',q:'Super understanding... great at lifting up everyone around him.'},
+{c:'team',n:'Mohamed abdelmegeid',r:'RM Large Corporate',q:'Brings a ton of positive energy... makes everything feel fresh and exciting.'},
+{c:'team',n:'Mohamed Hassan',r:'Senior Ops Officer',q:'An awesome teammate... always on the hunt for new ways to innovate.'},
+{c:'team',n:'Eslam Maher',r:'Large Corporate RM',q:'A Rock Star... his work ethic and ability to solve problems have made a real impact.'},
+{c:'team',n:'Ibrahim Shaaban',r:'Senior Corporate RM',q:'Active, fast learning, and open minded... the personality you need to build a successful team.'},
+{c:'team',n:'Yassmin Qurtam',r:'Senior Credit Analyst',q:'Working with Amr is delightful... very professional and efficient.'},
+{c:'team',n:'Hossam Aref',r:'Deputy GM',q:'Excellent participator in discussions, always adding value and helping you think broadly.'},
+{c:'team',n:'Hesham Kamal El Mahdy',r:'Senior RM',q:'A very decent and helpful guy who always takes initiative.'},
+{c:'team',n:'Ahmed hassan',r:'Senior RM',q:'Highly recommend him for his positive attitude and willingness to assist others.'},
+{c:'team',n:'Saladin Gomaa',r:'Team Leader',q:'Great appetite for learning... a pleasure to have him as a colleague.'},
+{c:'team',n:'Mohamed Abd El-Wahab',r:'Corporate Credit Analyst',q:'Rare to find someone who is both talented and modest at the same time.'},
+{c:'team',n:'Mahmoud Hosny',r:'Corporate Credit Analyst',q:'Positivity, passion, and commitment to teamwork make him a joy to work with.'},
+{c:'team',n:'Amr Awad',r:'Machine Learning Engineer',q:'A man of integrity.'},
+];
+
+const CATS={
+    all:{label:'All',icon:'✦',color:'var(--accent)'},
+    strategy:{label:'Strategy',icon:'🏛️',color:'#6366f1'},
+    tech:{label:'Tech',icon:'🚀',color:'#00e1ff'},
+    mentor:{label:'Mentoring',icon:'🎓',color:'#22c55e'},
+    agile:{label:'Agile',icon:'⚡',color:'#f97316'},
+    results:{label:'Results',icon:'🛠️',color:'#ef4444'},
+    team:{label:'Culture',icon:'🤝',color:'#a855f7'}
+};
+
+const AVATAR_COLORS=['#6366f1','#00e1ff','#22c55e','#f97316','#ef4444','#a855f7','#3b82f6','#ec4899','#14b8a6','#eab308'];
+
+let currentCat='all',currentIdx=0,filtered=[],autoTimer=null,autoFill=null;
+
+function getFiltered(cat){return cat==='all'?[...TC]:TC.filter(t=>t.c===cat);}
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function getInitials(name){const parts=name.split(' ');return parts.length>1?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():name.substring(0,2).toUpperCase();}
+
+function getAvatarColor(name){let h=0;for(let i=0;i<name.length;i++)h=name.charCodeAt(i)+((h<<5)-h);return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];}
+
+function buildCats(){
+    const el=document.getElementById('tcCats');
+    el.innerHTML=Object.keys(CATS).map(k=>{
+        const cat=CATS[k];
+        const count=k==='all'?TC.length:TC.filter(t=>t.c===k).length;
+        return `<button class="tc-cat${k===currentCat?' active':''}" data-cat="${k}">${cat.icon} ${cat.label}<span class="tc-cat-count">${count}</span></button>`;
+    }).join('');
+    el.querySelectorAll('.tc-cat').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            currentCat=btn.dataset.cat;currentIdx=0;
+            el.querySelectorAll('.tc-cat').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            filtered=shuffle(getFiltered(currentCat));
+            render();startAuto();
+        });
+    });
+}
+
+function buildSlide(t){
+    const cat=CATS[t.c];
+    const initials=getInitials(t.n);
+    const bgColor=getAvatarColor(t.n);
+    return `<div class="tc-slide"><div class="tc-card"><div class="tc-quote">${t.q}</div><div class="tc-author"><div class="tc-avatar" style="background:${bgColor}">${initials}</div><div class="tc-info"><div class="tc-name">${t.n}</div><div class="tc-role">${t.r}</div></div><span class="tc-cat-badge" style="color:${cat.color};background:${cat.color}15">${cat.icon} ${cat.label}</span></div></div></div>`;
+}
+
+function render(){
+    const track=document.getElementById('tcTrack');
+    track.innerHTML=filtered.map(buildSlide).join('');
+    track.style.transform=`translateX(-${currentIdx*100}%)`;
+    // Dots — show max 7
+    const dots=document.getElementById('tcDots');
+    const maxDots=Math.min(filtered.length,7);
+    const startDot=Math.max(0,Math.min(currentIdx-3,filtered.length-maxDots));
+    let dotsHtml='';
+    for(let i=startDot;i<startDot+maxDots&&i<filtered.length;i++){
+        dotsHtml+=`<div class="tc-dot${i===currentIdx?' active':''}" data-idx="${i}"></div>`;
+    }
+    dots.innerHTML=dotsHtml;
+    dots.querySelectorAll('.tc-dot').forEach(d=>{d.addEventListener('click',()=>{currentIdx=parseInt(d.dataset.idx);goTo();startAuto();});});
+    document.getElementById('tcCounter').textContent=`${currentIdx+1} / ${filtered.length}`;
+}
+
+function goTo(){
+    document.getElementById('tcTrack').style.transform=`translateX(-${currentIdx*100}%)`;
+    render();
+}
+
+function next(){currentIdx=(currentIdx+1)%filtered.length;goTo();}
+function prev(){currentIdx=(currentIdx-1+filtered.length)%filtered.length;goTo();}
+
+function startAuto(){
+    stopAuto();
+    const fill=document.getElementById('tcAutoFill');
+    fill.classList.remove('running');fill.style.width='0%';
+    void fill.offsetWidth;// Force reflow
+    fill.classList.add('running');
+    autoTimer=setTimeout(()=>{next();startAuto();},6000);
+}
+function stopAuto(){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}document.getElementById('tcAutoFill').classList.remove('running');}
+
+// Init
+filtered=shuffle(getFiltered('all'));
+buildCats();render();
+
+// Nav buttons
+document.getElementById('tcPrev').addEventListener('click',()=>{prev();startAuto();});
+document.getElementById('tcNext').addEventListener('click',()=>{next();startAuto();});
+
+// Swipe support
+let stx=0;const vp=document.getElementById('tcViewport');
+vp.addEventListener('touchstart',e=>{stx=e.touches[0].clientX;stopAuto();},{passive:true});
+vp.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-stx;if(Math.abs(dx)>40){dx<0?next():prev();}startAuto();},{passive:true});
+
+// Pause auto on hover (desktop)
+vp.addEventListener('mouseenter',stopAuto);
+vp.addEventListener('mouseleave',startAuto);
+
+// Start auto-play after delay
+setTimeout(startAuto,5000);
+})();
 
 // ═════════════════════════════════════════════════
 // FEATURE: FINTECH TRADER GAME — Mobile-optimized
