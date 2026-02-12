@@ -194,9 +194,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 /* AVAILABILITY */
 .avail{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.5;margin:4px 0 8px;letter-spacing:.5px}.avail i{color:var(--accent);font-size:8px}
-/* QUICK PROMPTS */
-.qp-wrap{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:16px 0 8px}
-.qp{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:100px;background:var(--card);border:1px solid var(--border);color:var(--sub);text-decoration:none;transition:all .3s;backdrop-filter:blur(10px);white-space:nowrap;cursor:pointer}.qp:hover{border-color:var(--accent);color:var(--accent);background:var(--cardH);transform:translateY(-2px)}
 /* READING */
 .reading-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);margin:12px 0 0}
 .reading-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:var(--bg)}
@@ -219,39 +216,81 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .share-close{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer;margin-top:16px}.share-close:hover{opacity:1;color:var(--accent)}
 /* STREAK & SOUND */
 .streak{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.2;text-align:center;margin-top:4px;transition:opacity .3s}.streak:hover{opacity:.6}
-.snd-btn i{font-size:12px}
 /* ACHIEVEMENT TOAST */
 .toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9990;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
-.toast{display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:12px;background:var(--bg2);border:1px solid var(--accent);backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,225,255,.2);font-family:'JetBrains Mono',monospace;transform:translateY(60px) scale(.8);opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:90vw}
+.toast{display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:14px;background:var(--bg2);border:1px solid var(--accent);backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,225,255,.25);font-family:'JetBrains Mono',monospace;transform:translateY(60px) scale(.8);opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:90vw;position:relative;overflow:hidden}
 .toast.show{transform:translateY(0) scale(1);opacity:1}
-.toast-emoji{font-size:28px;flex-shrink:0}.toast-body{display:flex;flex-direction:column;gap:2px}
+.toast-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,225,255,.06),transparent);animation:tshimmer 2s ease-in-out}
+@keyframes tshimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.toast-emoji{font-size:32px;flex-shrink:0;animation:tpop .5s cubic-bezier(.16,1,.3,1)}.toast.show .toast-emoji{animation:tpop .5s cubic-bezier(.16,1,.3,1) .2s both}
+@keyframes tpop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+.toast-body{display:flex;flex-direction:column;gap:2px;position:relative;z-index:1}
 .toast-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-weight:700}
 .toast-desc{font-size:11px;color:var(--sub)}
 .toast-xp{font-size:9px;color:var(--accent3);margin-top:2px;letter-spacing:1px}
-/* TROPHY CASE */
-#trophyOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(12px);pointer-events:none}
+.toast-rarity{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+.toast.legendary{border-color:#fbbf24;box-shadow:0 8px 32px rgba(251,191,36,.3)}
+.toast.legendary .toast-title{color:#fbbf24}
+.toast.epic{border-color:#a855f7;box-shadow:0 8px 32px rgba(168,85,247,.25)}
+.toast.epic .toast-title{color:#a855f7}
+/* LEVEL UP TOAST */
+.toast-levelup{border-color:#22c55e;box-shadow:0 8px 40px rgba(34,197,94,.3);background:linear-gradient(135deg,var(--bg2),rgba(34,197,94,.05))}
+.toast-levelup .toast-title{color:#22c55e;font-size:12px}
+/* TROPHY CASE - UPGRADED */
+#trophyOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(14px);pointer-events:none}
 #trophyOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.trophy-panel{width:90%;max-width:400px;max-height:80vh;overflow-y:auto;padding:28px;border-radius:20px;background:var(--bg2);border:1px solid var(--border);transform:scale(.85);transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.trophy-panel{width:92%;max-width:420px;max-height:85vh;overflow-y:auto;padding:24px;border-radius:22px;background:var(--bg2);border:1px solid var(--border);transform:scale(.85);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 #trophyOverlay.show .trophy-panel{transform:scale(1)}
+.trophy-panel::-webkit-scrollbar{width:3px}.trophy-panel::-webkit-scrollbar-track{background:transparent}.trophy-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .trophy-header{text-align:center;margin-bottom:20px}
-.trophy-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
-.trophy-xp-bar{margin:12px 0 8px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;position:relative}
-.trophy-xp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));transition:width .8s cubic-bezier(.16,1,.3,1)}
+.trophy-title{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.trophy-stats{display:flex;justify-content:center;gap:24px;margin:12px 0}
+.trophy-stat{text-align:center}.trophy-stat-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text)}.trophy-stat-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px}
+.trophy-ring-wrap{position:relative;width:100px;height:100px;margin:16px auto}
+.trophy-ring-svg{transform:rotate(-90deg)}
+.trophy-ring-bg{fill:none;stroke:var(--border);stroke-width:4}
+.trophy-ring-fill{fill:none;stroke:url(#trophyGrad);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)}
+.trophy-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.trophy-ring-pct{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text)}
+.trophy-ring-sub{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--sub);margin-top:1px}
+.trophy-xp-bar{margin:12px 0 6px;height:8px;border-radius:4px;background:var(--border);overflow:hidden;position:relative}
+.trophy-xp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));transition:width 1s cubic-bezier(.16,1,.3,1);position:relative}
+.trophy-xp-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:xpshimmer 2s ease-in-out infinite}
+@keyframes xpshimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .trophy-level{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);text-align:center;letter-spacing:1px}
-.trophy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
-.trophy-badge{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .3s}
-.trophy-badge.unlocked{border-color:rgba(0,225,255,.2);background:rgba(0,225,255,.03)}
-.trophy-badge.locked{opacity:.3;filter:grayscale(1)}
-.trophy-badge-emoji{font-size:28px;transition:transform .3s}.trophy-badge.unlocked:hover .trophy-badge-emoji{transform:scale(1.2) rotate(10deg)}
-.trophy-badge-name{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
-.trophy-badge-desc{font-size:9px;color:var(--sub);line-height:1.3}
+.trophy-tier-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--sub);margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.trophy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.trophy-badge{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .4s;position:relative;overflow:hidden;cursor:default}
+.trophy-badge.unlocked{border-color:rgba(0,225,255,.15);background:rgba(0,225,255,.02)}
+.trophy-badge.unlocked.legendary{border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.03)}
+.trophy-badge.unlocked.epic{border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.03)}
+.trophy-badge.unlocked.rare{border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.03)}
+.trophy-badge.locked{opacity:.25;filter:grayscale(1)}
+.trophy-badge-emoji{font-size:30px;transition:transform .4s}.trophy-badge.unlocked:hover .trophy-badge-emoji{transform:scale(1.25) rotate(8deg)}
+.trophy-badge-name{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.8px;text-transform:uppercase;color:var(--text);font-weight:600}
+.trophy-badge-desc{font-size:8px;color:var(--sub);line-height:1.3}
+.trophy-badge-rarity{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;padding:2px 6px;border-radius:4px}
+.trophy-badge-rarity.common{color:#6b7a90;background:rgba(107,122,144,.1)}
+.trophy-badge-rarity.rare{color:#3b82f6;background:rgba(59,130,246,.1)}
+.trophy-badge-rarity.epic{color:#a855f7;background:rgba(168,85,247,.1)}
+.trophy-badge-rarity.legendary{color:#fbbf24;background:rgba(251,191,36,.1)}
+.trophy-badge-time{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--sub);opacity:.5;margin-top:1px}
 .trophy-close{text-align:center;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer}.trophy-close:hover{opacity:1;color:var(--accent)}
-/* XP BAR (footer) */
-.xp-footer{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px;opacity:.2;transition:opacity .3s}.xp-footer:hover{opacity:.6}
-.xp-bar-mini{width:80px;height:3px;border-radius:2px;background:var(--border);overflow:hidden}.xp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+.trophy-share-btn{display:block;margin:12px auto 0;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 20px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .3s}.trophy-share-btn:hover{background:rgba(0,225,255,.1)}
+/* XP BAR (footer) - enhanced */
+.xp-footer{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px;opacity:.25;transition:opacity .3s;cursor:pointer}.xp-footer:hover{opacity:.7}
+.xp-bar-mini{width:100px;height:4px;border-radius:2px;background:var(--border);overflow:hidden;position:relative}.xp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
 .xp-text{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);letter-spacing:1px}
+.xp-level-badge{font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 6px;border-radius:4px;letter-spacing:1px;font-weight:700}
 /* TROPHY BUTTON */
-.trophy-btn{font-size:12px}
+.trophy-btn{font-size:12px;position:relative}
+.trophy-btn-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse 2s ease-in-out infinite}
+/* COMBO INDICATOR */
+.combo-indicator{position:fixed;top:60px;right:16px;z-index:100;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);opacity:0;transition:all .4s;pointer-events:none;text-align:right}
+.combo-indicator.show{opacity:1}
+.combo-count{font-size:20px;font-weight:700;line-height:1}
+.combo-label{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px}
+.combo-mult{font-size:9px;color:var(--accent3)}
 /* LIVE CONSOLE */
 .live-console{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.25;text-align:center;margin-top:8px;min-height:14px;letter-spacing:.5px;transition:opacity .3s}.live-console:hover{opacity:.6}
 .live-console .cursor-blink{animation:cblink 1s step-end infinite}
@@ -263,13 +302,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .smart-cta-inner:hover{box-shadow:0 -4px 32px rgba(0,225,255,.3);transform:translateY(-2px)}
 .smart-cta-icon{font-size:18px;color:var(--accent)}.smart-cta-text{flex:1}.smart-cta-title{font-size:12px;font-weight:600}.smart-cta-sub{font-size:9px;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:2px}
 .smart-cta-close{color:var(--sub);cursor:pointer;padding:4px;font-size:12px;opacity:.5;transition:opacity .3s}.smart-cta-close:hover{opacity:1}
-/* DAILY CHALLENGE */
-.challenge-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(0,225,255,.03),rgba(99,102,241,.03));border:1px dashed rgba(0,225,255,.15);margin:12px 0 0;transition:all .3s}
-.challenge-card.completed{border-style:solid;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
-.challenge-icon{font-size:18px;flex-shrink:0}.challenge-meta{flex:1}
-.challenge-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
-.challenge-text{font-size:11px;color:var(--sub)}
-.challenge-progress{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);flex-shrink:0}
 /* PERSONALIZED RECS */
 .rec-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);margin-top:8px;text-decoration:none;color:var(--text);transition:all .3s}
 .rec-card:hover{border-color:rgba(0,225,255,.15);background:var(--cardH);transform:translateX(4px)}
@@ -284,11 +316,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .cert-org{font-size:7px;color:var(--accent);opacity:.6;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
 .cert-verify{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center;font-size:7px;color:#22c55e;opacity:0;transition:opacity .3s}.cert-card:hover .cert-verify{opacity:1}
 @media(max-width:380px){.cert-grid{grid-template-columns:repeat(2,1fr)}}
-/* VISITOR GLOBE */
-.globe-wrap{margin:12px auto;text-align:center;position:relative}
-.globe-canvas{border-radius:50%;display:block;margin:0 auto}
-.globe-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);opacity:.3;text-align:center;margin-top:6px;letter-spacing:1px}
-.globe-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);text-align:center;margin-top:2px;opacity:.4}
 /* MICRO-ANIMATIONS (scroll-triggered) */
 .sa{opacity:0;transition:opacity .8s,transform .8s cubic-bezier(.16,1,.3,1)}.sa.vis{opacity:1;transform:none!important}
 .sa-up{transform:translateY(30px)}.sa-left{transform:translateX(-30px)}.sa-right{transform:translateX(30px)}.sa-scale{transform:scale(.9)}.sa-rotate{transform:rotate(-3deg) translateY(20px)}
@@ -296,6 +323,76 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .foot:hover{opacity:.7}
 .visitor-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.15;text-align:center;margin-top:8px;transition:opacity .3s}
 .visitor-count:hover{opacity:.5}
+/* TERMINAL */
+#termOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;pointer-events:none}
+#termOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.term-win{width:94%;max-width:520px;max-height:80vh;border-radius:14px;background:#0d1117;border:1px solid #30363d;overflow:hidden;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column}
+#termOverlay.show .term-win{transform:scale(1)}
+.term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#161b22;border-bottom:1px solid #30363d}
+.term-dot{width:10px;height:10px;border-radius:50%}.term-dot.r{background:#ff5f57}.term-dot.y{background:#febc2e}.term-dot.g{background:#28c840}
+.term-title{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8b949e;letter-spacing:1px}
+.term-body{padding:16px;overflow-y:auto;flex:1;max-height:60vh;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:#c9d1d9}
+.term-line{margin-bottom:4px}.term-prompt{color:#58a6ff}.term-cmd{color:#c9d1d9}.term-out{color:#8b949e;margin-left:12px}.term-accent{color:#00e1ff}.term-green{color:#3fb950}.term-warn{color:#d29922}
+.term-input-line{display:flex;align-items:center;gap:6px;padding:8px 16px;border-top:1px solid #30363d;background:#0d1117}
+.term-input{flex:1;background:transparent;border:none;outline:none;color:#c9d1d9;font-family:'JetBrains Mono',monospace;font-size:11px;caret-color:#58a6ff}
+/* MINI GAME */
+#gameOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;pointer-events:none}
+#gameOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.game-win{width:320px;border-radius:14px;background:#0d1117;border:1px solid #30363d;overflow:hidden;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1);text-align:center;padding:20px}
+#gameOverlay.show .game-win{transform:scale(1)}
+.game-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#58a6ff;margin-bottom:12px}
+.game-canvas{border:1px solid #30363d;border-radius:6px;display:block;margin:0 auto}
+.game-score{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8b949e;margin-top:8px}
+.game-hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:#484f58;margin-top:6px}
+/* TESTIMONIAL WALL */
+.test-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:8px 0}
+.test-card{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);transition:all .3s}
+.test-card:hover{border-color:rgba(0,225,255,.1);transform:translateY(-2px)}
+.test-quote{font-size:12px;line-height:1.6;color:var(--sub);font-style:italic;margin-bottom:8px}
+.test-quote::before{content:'"';font-size:24px;color:var(--accent);opacity:.3;font-style:normal;vertical-align:text-top;line-height:.5;margin-right:2px}
+.test-author{display:flex;align-items:center;gap:8px}
+.test-avatar{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;overflow:hidden}
+.test-avatar img{width:100%;height:100%;object-fit:cover}
+.test-info{flex:1}.test-name{font-size:11px;font-weight:600}.test-role{font-size:9px;color:var(--sub)}
+/* SPEAKING TIMELINE */
+.speak-wrap{margin:8px 0 12px}
+.speak-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);margin-bottom:6px;transition:all .3s;text-decoration:none;color:var(--text)}
+.speak-item:hover{border-color:rgba(0,225,255,.1);transform:translateX(4px)}
+.speak-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--bg)}
+.speak-meta{flex:1}.speak-event{font-size:11px;font-weight:600}.speak-talk{font-size:9px;color:var(--sub);margin-top:1px}
+.speak-yr{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--accent);opacity:.6}
+/* STATS DASHBOARD */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
+.stat-card{padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(0,225,255,.1);transform:translateY(-2px)}
+.stat-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:4px}
+.stat-icon{font-size:18px;margin-bottom:4px}
+/* BOOK SHOWCASE */
+.book-card{display:flex;gap:14px;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--border);margin:8px 0;backdrop-filter:blur(20px);transition:all .3s}
+.book-card:hover{border-color:rgba(0,225,255,.1)}
+.book-cover{width:70px;height:100px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+.book-cover img{width:100%;height:100%;object-fit:cover}
+.book-info{flex:1;display:flex;flex-direction:column;gap:4px}
+.book-title-text{font-size:14px;font-weight:700}.book-subtitle{font-size:10px;color:var(--sub)}
+.book-stars{color:#fbbf24;font-size:10px;letter-spacing:1px}
+.book-links{display:flex;gap:6px;margin-top:auto}
+.book-link{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:6px;border:1px solid var(--border);color:var(--sub);text-decoration:none;transition:all .3s}.book-link:hover{border-color:var(--accent);color:var(--accent)}
+/* KEYBOARD SHORTCUTS */
+#shortcutOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(12px);pointer-events:none}
+#shortcutOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.shortcut-panel{width:90%;max-width:360px;padding:24px;border-radius:16px;background:var(--bg2);border:1px solid var(--border);transform:scale(.9);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+#shortcutOverlay.show .shortcut-panel{transform:scale(1)}
+.sc-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:16px}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.sc-key{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:5px;background:var(--card);border:1px solid var(--border);color:var(--text);min-width:24px;text-align:center}
+.sc-desc{font-size:11px;color:var(--sub)}
+.sc-close{text-align:center;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer}.sc-close:hover{opacity:1;color:var(--accent)}
+/* CURSOR TRAIL */
+.cursor-particle{position:fixed;pointer-events:none;z-index:9990;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0;transition:none}
+/* PRINT RESUME */
+@media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card,.test-card,.speak-item,.stat-card,.book-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
+.print-only{display:none}
 </style>
 </head>
 <body>
@@ -307,8 +404,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <canvas id="bgC" aria-hidden="true"></canvas>
 
 <div class="top-btns">
-    <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i></button>
-    <button class="tbtn snd-btn" id="sndBtn" aria-label="Toggle ambient sound" style="display:none"><i class="fa-solid fa-volume-xmark" id="sndIcon"></i></button>
+    <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i><span class="trophy-btn-dot" id="trophyDot" style="display:none"></span></button>
     <button class="tbtn lang-btn" id="langBtn" aria-label="Toggle Arabic/English">EN</button>
     <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
 </div>
@@ -326,10 +422,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 <div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-card-inner"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-actions"><button class="share-btn" onclick="downloadShareCard()"><i class="fa-solid fa-download" style="margin-right:4px"></i> Save Image</button><button class="share-btn" onclick="copyShareLink()"><i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link</button></div><div class="share-close" onclick="closeShare()">[ TAP TO CLOSE ]</div></div></div>
 
+<!-- Terminal Overlay -->
+<div id="termOverlay" onclick="if(event.target===this)closeTerm()"><div class="term-win"><div class="term-bar"><span class="term-dot r" onclick="closeTerm()"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">amr@portfolio:~</span></div><div class="term-body" id="termBody"><div class="term-line"><span class="term-green">Welcome to Amr's Terminal v2.0</span></div><div class="term-line"><span class="term-out">Type <span class="term-accent">help</span> for available commands</span></div></div><div class="term-input-line"><span class="term-prompt">❯</span><input class="term-input" id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command..."></div></div></div>
+<!-- Mini Game Overlay -->
+<div id="gameOverlay" onclick="if(event.target===this)closeGame()"><div class="game-win"><div class="game-title">🐍 Snake</div><canvas id="snakeCanvas" class="game-canvas" width="280" height="280"></canvas><div class="game-score" id="gameScore">Score: 0</div><div class="game-hint">Arrow keys or swipe to move · ESC to close</div></div></div>
+<!-- Keyboard Shortcuts Overlay -->
+<div id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()"><div class="shortcut-panel"><div class="sc-title">⌨️ Keyboard Shortcuts</div><div class="sc-row"><span class="sc-key">T</span><span class="sc-desc">Open Trophy Case</span></div><div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">This panel</span></div><div class="sc-row"><span class="sc-key">`</span><span class="sc-desc">Open Terminal</span></div><div class="sc-row"><span class="sc-key">G</span><span class="sc-desc">Play Snake</span></div><div class="sc-row"><span class="sc-key">↑↑↓↓←→←→BA</span><span class="sc-desc">Easter Egg</span></div><div class="sc-row"><span class="sc-key">Ctrl+P</span><span class="sc-desc">Print Resume</span></div><div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">Close any overlay</span></div><div class="sc-close" onclick="closeShortcuts()">[ PRESS ? OR ESC TO CLOSE ]</div></div></div>
 <!-- Trophy Case Overlay -->
-<div id="trophyOverlay" onclick="if(event.target===this)closeTrophy()"><div class="trophy-panel"><div class="trophy-header"><div class="trophy-title">🏆 Trophy Case</div><div class="trophy-xp-bar"><div class="trophy-xp-fill" id="trophyXpFill" style="width:0%"></div></div><div class="trophy-level" id="trophyLevel">Level 1 · 0 XP</div></div><div class="trophy-grid" id="trophyGrid"></div><div class="trophy-close" onclick="closeTrophy()">[ PRESS T OR TAP TO CLOSE ]</div></div></div>
+<div id="trophyOverlay" onclick="if(event.target===this)closeTrophy()"><div class="trophy-panel"><div class="trophy-header"><div class="trophy-title">🏆 Trophy Case</div><div class="trophy-ring-wrap"><svg class="trophy-ring-svg" width="100" height="100" viewBox="0 0 100 100"><defs><linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent)"/><stop offset="50%" stop-color="var(--accent2)"/><stop offset="100%" stop-color="var(--accent3)"/></linearGradient></defs><circle class="trophy-ring-bg" cx="50" cy="50" r="44"/><circle class="trophy-ring-fill" id="trophyRing" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/></svg><div class="trophy-ring-text"><div class="trophy-ring-pct" id="trophyPct">0%</div><div class="trophy-ring-sub">Complete</div></div></div><div class="trophy-stats"><div class="trophy-stat"><div class="trophy-stat-num" id="trophySBadges">0</div><div class="trophy-stat-label">Badges</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySXp">0</div><div class="trophy-stat-label">Total XP</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySLevel">1</div><div class="trophy-stat-label">Level</div></div></div><div class="trophy-xp-bar"><div class="trophy-xp-fill" id="trophyXpFill" style="width:0%"></div></div><div class="trophy-level" id="trophyLevel">Level 1 · 0 XP to next</div></div><div id="trophyGrid"></div><button class="trophy-share-btn" onclick="shareTrophy()"><i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress</button><div class="trophy-close" onclick="closeTrophy()">[ PRESS T OR TAP TO CLOSE ]</div></div></div>
 <!-- Toast Notifications -->
 <div class="toast-container" id="toastContainer"></div>
+<div class="combo-indicator" id="comboIndicator"><div class="combo-count" id="comboCount">x2</div><div class="combo-label">combo</div><div class="combo-mult" id="comboMult">2× XP</div></div>
 <!-- Smart CTA -->
 <div class="smart-cta" id="smartCta"><a class="smart-cta-inner" id="smartCtaLink" href="#" target="_blank" rel="noopener"><div class="smart-cta-icon" id="smartCtaIcon"><i class="fa-solid fa-comments"></i></div><div class="smart-cta-text"><div class="smart-cta-title" id="smartCtaTitle"></div><div class="smart-cta-sub" id="smartCtaSub"></div></div><div class="smart-cta-close" onclick="event.preventDefault();event.stopPropagation();dismissSmartCta()"><i class="fa-solid fa-xmark"></i></div></a></div>
 
@@ -343,6 +446,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <div id="app">
     <div class="rv" style="display:flex;justify-content:center;">
         <div class="st"><span class="sd" id="sdot" style="background:#22c55e;" aria-hidden="true"></span><span id="stxt">LOCATING...</span></div>
+    </div>
+    <div id="greetBar" style="display:none;text-align:center;margin-top:4px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);opacity:.7;" id="greetTxt"></span>
     </div>
     <div class="pf rv" id="pfw" role="button" tabindex="0" aria-label="Flip to show QR code" onclick="toggleFlip()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFlip();}">
         <svg viewBox="0 0 136 136" aria-hidden="true"><circle cx="68" cy="68" r="66" stroke="var(--accent)" opacity=".3"/><circle cx="68" cy="68" r="66" stroke="var(--accent2)" opacity=".2" stroke-dasharray="4 10" style="animation-direction:reverse;animation-duration:18s"/></svg>
@@ -399,13 +505,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <button class="vcb" id="vcBtn" onclick="downloadVCard()"><div class="vcb-shim"></div><i class="fa-solid fa-address-card" aria-hidden="true"></i><span id="vcTxt">Save Contact</span></button>
     </div>
 
-    <div class="qp-wrap rv">
-        <a class="qp" href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener"><i class="fa-solid fa-bolt" style="margin-right:4px;color:var(--accent);"></i>Ask about Agile</a>
-        <a class="qp" href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener"><i class="fa-solid fa-coins" style="margin-right:4px;color:var(--accent2);"></i>Ask about FinTech</a>
-        <a class="qp" href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener"><i class="fa-solid fa-book" style="margin-right:4px;color:var(--accent3);"></i>About My Book</a>
-        <a class="qp" href="https://adplist.org/mentors/amr-elharony" target="_blank" rel="noopener"><i class="fa-solid fa-graduation-cap" style="margin-right:4px;color:#eab308;"></i>Get Mentored</a>
-    </div>
-
     <div style="display:flex;flex-direction:column;gap:12px;">
         <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">My Book</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
         <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="fb.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-users fbi" style="color:var(--accent2);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Fintech Bilinguals</div><div class="lsu">Join the Community</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
@@ -457,11 +556,55 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <a href="https://www.credly.com/users/amr-elharony" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎓</div><div class="cert-name"><strong>DBA</strong>Digital Transform.</div><div class="cert-org">Helwan Univ. · 2023</div></a>
     </div>
 
-    <!-- Visitor Globe -->
-    <div class="globe-wrap rv" id="globeWrap">
-        <canvas id="globeCanvas" class="globe-canvas" width="180" height="180"></canvas>
-        <div class="globe-label">VISITORS WORLDWIDE</div>
-        <div class="globe-count" id="globeCount"></div>
+    <!-- Testimonial Wall -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">WHAT PEOPLE SAY</div><div class="ndl"></div></div>
+    <div class="test-grid">
+        <div class="test-card sa sa-right"><div class="test-quote">Amr is a rare talent who challenges, teaches, and leads to drive change. His ability to combine agile mastery with genuine empathy sets him apart.</div><div class="test-author"><div class="test-avatar">🏦</div><div class="test-info"><div class="test-name">Sameh Elebiary</div><div class="test-role">Credit Analyst, Banque Misr</div></div></div></div>
+        <div class="test-card sa sa-left"><div class="test-quote">His deep tech expertise and emotional intelligence make every mentoring session transformative. He doesn't just give advice — he builds capability.</div><div class="test-author"><div class="test-avatar">📊</div><div class="test-info"><div class="test-name">Eslam Youssef</div><div class="test-role">Sr. Data Analyst</div></div></div></div>
+        <div class="test-card sa sa-right"><div class="test-quote">Working with Amr on agile transformation was a masterclass. He translates complex frameworks into practical, actionable strategies that teams actually adopt.</div><div class="test-author"><div class="test-avatar">💼</div><div class="test-info"><div class="test-name">Ahmed Saleh</div><div class="test-role">Product Manager</div></div></div></div>
+        <div class="test-card sa sa-left"><div class="test-quote">Amr's book 'The Bilingual Executive' is a must-read for anyone navigating leadership in a bilingual professional environment. Practical and insightful.</div><div class="test-author"><div class="test-avatar">📖</div><div class="test-info"><div class="test-name">Sara Ibrahim</div><div class="test-role">Executive Coach</div></div></div></div>
+    </div>
+
+    <!-- Speaking Timeline -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">SPEAKING & PANELS</div><div class="ndl"></div></div>
+    <div class="speak-wrap">
+        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-microphone"></i></div><div class="speak-meta"><div class="speak-event">Techne Summit</div><div class="speak-talk">Agile in FinTech: From Frameworks to Real Delivery</div></div><div class="speak-yr">2025</div></div>
+        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-code"></i></div><div class="speak-meta"><div class="speak-event">DevOpsDays Cairo</div><div class="speak-talk">Panel: Bridging Dev and Business in Banking</div></div><div class="speak-yr">2025</div></div>
+        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-building-columns"></i></div><div class="speak-meta"><div class="speak-event">Africa FinTech Forum</div><div class="speak-talk">Digital Transformation in MENA Banking</div></div><div class="speak-yr">2025</div></div>
+        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-rocket"></i></div><div class="speak-meta"><div class="speak-event">Career 180 Summit</div><div class="speak-talk">From IT Officer to FinTech Author: A Non-Linear Career Path</div></div><div class="speak-yr">2024</div></div>
+        <div class="speak-item sa sa-left"><div class="speak-icon"><i class="fa-solid fa-users"></i></div><div class="speak-meta"><div class="speak-event">Seamless KSA</div><div class="speak-talk">The Bilingual Executive: Leadership Across Cultures</div></div><div class="speak-yr">2024</div></div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">BY THE NUMBERS</div><div class="ndl"></div></div>
+    <div class="stats-grid">
+        <div class="stat-card sa sa-scale"><div class="stat-icon">☕</div><div class="stat-num" id="statCoffee">0</div><div class="stat-label">Cups of Coffee</div></div>
+        <div class="stat-card sa sa-scale"><div class="stat-icon">📝</div><div class="stat-num" id="statArticles">0</div><div class="stat-label">Articles Published</div></div>
+        <div class="stat-card sa sa-scale"><div class="stat-icon">🎓</div><div class="stat-num" id="statMentees">0</div><div class="stat-label">Mentees Coached</div></div>
+        <div class="stat-card sa sa-scale"><div class="stat-icon">🏆</div><div class="stat-num" id="statCerts">0</div><div class="stat-label">Certifications</div></div>
+    </div>
+
+    <!-- Book Showcase -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">MY BOOK</div><div class="ndl"></div></div>
+    <div class="book-card rv">
+        <div class="book-cover"><img src="be.png" alt="The Bilingual Executive" onerror="this.style.display='none';this.parentElement.textContent='📚'"></div>
+        <div class="book-info">
+            <div class="book-title-text">The Bilingual Executive</div>
+            <div class="book-subtitle">Leadership Communication for a Bilingual World</div>
+            <div class="book-stars">★★★★★ <span style="color:var(--sub);font-family:'JetBrains Mono',monospace;font-size:8px;">5.0</span></div>
+            <div style="font-size:10px;color:var(--sub);line-height:1.4;margin-top:2px;">A practical guide for professionals navigating leadership in bilingual environments. Print, eBook & AI audiobook.</div>
+            <div class="book-links">
+                <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="book-link">Read More</a>
+                <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="book-link">Get the Book</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print-only resume header -->
+    <div class="print-only" style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #000;">
+        <h1 style="font-size:28px;margin-bottom:4px;">Amr Elharony</h1>
+        <p style="font-size:14px;color:#555;">Delivery Lead · Mentor · Fintech Author & Speaker</p>
+        <p style="font-size:11px;color:#888;">Cairo, Egypt · a.elharony@gmail.com · amrelharony.com · linkedin.com/in/amrmelharony</p>
     </div>
 
     <div class="nd rv"><div class="ndl"></div><div class="ndt">LATEST ARTICLES</div><div class="ndl"></div></div>
@@ -472,9 +615,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         </div>
     </div>
 
-    <!-- Daily Challenge -->
-    <div class="challenge-card rv" id="dailyChallenge"><div class="challenge-icon" id="challengeIcon">🎯</div><div class="challenge-meta"><div class="challenge-label">Daily Challenge</div><div class="challenge-text" id="challengeText">Loading...</div></div><div class="challenge-progress" id="challengeProgress"></div></div>
-
     <!-- Personalized Recommendation -->
     <div id="recContainer"></div>
 
@@ -482,7 +622,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
     <div class="visitor-count" id="visitorCount"></div>
     <div class="streak" id="streakCount"></div>
-    <div class="xp-footer" id="xpFooter"><span class="xp-text" id="xpText">0 XP</span><div class="xp-bar-mini"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div><span class="xp-text" id="xpLevel">LVL 1</span></div>
+    <div class="xp-footer" id="xpFooter" onclick="openTrophy()"><span class="xp-text" id="xpText">0 XP</span><div class="xp-bar-mini"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div><span class="xp-level-badge" id="xpLevel" style="color:var(--accent);background:rgba(0,225,255,.1);">LVL 1</span></div>
     <div class="live-console" id="liveConsole"><span class="cursor-blink">▊</span></div>
     <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
 </div>
@@ -564,13 +704,18 @@ function updStatus(){
     const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
     const dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
     let msg,col;
-    if(customGreeting){msg=customGreeting;col="#00e1ff";}
-    else if(h>=9&&h<17){msg="CAIRO · BUILDING FINTECH";col="#22c55e";}
-    else if(h>=17&&h<23){msg="CAIRO · MENTORING";col="#a855f7";}
-    else{msg="CAIRO · RECHARGING";col="#f97316";}
+    if(h>=9&&h<17){msg=isArabic?"القاهرة · بناء التكنولوجيا المالية":"CAIRO · BUILDING FINTECH";col="#22c55e";}
+    else if(h>=17&&h<23){msg=isArabic?"القاهرة · إرشاد":"CAIRO · MENTORING";col="#a855f7";}
+    else{msg=isArabic?"القاهرة · استراحة":"CAIRO · RECHARGING";col="#f97316";}
     dot.style.background=col;
     if(reducedMotion){txt.textContent=msg;return;}
     txt.textContent='';let i=0;(function t(){if(i<msg.length){txt.textContent+=msg[i];i++;setTimeout(t,35);}})();
+    // Show separate greeting bar if referrer-based
+    if(customGreeting){
+        const bar=document.getElementById('greetBar');
+        const gt=document.getElementById('greetTxt');
+        if(bar&&gt){bar.style.display='block';gt.textContent=customGreeting;}
+    }
 }
 
 // ═══ LIVE MENTORING COUNTER ═══
@@ -670,6 +815,7 @@ document.getElementById('langBtn').addEventListener('click',()=>{
     document.getElementById('impL2').textContent=d.imp[1];
     document.getElementById('impL3').textContent=d.imp[2];
     document.querySelector('.ph').textContent=d.ph;
+    updStatus();// Refresh status text for current language
 });
 
 // ═══ VISITOR COUNTER ═══
@@ -703,12 +849,6 @@ document.getElementById('langBtn').addEventListener('click',()=>{
 
 // ═══ AVAILABILITY ═══
 (function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
-
-// ═══ AMBIENT SOUND ═══
-let audioCtx,sndPlaying=false;
-document.getElementById('sndBtn').addEventListener('click',()=>{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(sndPlaying){audioCtx.suspend();sndPlaying=false;document.getElementById('sndIcon').className='fa-solid fa-volume-xmark';}else{if(audioCtx.state==='suspended')audioCtx.resume();else{const g=audioCtx.createGain();g.gain.value=0.03;g.connect(audioCtx.destination);const o1=audioCtx.createOscillator();o1.type='sine';o1.frequency.value=80;o1.connect(g);o1.start();const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.value=120;const g2=audioCtx.createGain();g2.gain.value=0.015;o2.connect(g2);g2.connect(audioCtx.destination);o2.start();const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=0.1;const lg=audioCtx.createGain();lg.gain.value=5;lfo.connect(lg);lg.connect(o1.frequency);lfo.start();}sndPlaying=true;document.getElementById('sndIcon').className='fa-solid fa-volume-high';}});
-// Show sound button after preloader
-setTimeout(()=>{document.getElementById('sndBtn').style.display='flex';},4000);
 
 // ═══ SHARE CARD ═══
 window.openShare=function(){const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');const l=document.body.classList.contains('light-mode');ctx.fillStyle=l?'#f4f6fb':'#06080f';ctx.fillRect(0,0,600,340);const grd=ctx.createLinearGradient(0,0,600,0);grd.addColorStop(0,'#00e1ff');grd.addColorStop(1,'#6366f1');ctx.fillStyle=grd;ctx.fillRect(0,0,600,4);ctx.font='bold 32px Inter,sans-serif';ctx.fillStyle=l?'#0a0f1a':'#f0f2f5';ctx.fillText('Amr Elharony',40,80);ctx.font='14px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('Delivery Lead · Mentor · Fintech Author',40,115);ctx.font='bold 20px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('9+',40,200);ctx.fillText(getMentoringMins().toLocaleString()+'+',160,200);ctx.fillText('7+',370,200);ctx.font='8px monospace';ctx.fillStyle=l?'#5a6578':'#6b7a90';ctx.fillText('YEARS IN BANKING',40,218);ctx.fillText('MENTORING MINS',160,218);ctx.fillText('PANEL STAGES',370,218);ctx.font='12px monospace';ctx.fillStyle='#00e1ff';ctx.fillText('amrelharony.com',40,300);document.getElementById('shareOverlay').classList.add('show');};
@@ -956,7 +1096,7 @@ const consoleMessages=[
     ()=>{const m=1000+Math.floor(((Date.now()-new Date('2023-10-01').getTime())/2592000000)*80);return `${m.toLocaleString()}+ mentoring minutes and counting...`;},
     ()=>`Engagement score: ${getEngagementScore()}/100`,
     ()=>`Your device: ${VDna.get().device} · ${VDna.get().os} · ${VDna.get().browser}`,
-    ()=>`${VDna.get().achievements.length}/${10} achievements unlocked`,
+    ()=>`${VDna.get().achievements.length}/${15} achievements unlocked`,
     ()=>`Running on ${navigator.hardwareConcurrency||'?'} cores · ${VDna.get().screen}`,
     ()=>'System status: all modules operational ✓',
 ];
@@ -971,60 +1111,121 @@ function typeConsole(){
 setTimeout(()=>{typeConsole();setInterval(typeConsole,8000);},5000);
 
 // ═════════════════════════════════════════════════
-// SYSTEM 4: GAMIFICATION LAYER
+// SYSTEM 4: GAMIFICATION LAYER (ADVANCED)
 // ═════════════════════════════════════════════════
 
 const BADGES=[
-    {id:'explorer',emoji:'🔍',name:'Explorer',desc:'Scrolled to 100%'},
-    {id:'regular',emoji:'🔄',name:'Regular',desc:'Visited 3+ times'},
-    {id:'connector',emoji:'🤝',name:'Connector',desc:'Clicked a link'},
-    {id:'scholar',emoji:'📖',name:'Scholar',desc:'Visited all 3 newsletters'},
-    {id:'nightowl',emoji:'🌙',name:'Night Owl',desc:'Visited midnight–5AM'},
-    {id:'secret',emoji:'🤫',name:'Secret Agent',desc:'Found the easter egg'},
-    {id:'shaker',emoji:'📱',name:'Shaker',desc:'Unlocked contact section'},
-    {id:'streak5',emoji:'🔥',name:'Streak Master',desc:'5+ day visit streak'},
-    {id:'globe',emoji:'🌍',name:'Globetrotter',desc:'Visited from outside Egypt'},
-    {id:'speed',emoji:'⚡',name:'Speed Reader',desc:'Reached bottom in <30s'},
+    {id:'explorer',emoji:'🔍',name:'Explorer',desc:'Scrolled to 100%',rarity:'common',xp:25},
+    {id:'regular',emoji:'🔄',name:'Regular',desc:'Visited 3+ times',rarity:'common',xp:25},
+    {id:'connector',emoji:'🤝',name:'Connector',desc:'Clicked a link',rarity:'common',xp:20},
+    {id:'scholar',emoji:'📖',name:'Scholar',desc:'Read all 3 newsletters',rarity:'rare',xp:40},
+    {id:'nightowl',emoji:'🌙',name:'Night Owl',desc:'Visited midnight–5AM',rarity:'rare',xp:40},
+    {id:'secret',emoji:'🤫',name:'Secret Agent',desc:'Found the easter egg',rarity:'epic',xp:60},
+    {id:'shaker',emoji:'📱',name:'Shaker',desc:'Unlocked contact section',rarity:'rare',xp:35},
+    {id:'streak5',emoji:'🔥',name:'Streak Master',desc:'5+ day visit streak',rarity:'epic',xp:60},
+    {id:'globe',emoji:'🌍',name:'Globetrotter',desc:'Visited from outside Egypt',rarity:'rare',xp:35},
+    {id:'speed',emoji:'⚡',name:'Speed Reader',desc:'Reached bottom in <30s',rarity:'epic',xp:50},
+    {id:'deep',emoji:'🧠',name:'Deep Diver',desc:'Spent 3+ minutes exploring',rarity:'common',xp:25},
+    {id:'social',emoji:'🔗',name:'Networker',desc:'Clicked 5+ different links',rarity:'rare',xp:40},
+    {id:'collector',emoji:'🏆',name:'Collector',desc:'Unlocked 8 badges',rarity:'legendary',xp:100},
+    {id:'certified',emoji:'📜',name:'Cert Inspector',desc:'Visited 3+ certifications',rarity:'rare',xp:35},
+    {id:'bilingual',emoji:'🌐',name:'Bilingual',desc:'Switched to Arabic mode',rarity:'common',xp:20},
 ];
 
+const LEVEL_NAMES=['Visitor','Curious','Explorer','Engaged','Fan','Superfan','Legend'];
+const LEVEL_COLORS=['var(--sub)','var(--accent)','#3b82f6','#a855f7','#f97316','#ef4444','#fbbf24'];
+const RARITY_ORDER={common:0,rare:1,epic:2,legendary:3};
+
+// Combo System
+const Combo=(function(){
+    let count=0,timer=null;
+    function hit(){
+        count++;if(timer)clearTimeout(timer);
+        timer=setTimeout(()=>{count=0;document.getElementById('comboIndicator').classList.remove('show');},8000);
+        if(count>=2){
+            const el=document.getElementById('comboIndicator');
+            document.getElementById('comboCount').textContent='×'+count;
+            document.getElementById('comboMult').textContent=Math.min(count,5)+'× XP';
+            el.classList.add('show');
+        }
+        return Math.min(count,5);// Max 5x multiplier
+    }
+    return{hit,get:()=>count};
+})();
+
 const Achieve=(function(){
-    const shown={};// Track shown this session to prevent any duplicate calls
+    const shown={};
     const queue=[];
     let toastActive=false;
+    let prevLevel=VDna.get().level;
     function processQueue(){
         if(queue.length===0){toastActive=false;return;}
         toastActive=true;
-        const badge=queue.shift();
-        showToast(badge);
-        setTimeout(processQueue,4500);// Wait for current toast to finish
+        const item=queue.shift();
+        if(item._levelUp)showLevelUpToast(item);
+        else showToast(item);
+        setTimeout(processQueue,4800);
     }
     function check(id){
-        if(shown[id])return;// Already checked this session
+        if(shown[id])return;
         const p=VDna.get();
         if(p.achievements.includes(id))return;
         shown[id]=true;
+        const badge=BADGES.find(b=>b.id===id);
+        if(!badge)return;
+        // Timestamp the unlock
+        if(!p.achieveTimes)p.achieveTimes={};
+        p.achieveTimes[id]=Date.now();
         p.achievements.push(id);VDna.save();
-        VDna.addXp(25);
-        queue.push(BADGES.find(b=>b.id===id));
+        // XP with combo multiplier
+        const mult=Combo.hit();
+        const xp=badge.xp*(mult>=2?mult:1);
+        VDna.addXp(xp);
+        badge._earnedXp=xp;badge._combo=mult;
+        queue.push(badge);
+        // Check for level up
+        const newLevel=VDna.get().level;
+        if(newLevel>prevLevel){queue.push({_levelUp:true,level:newLevel});prevLevel=newLevel;}
+        // Check collector badge
+        if(p.achievements.length>=8)check('collector');
+        // Trophy button notification dot
+        const dot=document.getElementById('trophyDot');if(dot)dot.style.display='block';
         if(!toastActive)processQueue();
-        ChallengeSystem.checkProgress();
     }
     return{check};
 })();
 
-// Toast System
+// Enhanced Toast System
 function showToast(badge){
     const container=document.getElementById('toastContainer');
     const toast=document.createElement('div');
-    toast.className='toast';
-    toast.innerHTML=`<div class="toast-emoji">${badge.emoji}</div><div class="toast-body"><div class="toast-title">Achievement Unlocked!</div><div class="toast-desc">${badge.name} — ${badge.desc}</div><div class="toast-xp">+25 XP</div></div>`;
+    const rarityClass=badge.rarity||'common';
+    toast.className='toast '+rarityClass;
+    const rarityLabel={common:'Common',rare:'✦ Rare',epic:'✦✦ Epic',legendary:'★ Legendary'}[rarityClass];
+    const rarityColor={common:'#6b7a90',rare:'#3b82f6',epic:'#a855f7',legendary:'#fbbf24'}[rarityClass];
+    toast.innerHTML=`<div class="toast-shimmer"></div><div class="toast-emoji">${badge.emoji}</div><div class="toast-body"><div class="toast-title">Achievement Unlocked!</div><div class="toast-desc">${badge.name} — ${badge.desc}</div><div class="toast-xp">+${badge._earnedXp||badge.xp} XP${badge._combo>=2?' (×'+badge._combo+' combo!)':''}</div><div class="toast-rarity" style="color:${rarityColor}">${rarityLabel}</div></div>`;
     container.appendChild(toast);
     setTimeout(()=>toast.classList.add('show'),50);
-    setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),500);},4000);
-    if(navigator.vibrate)navigator.vibrate([100,50,100,50,200]);
+    setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),500);},4200);
+    if(navigator.vibrate){
+        const patterns={common:[80,40,80],rare:[80,40,80,40,120],epic:[60,30,60,30,60,30,200],legendary:[100,50,100,50,100,50,300]};
+        navigator.vibrate(patterns[rarityClass]||[80]);
+    }
 }
 
-// XP UI
+function showLevelUpToast(item){
+    const container=document.getElementById('toastContainer');
+    const toast=document.createElement('div');
+    toast.className='toast toast-levelup';
+    const name=LEVEL_NAMES[item.level-1]||'Legend';
+    toast.innerHTML=`<div class="toast-shimmer"></div><div class="toast-emoji">🎉</div><div class="toast-body"><div class="toast-title">Level Up!</div><div class="toast-desc">You reached Level ${item.level}: ${name}</div><div class="toast-xp">Keep exploring to unlock more badges</div></div>`;
+    container.appendChild(toast);
+    setTimeout(()=>toast.classList.add('show'),50);
+    setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),500);},4200);
+    if(navigator.vibrate)navigator.vibrate([100,80,100,80,100,80,300]);
+}
+
+// Enhanced XP UI
 function updateXpUI(){
     const p=VDna.get();
     const lvls=[0,50,150,300,500,800,1200];
@@ -1036,57 +1237,92 @@ function updateXpUI(){
     const xpLvl=document.getElementById('xpLevel');
     if(xpText)xpText.textContent=p.xp+' XP';
     if(xpFill)xpFill.style.width=pct+'%';
-    if(xpLvl)xpLvl.textContent='LVL '+p.level;
+    if(xpLvl){
+        const name=LEVEL_NAMES[p.level-1]||'Legend';
+        const color=LEVEL_COLORS[p.level-1]||'#fbbf24';
+        xpLvl.textContent='LVL '+p.level+' · '+name;
+        xpLvl.style.color=color;
+        xpLvl.style.background=color.replace(')',',0.1)').replace('var(','rgba(').replace('--sub','107,122,144').replace('--accent','0,225,255');
+    }
 }
 setTimeout(updateXpUI,3000);
 
-// Trophy Case
+// Enhanced Trophy Case
 function openTrophy(){
     const p=VDna.get();
-    const grid=document.getElementById('trophyGrid');
-    grid.innerHTML=BADGES.map(b=>{
-        const unlocked=p.achievements.includes(b.id);
-        return `<div class="trophy-badge ${unlocked?'unlocked':'locked'}"><div class="trophy-badge-emoji">${unlocked?b.emoji:'🔒'}</div><div class="trophy-badge-name">${b.name}</div><div class="trophy-badge-desc">${b.desc}</div></div>`;
-    }).join('');
-    // XP bar in trophy
+    const unlockedCount=p.achievements.length;
+    const totalCount=BADGES.length;
+    const pct=Math.round((unlockedCount/totalCount)*100);
+    // Progress ring
+    const circ=276.5;
+    const ring=document.getElementById('trophyRing');
+    setTimeout(()=>{ring.style.strokeDashoffset=circ-(circ*pct/100);},100);
+    document.getElementById('trophyPct').textContent=pct+'%';
+    // Stats
+    document.getElementById('trophySBadges').textContent=unlockedCount+'/'+totalCount;
+    document.getElementById('trophySXp').textContent=p.xp;
+    document.getElementById('trophySLevel').textContent=p.level;
+    // XP bar
     const lvls=[0,50,150,300,500,800,1200];
     const currLvlXp=lvls[p.level-1]||0;
     const nextLvlXp=lvls[p.level]||lvls[lvls.length-1];
-    const pct=Math.min(((p.xp-currLvlXp)/(nextLvlXp-currLvlXp))*100,100);
-    document.getElementById('trophyXpFill').style.width=pct+'%';
-    document.getElementById('trophyLevel').textContent=`Level ${p.level} · ${p.xp} XP · ${p.achievements.length}/${BADGES.length} badges`;
+    const xpPct=Math.min(((p.xp-currLvlXp)/(nextLvlXp-currLvlXp))*100,100);
+    document.getElementById('trophyXpFill').style.width=xpPct+'%';
+    const name=LEVEL_NAMES[p.level-1]||'Legend';
+    document.getElementById('trophyLevel').textContent=`${name} · ${nextLvlXp-p.xp} XP to Level ${p.level+1}`;
+    // Build grid grouped by rarity
+    const grid=document.getElementById('trophyGrid');
+    let html='';
+    ['legendary','epic','rare','common'].forEach(tier=>{
+        const badges=BADGES.filter(b=>b.rarity===tier);
+        if(badges.length===0)return;
+        const tierLabel={legendary:'★ Legendary',epic:'✦ Epic',rare:'✦ Rare',common:'Common'}[tier];
+        html+=`<div class="trophy-tier-label" style="grid-column:1/-1">${tierLabel}</div>`;
+        badges.forEach(b=>{
+            const unlocked=p.achievements.includes(b.id);
+            const time=p.achieveTimes&&p.achieveTimes[b.id]?new Date(p.achieveTimes[b.id]).toLocaleDateString():'';
+            html+=`<div class="trophy-badge ${unlocked?'unlocked':' locked'} ${tier}"><div class="trophy-badge-emoji">${unlocked?b.emoji:'🔒'}</div><div class="trophy-badge-name">${b.name}</div><div class="trophy-badge-desc">${b.desc}</div><span class="trophy-badge-rarity ${tier}">${b.xp} XP</span>${unlocked&&time?'<div class="trophy-badge-time">'+time+'</div>':''}</div>`;
+        });
+    });
+    grid.innerHTML=html;
+    // Hide notification dot
+    const dot=document.getElementById('trophyDot');if(dot)dot.style.display='none';
     document.getElementById('trophyOverlay').classList.add('show');
 }
 window.closeTrophy=function(){document.getElementById('trophyOverlay').classList.remove('show');};
-document.addEventListener('keydown',e=>{
-    if(e.key==='t'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT')openTrophy();
-    if(e.key==='Escape'){closeEgg();closeShare();closeTrophy();}
-});
+// Share progress
+window.shareTrophy=function(){
+    const p=VDna.get();
+    const name=LEVEL_NAMES[p.level-1]||'Legend';
+    const text=`🏆 I'm Level ${p.level} (${name}) on amrelharony.com!\n${p.achievements.length}/${BADGES.length} badges · ${p.xp} XP\nCan you beat my score?`;
+    if(navigator.share){navigator.share({title:'My Trophy Progress',text,url:'https://amrelharony.com'}).catch(()=>{});}
+    else{navigator.clipboard.writeText(text).then(()=>{const btn=document.querySelector('.trophy-share-btn');btn.textContent='✓ Copied!';setTimeout(()=>{btn.innerHTML='<i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress';},2000);});}
+};
 setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);},4000);
 
 // Auto-check achievements on load
 (function(){
     const p=VDna.get();
-    // Regular: 3+ visits
     if(p.visits>=3)Achieve.check('regular');
-    // Night Owl: midnight-5AM Cairo
     const cairoH=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
     if(cairoH>=0&&cairoH<5)Achieve.check('nightowl');
-    // Streak Master: 5+ streak
     const streak=parseInt(localStorage.getItem('streak')||'0');
     if(streak>=5)Achieve.check('streak5');
-    // Speed Reader: set timer
+    // Speed Reader
     const loadTime=Date.now();
     let speedDone=false;
-    const speedCheck=()=>{
-        if(speedDone)return;
-        const pct=scrollY/(document.documentElement.scrollHeight-innerHeight);
-        if(pct>0.95&&(Date.now()-loadTime)<30000){speedDone=true;Achieve.check('speed');removeEventListener('scroll',speedCheck);}
-    };
+    const speedCheck=()=>{if(speedDone)return;const pct=scrollY/(document.documentElement.scrollHeight-innerHeight);if(pct>0.95&&(Date.now()-loadTime)<30000){speedDone=true;Achieve.check('speed');removeEventListener('scroll',speedCheck);}};
     addEventListener('scroll',speedCheck,{passive:true});
     setTimeout(()=>{speedDone=true;removeEventListener('scroll',speedCheck);},35000);
-    // Globe: check via IP (already fetched)
+    // Globetrotter
     if(p.tz&&!p.tz.includes('Cairo')&&!p.tz.includes('Africa'))Achieve.check('globe');
+    // Deep Diver: 3 min timer
+    setTimeout(()=>Achieve.check('deep'),180000);
+    // Social Networker: check existing clicks
+    if(p.clickedLinks.length>=5)Achieve.check('social');
+    // Cert Inspector: check cert clicks
+    const certClicks=p.clickedLinks.filter(l=>l.includes('credly')||l.includes('certmetrics')||l.includes('cdmp')||l.includes('datacamp'));
+    if(certClicks.length>=3)Achieve.check('certified');
 })();
 
 // Hook easter egg achievement
@@ -1095,162 +1331,21 @@ showEgg=function(){origShowEgg();Achieve.check('secret');};
 // Hook shake contact achievement
 const origReveal=revealContact;
 revealContact=function(){origReveal();Achieve.check('shaker');};
-
-// 4e. Daily Challenge System
-const ChallengeSystem=(function(){
-    const challenges=[
-        {id:'scroll100',text:'Scroll to the very bottom of the page',check:()=>VDna.get().scrollMax>=98},
-        {id:'click3',text:'Click on 3 different links',check:()=>VDna.get().sessionClicks>=3},
-        {id:'trophy',text:'Open the trophy case (press T)',check:()=>document.getElementById('trophyOverlay').classList.contains('show')},
-        {id:'theme',text:'Try both light and dark themes',check:()=>!!localStorage.getItem('theme_switched')},
-        {id:'share',text:'Generate and share your profile card',check:()=>!!localStorage.getItem('shared_card')},
-        {id:'easter',text:'Find the hidden easter egg',check:()=>VDna.get().achievements.includes('secret')},
-        {id:'allnl',text:'Visit all 3 newsletter links',check:()=>VDna.get().achievements.includes('scholar')},
-    ];
-    const today=new Date().toDateString();
-    const dayIdx=Math.floor(Date.now()/86400000)%challenges.length;
-    const todayChallenge=challenges[dayIdx];
+// Hook language toggle for bilingual badge
+document.getElementById('langBtn').addEventListener('click',()=>{Achieve.check('bilingual');});
+// Track social networker on clicks
+document.addEventListener('click',e=>{
     const p=VDna.get();
-    const completed=p.challengeDate===today&&p.challengeDone;
+    if(p.clickedLinks.length>=5)Achieve.check('social');
+    // Cert inspector
+    const certClicks=p.clickedLinks.filter(l=>l.includes('credly')||l.includes('certmetrics')||l.includes('cdmp')||l.includes('datacamp'));
+    if(certClicks.length>=3)Achieve.check('certified');
+},{passive:true});
 
-    function render(){
-        const el=document.getElementById('challengeText');
-        const prog=document.getElementById('challengeProgress');
-        const icon=document.getElementById('challengeIcon');
-        const card=document.getElementById('dailyChallenge');
-        if(!el)return;
-        el.textContent=todayChallenge.text;
-        if(completed||p.challengeDone&&p.challengeDate===today){
-            prog.textContent='✓ DONE';icon.textContent='✅';card.classList.add('completed');
-        } else {
-            prog.textContent='0/1';
-        }
-    }
-    function checkProgress(){
-        if(p.challengeDone)return;// Already done (even if just completed this session)
-        if(todayChallenge.check()){
-            p.challengeDate=today;p.challengeDone=true;VDna.save();
-            VDna.addXp(15);
-            const el=document.getElementById('challengeProgress');
-            const icon=document.getElementById('challengeIcon');
-            const card=document.getElementById('dailyChallenge');
-            if(el){el.textContent='✓ DONE';icon.textContent='✅';card.classList.add('completed');}
-            showToast({emoji:'🎯',name:'Challenge Complete',desc:todayChallenge.text+' · +15 XP'});
-        }
-    }
-    // Reset challenge if new day
-    if(p.challengeDate!==today){p.challengeDate=today;p.challengeDone=false;VDna.save();}
-    setTimeout(render,3000);
-    // Check periodically
-    setInterval(checkProgress,3000);
-    return{checkProgress};
-})();
-
-// Hook theme switch for challenge tracking
-const origThemeBtn=document.getElementById('tbtn');
-origThemeBtn.addEventListener('click',()=>{localStorage.setItem('theme_switched','1');ChallengeSystem.checkProgress();});
-
-// Hook share for challenge tracking
-const origOpenShare=window.openShare;
-window.openShare=function(){origOpenShare();localStorage.setItem('shared_card','1');ChallengeSystem.checkProgress();};
+const ChallengeSystem={checkProgress(){}};
 
 // Engagement check interval
-setInterval(()=>{checkSmartCta();ChallengeSystem.checkProgress();},5000);
-
-// ═════════════════════════════════════════════════
-// FEATURE: VISITOR MAP GLOBE
-// ═════════════════════════════════════════════════
-(function(){
-    const c=document.getElementById('globeCanvas');if(!c)return;
-    const ctx=c.getContext('2d'),W=180,H=180,cx=W/2,cy=H/2,R=70;
-    // Simulated visitor locations (lat,lng pairs) — seed + real visitor via timezone
-    const visitors=[
-        [30.04,31.24],[25.27,55.30],[51.51,-0.13],[40.71,-74.01],[48.86,2.35],
-        [35.68,139.69],[1.35,103.82],[-33.87,151.21],[55.75,37.62],[19.43,-99.13],
-        [37.57,126.98],[28.61,77.21],[41.01,28.98],[33.89,35.50],[-23.55,-46.63],
-        [52.52,13.41],[39.92,32.85],[36.19,44.01],[24.71,46.68],[31.95,35.93]
-    ];
-    // Add visitor's own location based on timezone offset
-    const myOffset=-new Date().getTimezoneOffset()/60;
-    const approxLng=myOffset*15;
-    visitors.push([30+Math.random()*20-10,approxLng+Math.random()*10-5]);
-
-    let rot=0;
-    function project(lat,lng){
-        const phi=(90-lat)*Math.PI/180,theta=(lng+rot)*Math.PI/180;
-        const x=R*Math.sin(phi)*Math.cos(theta),y=-R*Math.cos(phi),z=R*Math.sin(phi)*Math.sin(theta);
-        return{x:cx+x,y:cy+y,z,vis:z>-10};
-    }
-    function drawGlobe(){
-        ctx.clearRect(0,0,W,H);
-        // Globe sphere
-        const grd=ctx.createRadialGradient(cx-15,cy-15,5,cx,cy,R);
-        const isDark=!document.body.classList.contains('light-mode');
-        grd.addColorStop(0,isDark?'rgba(20,30,50,.6)':'rgba(200,210,230,.4)');
-        grd.addColorStop(1,isDark?'rgba(6,8,15,.8)':'rgba(240,245,255,.6)');
-        ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
-        ctx.strokeStyle=isDark?'rgba(0,225,255,.1)':'rgba(0,102,255,.1)';ctx.lineWidth=1;ctx.stroke();
-        // Grid lines (meridians + parallels)
-        ctx.strokeStyle=isDark?'rgba(0,225,255,.04)':'rgba(0,102,255,.04)';ctx.lineWidth=.5;
-        for(let lng=-180;lng<180;lng+=30){
-            ctx.beginPath();
-            for(let lat=-90;lat<=90;lat+=3){const p=project(lat,lng);if(p.vis){if(lat===-90)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}}
-            ctx.stroke();
-        }
-        for(let lat=-60;lat<=60;lat+=30){
-            ctx.beginPath();
-            for(let lng=-180;lng<=180;lng+=3){const p=project(lat,lng);if(p.vis){if(lng===-180)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}}
-            ctx.stroke();
-        }
-        // Rough continent outlines (simplified world map points)
-        const continents=[
-            // Africa
-            [[35,10],[30,30],[10,40],[0,40],[-5,30],[-15,40],[-35,20],[-35,25],[-20,35],[5,50],[15,50],[30,35],[37,10],[35,-5],[35,10]],
-            // Europe
-            [[48,-5],[43,0],[36,-5],[36,25],[40,30],[42,45],[48,40],[55,25],[60,30],[70,30],[65,45],[55,50],[48,10],[48,-5]],
-            // Asia
-            [[70,40],[60,60],[50,80],[40,75],[30,70],[25,55],[10,80],[0,100],[5,105],[15,105],[25,120],[35,130],[40,140],[45,135],[55,130],[55,80],[65,60],[70,40]],
-            // North America
-            [[50,-60],[45,-70],[30,-80],[25,-80],[20,-100],[30,-105],[35,-120],[50,-125],[60,-140],[65,-165],[70,-160],[70,-100],[60,-75],[50,-55],[50,-60]],
-            // South America
-            [[10,-75],[5,-60],[0,-50],[-5,-35],[-15,-40],[-25,-50],[-35,-55],[-55,-70],[-50,-75],[-20,-70],[-5,-80],[10,-75]],
-            // Australia
-            [[-15,130],[-20,115],[-30,115],[-35,138],[-38,145],[-30,153],[-20,150],[-12,135],[-15,130]]
-        ];
-        ctx.strokeStyle=isDark?'rgba(0,225,255,.12)':'rgba(0,102,255,.12)';ctx.lineWidth=.8;
-        continents.forEach(pts=>{
-            ctx.beginPath();let started=false;
-            pts.forEach(([lat,lng])=>{const p=project(lat,lng);if(p.vis){if(!started){ctx.moveTo(p.x,p.y);started=true;}else ctx.lineTo(p.x,p.y);}else started=false;});
-            ctx.stroke();
-        });
-        // Visitor dots
-        visitors.forEach(([lat,lng],i)=>{
-            const p=project(lat,lng);
-            if(p.vis){
-                const alpha=0.3+p.z/R*0.6;
-                const pulse=Math.sin(Date.now()/800+i)*0.3+0.7;
-                ctx.beginPath();ctx.arc(p.x,p.y,2.5*pulse,0,Math.PI*2);
-                ctx.fillStyle=isDark?`rgba(0,225,255,${alpha*pulse})`:`rgba(0,102,255,${alpha*pulse})`;
-                ctx.fill();
-                // Glow
-                ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);
-                ctx.fillStyle=isDark?`rgba(0,225,255,${alpha*0.1})`:`rgba(0,102,255,${alpha*0.1})`;
-                ctx.fill();
-            }
-        });
-        rot+=0.15;
-    }
-    let globeAnim;
-    function startGlobe(){if(!globeAnim)globeAnim=setInterval(drawGlobe,50);}
-    function stopGlobe(){if(globeAnim){clearInterval(globeAnim);globeAnim=null;}}
-    // Only animate when visible
-    const gObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)startGlobe();else stopGlobe();});},{threshold:0.1});
-    gObs.observe(c);
-    drawGlobe();
-    // Visitor count
-    const gc=document.getElementById('globeCount');
-    if(gc){const base=180+parseInt(localStorage.getItem('vc')||'0');gc.textContent=base+' visitors from '+visitors.length+' locations';}
-})();
+setInterval(checkSmartCta,5000);
 
 // ═════════════════════════════════════════════════
 // FEATURE: MICRO-ANIMATIONS (Scroll-triggered)
@@ -1263,10 +1358,11 @@ setInterval(()=>{checkSmartCta();ChallengeSystem.checkProgress();},5000);
         {sel:'.tl-item.tl-era',cls:'sa-left'},
         {sel:'.tl-item.tl-sub',cls:'sa-left'},
         {sel:'.insight-card',cls:'sa-right'},
-        {sel:'.challenge-card',cls:'sa-up'},
-        {sel:'.globe-wrap',cls:'sa-scale'},
         {sel:'.reading-card',cls:'sa-right'},
-        {sel:'.rec-card',cls:'sa-right'}
+        {sel:'.rec-card',cls:'sa-right'},
+        {sel:'.test-card',cls:'sa-right'},
+        {sel:'.speak-item',cls:'sa-left'},
+        {sel:'.stat-card',cls:'sa-scale'}
     ];
     targets.forEach(({sel,cls})=>{
         document.querySelectorAll(sel).forEach(el=>{
@@ -1288,6 +1384,170 @@ setInterval(()=>{checkSmartCta();ChallengeSystem.checkProgress();},5000);
         document.querySelectorAll('.sa').forEach(el=>saObs.observe(el));
     },4200);
 })();
+
+// ═════════════════════════════════════════════════
+// FEATURE: TYPING TERMINAL
+// ═════════════════════════════════════════════════
+const TermCmds={
+    help:()=>'<span class="term-accent">Available commands:</span>\n  <span class="term-green">about</span>     — Who is Amr?\n  <span class="term-green">certs</span>     — List certifications\n  <span class="term-green">skills</span>    — Core skills\n  <span class="term-green">contact</span>   — Get in touch\n  <span class="term-green">book</span>      — About The Bilingual Executive\n  <span class="term-green">stats</span>     — Fun stats\n  <span class="term-green">badges</span>    — Achievement progress\n  <span class="term-green">snake</span>     — Play Snake 🐍\n  <span class="term-green">clear</span>     — Clear terminal\n  <span class="term-green">exit</span>      — Close terminal',
+    about:()=>'<span class="term-accent">Amr Elharony</span>\nDelivery Lead · Mentor · Fintech Author & Speaker\nScrum Master at Banque Misr | DBA in Digital Transformation\n\nI help banks and FinTech teams ship digital products faster\nthrough agile delivery and data-driven decisions.',
+    certs:()=>'<span class="term-accent">Certifications (12):</span>\n  🎯 PMP · 📋 PSM II · 📦 PSPO II · 📊 PMI-ACP\n  🔄 SAFe® 6 SM · 🧠 PSK I · 🏗️ ICAgile ATF\n  💾 CDMP · 📈 Datacamp Pro · ⚙️ Jira Cloud\n  🏦 CEDF · 🎓 DBA Digital Transformation',
+    skills:()=>'<span class="term-accent">Core Skills:</span>\n  Agile/Scrum · Kanban · SAFe · Data Analytics\n  Digital Transformation · Stakeholder Management\n  FinTech · Project Management · Mentoring\n  Python · SQL · Jira · Confluence',
+    contact:()=>'<span class="term-accent">Contact Amr:</span>\n  📧 a.elharony@gmail.com\n  🔗 linkedin.com/in/amrmelharony\n  📅 calendly.com/amrmelharony/30min\n  🌐 amrelharony.com',
+    book:()=>'<span class="term-accent">📚 The Bilingual Executive</span>\nLeadership Communication for a Bilingual World\n\nAvailable in: Print · eBook · AI Audiobook\n→ bilingualexecutive.amrelharony.com',
+    stats:()=>{const p=VDna.get();return `<span class="term-accent">Your Session Stats:</span>\n  Visits: ${p.visits} · Scroll: ${p.scrollMax}%\n  Badges: ${p.achievements.length}/15 · XP: ${p.xp}\n  Device: ${p.device} · ${p.browser}`;},
+    badges:()=>{const p=VDna.get();return '<span class="term-accent">Badges ('+p.achievements.length+'/15):</span>\n'+BADGES.map(b=>'  '+(p.achievements.includes(b.id)?b.emoji:' 🔒')+' '+b.name+' — '+b.desc).join('\n');},
+    snake:()=>{closeTerm();setTimeout(openGame,400);return '<span class="term-green">Launching Snake...</span>';},
+    clear:()=>'__CLEAR__',
+    exit:()=>{closeTerm();return '';}
+};
+window.openTerm=function(){document.getElementById('termOverlay').classList.add('show');setTimeout(()=>document.getElementById('termInput').focus(),300);};
+window.closeTerm=function(){document.getElementById('termOverlay').classList.remove('show');};
+document.getElementById('termInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+        const input=e.target;const cmd=input.value.trim().toLowerCase();input.value='';
+        const body=document.getElementById('termBody');
+        body.innerHTML+=`<div class="term-line"><span class="term-prompt">❯</span> <span class="term-cmd">${cmd}</span></div>`;
+        const fn=TermCmds[cmd];
+        if(fn){const out=fn();if(out==='__CLEAR__'){body.innerHTML='<div class="term-line"><span class="term-green">Terminal cleared.</span></div>';}else if(out){body.innerHTML+=`<div class="term-line"><span class="term-out">${out.replace(/\n/g,'</span></div><div class="term-line"><span class="term-out">')}</span></div>`;}}
+        else if(cmd)body.innerHTML+=`<div class="term-line"><span class="term-warn">Command not found: ${cmd}. Type <span class="term-accent">help</span></span></div>`;
+        body.scrollTop=body.scrollHeight;
+    }
+});
+
+// ═════════════════════════════════════════════════
+// FEATURE: MINI GAME (Snake)
+// ═════════════════════════════════════════════════
+let snakeGame=null;
+window.openGame=function(){
+    document.getElementById('gameOverlay').classList.add('show');
+    startSnake();
+};
+window.closeGame=function(){
+    document.getElementById('gameOverlay').classList.remove('show');
+    if(snakeGame){clearInterval(snakeGame);snakeGame=null;}
+};
+function startSnake(){
+    const c=document.getElementById('snakeCanvas'),ctx=c.getContext('2d');
+    const sz=14,cols=20,rows=20;c.width=cols*sz;c.height=rows*sz;
+    let snake=[{x:10,y:10}],dir={x:1,y:0},food={x:15,y:10},score=0,gameOver=false;
+    function place(){food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};}
+    function draw(){
+        ctx.fillStyle='#0d1117';ctx.fillRect(0,0,c.width,c.height);
+        // Grid
+        ctx.strokeStyle='#161b22';ctx.lineWidth=0.5;
+        for(let i=0;i<cols;i++){ctx.beginPath();ctx.moveTo(i*sz,0);ctx.lineTo(i*sz,c.height);ctx.stroke();}
+        for(let i=0;i<rows;i++){ctx.beginPath();ctx.moveTo(0,i*sz);ctx.lineTo(c.width,i*sz);ctx.stroke();}
+        // Food
+        ctx.fillStyle='#f97316';ctx.beginPath();ctx.arc(food.x*sz+sz/2,food.y*sz+sz/2,sz/2-1,0,Math.PI*2);ctx.fill();
+        // Snake
+        snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#00e1ff':'#58a6ff';ctx.fillRect(s.x*sz+1,s.y*sz+1,sz-2,sz-2);if(i===0){ctx.fillStyle='#0d1117';ctx.fillRect(s.x*sz+3,s.y*sz+3,3,3);ctx.fillRect(s.x*sz+sz-6,s.y*sz+3,3,3);}});
+        document.getElementById('gameScore').textContent='Score: '+score+(gameOver?' · GAME OVER — Press R to restart':'');
+    }
+    function update(){
+        if(gameOver)return;
+        const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+        if(head.x<0||head.x>=cols||head.y<0||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)){gameOver=true;draw();return;}
+        snake.unshift(head);
+        if(head.x===food.x&&head.y===food.y){score++;place();VDna.addXp(3);}else snake.pop();
+        draw();
+    }
+    if(snakeGame)clearInterval(snakeGame);
+    snakeGame=setInterval(update,120);draw();
+    const handler=e=>{
+        if(!document.getElementById('gameOverlay').classList.contains('show')){document.removeEventListener('keydown',handler);return;}
+        if(e.key==='r'||e.key==='R'){snake=[{x:10,y:10}];dir={x:1,y:0};score=0;gameOver=false;place();return;}
+        const map={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}};
+        if(map[e.key]){const d=map[e.key];if(d.x!==-dir.x||d.y!==-dir.y){dir=d;}e.preventDefault();}
+    };
+    document.addEventListener('keydown',handler);
+    // Touch controls
+    let tx=0,ty=0;
+    c.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+    c.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)){dir=dx>0?{x:1,y:0}:{x:-1,y:0};}else{dir=dy>0?{x:0,y:1}:{x:0,y:-1};}},{passive:true});
+}
+
+// ═════════════════════════════════════════════════
+// FEATURE: KEYBOARD SHORTCUTS
+// ═════════════════════════════════════════════════
+window.openShortcuts=function(){document.getElementById('shortcutOverlay').classList.add('show');};
+window.closeShortcuts=function(){document.getElementById('shortcutOverlay').classList.remove('show');};
+
+// ═════════════════════════════════════════════════
+// FEATURE: CURSOR TRAIL (desktop only)
+// ═════════════════════════════════════════════════
+if(D&&!reducedMotion){
+    const particles=[];
+    document.addEventListener('mousemove',e=>{
+        const p=document.createElement('div');p.className='cursor-particle';
+        p.style.left=e.clientX+'px';p.style.top=e.clientY+'px';
+        p.style.opacity='0.6';
+        const hue=Math.random()*60+170;// cyan-purple range
+        p.style.background=`hsl(${hue},100%,70%)`;
+        p.style.width=(2+Math.random()*3)+'px';p.style.height=p.style.width;
+        document.body.appendChild(p);
+        const angle=Math.random()*Math.PI*2;const dist=10+Math.random()*20;
+        const dx=Math.cos(angle)*dist;const dy=Math.sin(angle)*dist;
+        requestAnimationFrame(()=>{
+            p.style.transition='all .6s ease-out';
+            p.style.transform=`translate(${dx}px,${dy}px)`;
+            p.style.opacity='0';
+        });
+        setTimeout(()=>p.remove(),700);
+    });
+}
+
+// ═════════════════════════════════════════════════
+// FEATURE: STATS DASHBOARD (animated counters)
+// ═════════════════════════════════════════════════
+const statsObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+        if(e.isIntersecting){
+            animStat('statCoffee',3200+Math.floor(Math.random()*200));
+            animStat('statArticles',45+Math.floor((Date.now()-new Date('2023-01-01').getTime())/2592000000)*2);
+            animStat('statMentees',120+Math.floor((Date.now()-new Date('2023-01-01').getTime())/2592000000)*5);
+            animStat('statCerts',12);
+            statsObs.unobserve(e.target);
+        }
+    });
+},{threshold:0.3});
+function animStat(id,target){
+    const el=document.getElementById(id);if(!el)return;
+    if(reducedMotion){el.textContent=target.toLocaleString();return;}
+    let cur=0;const step=Math.max(1,Math.ceil(target/50));
+    const iv=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur.toLocaleString();if(cur>=target)clearInterval(iv);},30);
+}
+setTimeout(()=>{const grid=document.querySelector('.stats-grid');if(grid)statsObs.observe(grid);},4000);
+
+// ═════════════════════════════════════════════════
+// UNIFIED KEYBOARD HANDLER (enhanced)
+// ═════════════════════════════════════════════════
+// Remove old keydown handler first — we'll replace with unified
+(function(){
+    const unifiedKeys=e=>{
+        const tag=document.activeElement.tagName;
+        if(tag==='INPUT'||tag==='TEXTAREA')return;// Don't capture when typing
+        if(e.key==='Escape'){closeEgg();closeShare();closeTrophy();closeTerm();closeGame();closeShortcuts();}
+        if(e.key==='t'&&!e.ctrlKey&&!e.metaKey)openTrophy();
+        if(e.key==='?')openShortcuts();
+        if(e.key==='`')openTerm();
+        if(e.key==='g'&&!e.ctrlKey)openGame();
+    };
+    // Remove previous listeners (they're anonymous so can't remove — but our new unified one will work alongside)
+    document.addEventListener('keydown',unifiedKeys);
+})();
+
+// ═════════════════════════════════════════════════
+// FEATURE: SERVICE WORKER (Offline Mode)
+// ═════════════════════════════════════════════════
+if('serviceWorker' in navigator){
+    // Register inline service worker via blob
+    const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('amr-v1').then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok){const clone=res.clone();caches.open('amr-v1').then(c=>c.put(e.request,clone));}return res;}).catch(()=>caches.match('/'))));});`;
+    try{
+        const blob=new Blob([swCode],{type:'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'/'}).catch(()=>{});
+    }catch(e){}
+}
 
 // ═══ SCROLL & PARALLAX ═══
 addEventListener('scroll',()=>{const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';trackScroll();},{passive:true});
