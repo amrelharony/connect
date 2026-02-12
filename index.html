@@ -19,7 +19,7 @@
     <script defer src="/_vercel/insights/script.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace'],ar:['Noto Sans Arabic','sans-serif']}}}}</script>
 <style>
@@ -381,8 +381,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .game-hint{font-family:'JetBrains Mono',monospace;font-size:7px;color:#2d3748;padding:0 14px 4px}
 .game-btns{display:flex;gap:8px;justify-content:center;padding:8px 14px}
 .game-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:6px;border:1px solid #1a2332;background:#0d1420;color:#6b7280;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;flex:1}.game-btn:hover,.game-btn:active{border-color:#00e1ff;color:#00e1ff}
-.game-dpad{display:none;margin:6px auto;width:120px;height:120px;position:relative}
-.game-dpad-btn{position:absolute;width:36px;height:36px;border-radius:8px;border:1px solid #1a2332;background:#0d1420;color:#00e1ff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s;user-select:none}
+.game-dpad{display:none;margin:8px auto;width:160px;height:160px;position:relative}
+.game-dpad-btn{position:absolute;width:50px;height:50px;border-radius:12px;border:1px solid #1a2332;background:#0d1420;color:#00e1ff;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s;user-select:none}
 .game-dpad-btn:active{background:#00e1ff;color:#080c14}
 .game-dpad-btn.up{top:0;left:50%;transform:translateX(-50%)}
 .game-dpad-btn.down{bottom:0;left:50%;transform:translateX(-50%)}
@@ -444,7 +444,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <button class="tbtn" id="termBtn" aria-label="Open terminal" onclick="openTerm()" style="display:none"><i class="fa-solid fa-terminal"></i></button>
     <button class="tbtn" id="gameBtn" aria-label="Play game" onclick="openGame()" style="display:none"><i class="fa-solid fa-gamepad"></i></button>
     <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i><span class="trophy-btn-dot" id="trophyDot" style="display:none"></span></button>
-    <button class="tbtn lang-btn" id="langBtn" aria-label="Toggle Arabic/English">EN</button>
     <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
 </div>
 
@@ -459,7 +458,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     </div>
 </div>
 
-<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-panel">
+<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-panel" style="position:relative">
+    <button onclick="closeShare()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;z-index:2;transition:all .3s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'"><i class="fa-solid fa-xmark"></i></button>
     <div class="share-card-preview"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-copied" id="shareCopied">✓ Copied!</div></div>
     <div class="share-tabs">
         <button class="share-tab active" data-tab="platforms"><i class="fa-solid fa-share-nodes" style="margin-right:4px"></i>Share</button>
@@ -478,7 +478,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
             <button class="share-plat" data-platform="native"><div class="share-plat-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><div class="share-plat-name">More...</div></button>
         </div>
     </div>
-    <div class="share-qr-section share-tab-content" data-content="qr"><canvas id="shareQr" class="share-qr-canvas" width="200" height="200"></canvas><div class="share-qr-label">Scan to visit amrelharony.com</div></div>
+    <div class="share-qr-section share-tab-content" data-content="qr"><img id="shareQr" class="share-qr-canvas" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://amrelharony.com&color=00e1ff&bgcolor=ffffff&margin=10" alt="QR Code" width="200" height="200" style="border-radius:12px;border:1px solid var(--border);display:block;margin:0 auto;background:#fff"><div class="share-qr-label">Scan to visit amrelharony.com</div></div>
     <div class="share-card-section share-tab-content" data-content="card">
         <div class="share-dl-grid">
             <button class="share-dl-btn primary" onclick="downloadShareCard()"><i class="fa-solid fa-image"></i> Save as PNG</button>
@@ -691,18 +691,16 @@ let customGreeting=refKey&&refMap[refKey.toLowerCase()]?refMap[refKey.toLowerCas
 
 // ═══ SOCIAL PROOF TICKER ═══
 const quotes=[
-    {q:"A strategic catalyst for change",a:"Ayman Hassan Soliman",r:"Sr. Deputy GM, Banque Misr"},
-    {q:"He combines strategic vision with relentless focus on execution",a:"Omar Mohey",r:"Senior Data Steward"},
-    {q:"His deep understanding of Agile and data makes him a role model",a:"Alaa Ghaly",r:"Asst. Manager, Banque Misr"},
-    {q:"A rare talent who challenges, teaches and leads to drive change",a:"Sameh Elebiary",r:"Credit Analyst, Banque Misr"},
-    {q:"Amr is the complete package — business acumen and technology skills",a:"Dina Tony",r:"Sr. Corporate RM, Banque Misr"},
-    {q:"His EQ is off the charts — infectious positive energy",a:"Walid Gafeer",r:"Sr. RM, Banque Misr"},
-    {q:"His coaching mastery comes naturally, full of hope and radiate energy",a:"Amr Hussien",r:"Deputy GM, Banque Misr"},
-    {q:"He masterfully leverages technology to engineer fundamental shifts",a:"Ayman Hassan",r:"Sr. Deputy GM, Banque Misr"},
-    {q:"A tech-savvy banking professional with innovative problem-solving",a:"Haitham Adel",r:"Deputy GM, Banque Misr"},
-    {q:"Wikipedia moving on Earth — wide knowledge in multidisciplinary topics",a:"Mohamed Abaza",r:"Lead Data Scientist"},
-    {q:"His deep tech expertise and emotional intelligence set him apart",a:"Eslam Youssef",r:"Sr. Data Analyst"},
-    {q:"He is a true visionary and driving force",a:"Maha Mohamed",r:"Officer, Banque Misr"}
+    {q:"A strategic catalyst for change... masterfully leverages technology to engineer fundamental shifts in systems and culture",a:"Ayman Hassan Soliman",r:"Senior Deputy GM"},
+    {q:"Amr gets things done... delivering outstanding results on even the most complex and ambitious projects",a:"Omar Mohey",r:"Senior Data Steward"},
+    {q:"Outstanding Scrum Master... organized, supportive, and excellent at guiding the team to achieve sprint goals",a:"Esmail Eldally",r:"Data Analyst"},
+    {q:"The rare talent who sees the future of our data landscape, and then challenges, coaches, and leads his team to drive that change",a:"Alaa Ghaly",r:"Assistant Manager"},
+    {q:"Wide knowledge in multidisciplinary topics, almost like a Wikipedia moving on Earth!",a:"Mohamed Abaza",r:"Lead Data Scientist"},
+    {q:"Demonstrates remarkable courage in challenging the status quo... catalyzing fundamental shifts in both systems and attitude",a:"Romany Youssef",r:"GTB MIS Manager"},
+    {q:"Provided exceptional motivation and problem-solving strategies... guidance that exceeds expectations",a:"Ahmed Shewail",r:"Senior Banker"},
+    {q:"EQ is off the charts... a knack for improving morale and productivity just by being himself",a:"Walid Gafeer",r:"Senior RM"},
+    {q:"Working with him was transformative. His deep tech expertise and talent for fintech set him apart",a:"Eslam Youssef",r:"Senior Data Analyst"},
+    {q:"The complete package — a blend of business acumen and technology skills every organization needs",a:"Dina Tony",r:"Senior Corporate RM"}
 ];
 function buildTicker(){
     const t=document.getElementById('ticker');
@@ -836,34 +834,8 @@ window.closeEgg=function(){document.getElementById('easterEgg').classList.remove
 
 // ═══ ARABIC/ENGLISH TOGGLE ═══
 let isArabic=false;
-const arData={
-    name:'عمرو الحاروني',
-    vp:'أساعد <strong>البنوك وفِرق التكنولوجيا المالية</strong> على إطلاق المنتجات الرقمية بشكل أسرع من خلال <strong>التسليم الرشيق والقرارات المبنية على البيانات</strong>',
-    roles:['قائد التسليم','مُرشد','مؤلف ومتحدث فينتك'],
-    imp:['سنوات في البنوك','دقائق إرشاد','منصات حوارية'],
-    ph:'انقر على الصورة لرمز QR'
-};
-const enData={
-    name:'Amr Elharony',
-    vp:'I help <strong>banks and FinTech teams</strong> ship digital products faster through <strong>agile delivery, data-driven decisions</strong>, and bridging the gap between business and technology.',
-    roles:['Delivery Lead','Mentor','Fintech Author & Speaker'],
-    imp:['Years in Banking','Mentoring Mins','Panel Stages'],
-    ph:'TAP PHOTO FOR QR'
-};
-document.getElementById('langBtn').addEventListener('click',()=>{
-    isArabic=!isArabic;
-    const d=isArabic?arData:enData;
-    document.documentElement.dir=isArabic?'rtl':'ltr';
-    document.getElementById('langBtn').textContent=isArabic?'AR':'EN';
-    document.getElementById('hname').innerHTML=`<span class="ng">${d.name}</span>`;
-    document.getElementById('vpText').innerHTML=d.vp;
-    const tags=document.querySelectorAll('.rt');tags.forEach((t,i)=>{if(d.roles[i])t.textContent=d.roles[i];});
-    document.getElementById('impL1').textContent=d.imp[0];
-    document.getElementById('impL2').textContent=d.imp[1];
-    document.getElementById('impL3').textContent=d.imp[2];
-    document.querySelector('.ph').textContent=d.ph;
-    updStatus();// Refresh status text for current language
-});
+// Language toggle removed — stub for compatibility
+const _langEl=document.createElement('button');_langEl.id='langBtn';_langEl.style.display='none';document.body.appendChild(_langEl);
 
 // ═══ VISITOR COUNTER ═══
 (function(){
@@ -971,50 +943,12 @@ window.openShare=function(){
     ctx.fillStyle=l?'#8a94a6':'#4a5568';
     ctx.fillText('linkedin.com/in/amrmelharony',W-220,H-20);
 
-    // Generate QR code
-    generateQR();
-
     document.getElementById('shareOverlay').classList.add('show');
 };
 
 window.closeShare=function(){document.getElementById('shareOverlay').classList.remove('show');};
 
-// QR Code generator (simple matrix)
-function generateQR(){
-    const canvas=document.getElementById('shareQr');if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    const size=200;canvas.width=size;canvas.height=size;
-    ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
-    // Generate a visual QR-like pattern for amrelharony.com
-    const url='https://amrelharony.com';
-    const cellSize=6;const modules=Math.floor(size/cellSize);
-    // Seed from URL
-    let seed=0;for(let i=0;i<url.length;i++)seed=((seed<<5)-seed)+url.charCodeAt(i);
-    const rng=()=>{seed=(seed*16807+0)%2147483647;return seed/2147483647;};
-    // Draw data area
-    for(let r=0;r<modules;r++){
-        for(let c=0;c<modules;c++){
-            // Skip finder pattern areas
-            if((r<8&&c<8)||(r<8&&c>modules-9)||(r>modules-9&&c<8))continue;
-            if(rng()>0.55){
-                ctx.fillStyle='#06080f';
-                ctx.fillRect(c*cellSize,r*cellSize,cellSize-1,cellSize-1);
-            }
-        }
-    }
-    // Finder patterns (3 corners)
-    const drawFinder=(x,y)=>{
-        ctx.fillStyle='#06080f';ctx.fillRect(x,y,42,42);
-        ctx.fillStyle='#fff';ctx.fillRect(x+6,y+6,30,30);
-        ctx.fillStyle='#00e1ff';ctx.fillRect(x+12,y+12,18,18);
-    };
-    drawFinder(0,0);drawFinder(size-42,0);drawFinder(0,size-42);
-    // Center logo
-    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(size/2,size/2,16,0,Math.PI*2);ctx.fill();
-    ctx.font='bold 14px JetBrains Mono';ctx.fillStyle='#00e1ff';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('AE',size/2,size/2);
-    ctx.textAlign='start';ctx.textBaseline='alphabetic';
-}
+// QR code now uses external API image — no canvas generation needed
 
 // Tab switching
 document.querySelectorAll('.share-tab').forEach(tab=>{
@@ -1903,57 +1837,126 @@ function startSnake(){
     }
 
     function draw(){
-        ctx.fillStyle='#080c14';ctx.fillRect(0,0,c.width,c.height);
-        ctx.strokeStyle='#0f1724';ctx.lineWidth=0.5;
-        for(let i=0;i<=cols;i++){ctx.beginPath();ctx.moveTo(i*sz,0);ctx.lineTo(i*sz,c.height);ctx.stroke();}
-        for(let i=0;i<=rows;i++){ctx.beginPath();ctx.moveTo(0,i*sz);ctx.lineTo(c.width,i*sz);ctx.stroke();}
+        // Background with subtle gradient
+        const bgGrad=ctx.createRadialGradient(c.width/2,c.height/2,0,c.width/2,c.height/2,c.width/1.2);
+        bgGrad.addColorStop(0,'#0a0e18');bgGrad.addColorStop(1,'#060910');
+        ctx.fillStyle=bgGrad;ctx.fillRect(0,0,c.width,c.height);
 
+        // Grid with depth fade
+        for(let i=0;i<=cols;i++){
+            const alpha=0.03+Math.abs(i-cols/2)/cols*0.04;
+            ctx.strokeStyle=`rgba(0,225,255,${alpha})`;ctx.lineWidth=0.3;
+            ctx.beginPath();ctx.moveTo(i*sz,0);ctx.lineTo(i*sz,c.height);ctx.stroke();}
+        for(let i=0;i<=rows;i++){
+            const alpha=0.03+Math.abs(i-rows/2)/rows*0.04;
+            ctx.strokeStyle=`rgba(0,225,255,${alpha})`;ctx.lineWidth=0.3;
+            ctx.beginPath();ctx.moveTo(0,i*sz);ctx.lineTo(c.width,i*sz);ctx.stroke();}
+
+        // Items with rich glow + float animation
         items.forEach(item=>{
             const def=ITEMS[item.type];
-            const pulse=0.8+Math.sin(Date.now()/300+item.x)*0.2;
-            ctx.shadowColor=def.color;ctx.shadowBlur=8*pulse;
-            ctx.fillStyle=def.color+'33';
-            ctx.beginPath();ctx.arc(item.x*sz+sz/2,item.y*sz+sz/2,sz/2,0,Math.PI*2);ctx.fill();
+            const t=Date.now()/1000;
+            const pulse=0.7+Math.sin(t*2+item.x+item.y)*0.3;
+            const floatY=Math.sin(t*1.5+item.x)*1.5;
+            // Outer glow ring
+            ctx.shadowColor=def.color;ctx.shadowBlur=14*pulse;
+            ctx.fillStyle=def.color+'22';
+            ctx.beginPath();ctx.arc(item.x*sz+sz/2,item.y*sz+sz/2+floatY,sz/2+2,0,Math.PI*2);ctx.fill();
+            // Inner circle
+            ctx.fillStyle=def.color+'44';
+            ctx.beginPath();ctx.arc(item.x*sz+sz/2,item.y*sz+sz/2+floatY,sz/2-1,0,Math.PI*2);ctx.fill();
             ctx.shadowBlur=0;
-            ctx.font=(sz-4)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-            ctx.fillText(def.emoji,item.x*sz+sz/2,item.y*sz+sz/2+1);
-            if(item.timer<60){ctx.fillStyle='rgba(239,68,68,'+(0.3+Math.sin(Date.now()/100)*0.3)+')';ctx.fillRect(item.x*sz,item.y*sz,sz,sz);}
-        });
-
-        snake.forEach((s,i)=>{
-            const pct=1-i/snake.length;
-            if(i===0){
-                const hg=ctx.createLinearGradient(s.x*sz,s.y*sz,s.x*sz+sz,s.y*sz+sz);
-                hg.addColorStop(0,'#00e1ff');hg.addColorStop(1,'#6366f1');
-                ctx.fillStyle=hg;
-                ctx.beginPath();ctx.roundRect(s.x*sz+1,s.y*sz+1,sz-2,sz-2,[4]);ctx.fill();
-                ctx.fillStyle='#fff';
-                const ex=snakeDir.x===0?3:snakeDir.x>0?sz-5:3;
-                const ey=snakeDir.y===0?3:snakeDir.y>0?sz-5:3;
-                ctx.fillRect(s.x*sz+ex,s.y*sz+ey,2,2);
-                ctx.fillRect(s.x*sz+(snakeDir.y!==0?sz-5:ex),s.y*sz+(snakeDir.x!==0?sz-5:ey),2,2);
-                if(shieldActive){ctx.strokeStyle='#22c55e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(s.x*sz+sz/2,s.y*sz+sz/2,sz/2+2,0,Math.PI*2);ctx.stroke();}
-            } else {
-                ctx.fillStyle='rgba(0,225,255,'+(0.15+pct*0.5)+')';
-                ctx.beginPath();ctx.roundRect(s.x*sz+1,s.y*sz+1,sz-2,sz-2,[2]);ctx.fill();
+            // Emoji
+            ctx.font=(sz-2)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+            ctx.fillText(def.emoji,item.x*sz+sz/2,item.y*sz+sz/2+floatY+1);
+            // Expiry warning — pulsing red border
+            if(item.timer<80){
+                const warn=0.3+Math.sin(t*6)*0.4;
+                ctx.strokeStyle=`rgba(239,68,68,${warn})`;ctx.lineWidth=1.5;
+                ctx.beginPath();ctx.arc(item.x*sz+sz/2,item.y*sz+sz/2+floatY,sz/2+1,0,Math.PI*2);ctx.stroke();
             }
         });
 
+        // Snake trail (ghost segments behind)
+        if(snake.length>1){
+            ctx.globalAlpha=0.06;
+            for(let i=snake.length-1;i>=1;i--){
+                const s=snake[i];const prev=snake[Math.min(i+1,snake.length-1)];
+                ctx.fillStyle='#00e1ff';
+                ctx.beginPath();ctx.arc(s.x*sz+sz/2,s.y*sz+sz/2,sz/3,0,Math.PI*2);ctx.fill();
+            }
+            ctx.globalAlpha=1;
+        }
+
+        // Snake body — gradient segments with glow
+        snake.forEach((s,i)=>{
+            const pct=1-i/Math.max(snake.length,1);
+            if(i===0){
+                // Head glow
+                ctx.shadowColor='#00e1ff';ctx.shadowBlur=12;
+                const hg=ctx.createLinearGradient(s.x*sz,s.y*sz,s.x*sz+sz,s.y*sz+sz);
+                hg.addColorStop(0,'#00e1ff');hg.addColorStop(1,'#6366f1');
+                ctx.fillStyle=hg;
+                ctx.beginPath();ctx.roundRect(s.x*sz+0.5,s.y*sz+0.5,sz-1,sz-1,[5]);ctx.fill();
+                ctx.shadowBlur=0;
+                // Eyes — direction-aware
+                ctx.fillStyle='#fff';
+                let ex1,ey1,ex2,ey2;
+                if(snakeDir.x===1){ex1=sz-5;ey1=3;ex2=sz-5;ey2=sz-5;}
+                else if(snakeDir.x===-1){ex1=3;ey1=3;ex2=3;ey2=sz-5;}
+                else if(snakeDir.y===-1){ex1=3;ey1=3;ex2=sz-5;ey2=3;}
+                else{ex1=3;ey1=sz-5;ex2=sz-5;ey2=sz-5;}
+                ctx.beginPath();ctx.arc(s.x*sz+ex1,s.y*sz+ey1,1.5,0,Math.PI*2);ctx.fill();
+                ctx.beginPath();ctx.arc(s.x*sz+ex2,s.y*sz+ey2,1.5,0,Math.PI*2);ctx.fill();
+                // Shield ring
+                if(shieldActive){
+                    const sGrad=ctx.createLinearGradient(s.x*sz-4,s.y*sz-4,s.x*sz+sz+4,s.y*sz+sz+4);
+                    sGrad.addColorStop(0,'#22c55e');sGrad.addColorStop(1,'#3b82f6');
+                    ctx.strokeStyle=sGrad;ctx.lineWidth=2;
+                    ctx.beginPath();ctx.arc(s.x*sz+sz/2,s.y*sz+sz/2,sz/2+3,0,Math.PI*2);ctx.stroke();
+                }
+            } else {
+                // Body — gradient fade with rounded segments
+                const segGrad=ctx.createLinearGradient(s.x*sz,s.y*sz,s.x*sz+sz,s.y*sz+sz);
+                const a1=Math.max(0.15+pct*0.55,0.1);const a2=Math.max(0.1+pct*0.4,0.08);
+                segGrad.addColorStop(0,`rgba(0,225,255,${a1})`);
+                segGrad.addColorStop(1,`rgba(99,102,241,${a2})`);
+                ctx.fillStyle=segGrad;
+                const gap=Math.max(1,Math.round(2-pct));
+                ctx.beginPath();ctx.roundRect(s.x*sz+gap,s.y*sz+gap,sz-gap*2,sz-gap*2,[3-gap]);ctx.fill();
+                // Segment inner highlight
+                if(pct>0.5){ctx.fillStyle=`rgba(255,255,255,${pct*0.04})`;ctx.beginPath();ctx.roundRect(s.x*sz+gap+1,s.y*sz+gap+1,(sz-gap*2)/2,(sz-gap*2)/2,[2]);ctx.fill();}
+            }
+        });
+
+        // Particles with size variation
         particles.forEach(p=>{
             ctx.globalAlpha=p.life/20;ctx.fillStyle=p.color;
-            ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();
+            const r=1+p.life/10;
+            ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
+            // Particle glow
+            ctx.globalAlpha=p.life/60;
+            ctx.beginPath();ctx.arc(p.x,p.y,r*2.5,0,Math.PI*2);ctx.fill();
         });
         ctx.globalAlpha=1;
 
+        // Game over overlay
         if(gameOver){
-            ctx.fillStyle='rgba(8,12,20,0.85)';ctx.fillRect(0,0,c.width,c.height);
-            ctx.fillStyle='#ef4444';ctx.font='bold 16px JetBrains Mono';ctx.textAlign='center';
-            ctx.fillText('MARGIN CALL',c.width/2,c.height/2-20);
-            ctx.fillStyle='#8b949e';ctx.font='11px JetBrains Mono';
-            ctx.fillText('Portfolio: $'+portfolio.toLocaleString(),c.width/2,c.height/2+10);
-            ctx.fillText('Best Streak: '+bestStreak,c.width/2,c.height/2+28);
+            ctx.fillStyle='rgba(6,9,16,0.88)';ctx.fillRect(0,0,c.width,c.height);
+            // Red warning lines
+            ctx.strokeStyle='rgba(239,68,68,0.15)';ctx.lineWidth=1;
+            for(let i=0;i<c.height;i+=4){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(c.width,i);ctx.stroke();}
+            // Title
+            ctx.shadowColor='#ef4444';ctx.shadowBlur=20;
+            ctx.fillStyle='#ef4444';ctx.font='bold 18px JetBrains Mono';ctx.textAlign='center';
+            ctx.fillText('📉 MARGIN CALL',c.width/2,c.height/2-30);
+            ctx.shadowBlur=0;
+            ctx.fillStyle='#e2e8f0';ctx.font='bold 14px JetBrains Mono';
+            ctx.fillText('$'+portfolio.toLocaleString(),c.width/2,c.height/2+2);
+            ctx.fillStyle='#6b7280';ctx.font='10px JetBrains Mono';
+            ctx.fillText('Best Streak: '+bestStreak+' · Q'+level,c.width/2,c.height/2+24);
             ctx.fillStyle='#4a5568';ctx.font='9px JetBrains Mono';
-            ctx.fillText('Tap restart or press R',c.width/2,c.height/2+52);
+            ctx.fillText('Tap restart or press R',c.width/2,c.height/2+50);
         }
         updateHUD();
     }
