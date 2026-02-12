@@ -338,12 +338,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 /* MINI GAME */
 #gameOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;pointer-events:none}
 #gameOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.game-win{width:320px;border-radius:14px;background:#0d1117;border:1px solid #30363d;overflow:hidden;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1);text-align:center;padding:20px}
+.game-win{width:94%;max-width:340px;border-radius:14px;background:#0d1117;border:1px solid #30363d;overflow:hidden;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1);text-align:center;padding:16px}
 #gameOverlay.show .game-win{transform:scale(1)}
-.game-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#58a6ff;margin-bottom:12px}
-.game-canvas{border:1px solid #30363d;border-radius:6px;display:block;margin:0 auto}
+.game-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#58a6ff;margin-bottom:8px}
+.game-canvas{border:1px solid #30363d;border-radius:6px;display:block;margin:0 auto;max-width:100%;touch-action:none}
 .game-score{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8b949e;margin-top:8px}
-.game-hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:#484f58;margin-top:6px}
+.game-hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:#484f58;margin-top:4px}
+.game-btns{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.game-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:6px;border:1px solid #30363d;background:#161b22;color:#8b949e;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}.game-btn:hover,.game-btn:active{border-color:#58a6ff;color:#58a6ff}
+.game-dpad{display:none;margin:12px auto 0;width:130px;height:130px;position:relative}
+.game-dpad-btn{position:absolute;width:40px;height:40px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s;user-select:none}
+.game-dpad-btn:active{background:#58a6ff;color:#0d1117}
+.game-dpad-btn.up{top:0;left:50%;transform:translateX(-50%)}
+.game-dpad-btn.down{bottom:0;left:50%;transform:translateX(-50%)}
+.game-dpad-btn.left{left:0;top:50%;transform:translateY(-50%)}
+.game-dpad-btn.right{right:0;top:50%;transform:translateY(-50%)}
+@media(max-width:600px){.game-dpad{display:block}.game-hint{display:none}}
 /* KEYBOARD SHORTCUTS */
 #shortcutOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(12px);pointer-events:none}
 #shortcutOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -391,7 +401,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <!-- Terminal Overlay -->
 <div id="termOverlay" onclick="if(event.target===this)closeTerm()"><div class="term-win"><div class="term-bar"><span class="term-dot r" onclick="closeTerm()"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">amr@portfolio:~</span></div><div class="term-body" id="termBody"><div class="term-line"><span class="term-green">Welcome to Amr's Terminal v2.0</span></div><div class="term-line"><span class="term-out">Type <span class="term-accent">help</span> for available commands</span></div></div><div class="term-input-line"><span class="term-prompt">❯</span><input class="term-input" id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command..."></div></div></div>
 <!-- Mini Game Overlay -->
-<div id="gameOverlay" onclick="if(event.target===this)closeGame()"><div class="game-win"><div class="game-title">🐍 Snake</div><canvas id="snakeCanvas" class="game-canvas" width="280" height="280"></canvas><div class="game-score" id="gameScore">Score: 0</div><div class="game-hint">Arrow keys or swipe to move · ESC to close</div></div></div>
+<div id="gameOverlay" onclick="if(event.target===this)closeGame()"><div class="game-win"><div class="game-title">🐍 Snake</div><canvas id="snakeCanvas" class="game-canvas" width="280" height="280"></canvas><div class="game-score" id="gameScore">Score: 0</div><div class="game-hint">Arrow keys to move · R to restart · ESC to close</div><div class="game-dpad" id="gameDpad"><div class="game-dpad-btn up" data-dir="up"><i class="fa-solid fa-chevron-up"></i></div><div class="game-dpad-btn down" data-dir="down"><i class="fa-solid fa-chevron-down"></i></div><div class="game-dpad-btn left" data-dir="left"><i class="fa-solid fa-chevron-left"></i></div><div class="game-dpad-btn right" data-dir="right"><i class="fa-solid fa-chevron-right"></i></div></div><div class="game-btns"><button class="game-btn" onclick="restartSnake()">↻ Restart</button><button class="game-btn" onclick="closeGame()">✕ Close</button></div></div></div>
 <!-- Keyboard Shortcuts Overlay -->
 <div id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()"><div class="shortcut-panel"><div class="sc-title">⌨️ Keyboard Shortcuts</div><div class="sc-row"><span class="sc-key">T</span><span class="sc-desc">Open Trophy Case</span></div><div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">This panel</span></div><div class="sc-row"><span class="sc-key">`</span><span class="sc-desc">Open Terminal</span></div><div class="sc-row"><span class="sc-key">G</span><span class="sc-desc">Play Snake</span></div><div class="sc-row"><span class="sc-key">↑↑↓↓←→←→BA</span><span class="sc-desc">Easter Egg</span></div><div class="sc-row"><span class="sc-key">Ctrl+P</span><span class="sc-desc">Print Resume</span></div><div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">Close any overlay</span></div><div class="sc-close" onclick="closeShortcuts()">[ PRESS ? OR ESC TO CLOSE ]</div></div></div>
 <!-- Trophy Case Overlay -->
@@ -1330,9 +1340,9 @@ document.getElementById('termInput').addEventListener('keydown',e=>{
 });
 
 // ═════════════════════════════════════════════════
-// FEATURE: MINI GAME (Snake)
+// FEATURE: MINI GAME (Snake) — Mobile-optimized
 // ═════════════════════════════════════════════════
-let snakeGame=null;
+let snakeGame=null,snakeDir={x:1,y:0},snakeState=null;
 window.openGame=function(){
     document.getElementById('gameOverlay').classList.add('show');
     startSnake();
@@ -1341,45 +1351,95 @@ window.closeGame=function(){
     document.getElementById('gameOverlay').classList.remove('show');
     if(snakeGame){clearInterval(snakeGame);snakeGame=null;}
 };
+window.restartSnake=function(){
+    if(snakeState){snakeState.snake=[{x:10,y:10}];snakeDir={x:1,y:0};snakeState.score=0;snakeState.gameOver=false;snakeState.place();}
+};
 function startSnake(){
     const c=document.getElementById('snakeCanvas'),ctx=c.getContext('2d');
-    const sz=14,cols=20,rows=20;c.width=cols*sz;c.height=rows*sz;
-    let snake=[{x:10,y:10}],dir={x:1,y:0},food={x:15,y:10},score=0,gameOver=false;
+    // Responsive: fit to container width
+    const container=c.parentElement;
+    const maxW=Math.min(container.clientWidth-32,300);
+    const sz=Math.floor(maxW/20);
+    const cols=20,rows=20;
+    c.width=cols*sz;c.height=rows*sz;
+    c.style.width=cols*sz+'px';c.style.height=rows*sz+'px';
+
+    let snake=[{x:10,y:10}];
+    snakeDir={x:1,y:0};
+    let food={x:15,y:10},score=0,gameOver=false;
     function place(){food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};}
+
+    snakeState={snake,get score(){return score;},set score(v){score=v;},get gameOver(){return gameOver;},set gameOver(v){gameOver=v;},place};
+
     function draw(){
         ctx.fillStyle='#0d1117';ctx.fillRect(0,0,c.width,c.height);
-        // Grid
         ctx.strokeStyle='#161b22';ctx.lineWidth=0.5;
-        for(let i=0;i<cols;i++){ctx.beginPath();ctx.moveTo(i*sz,0);ctx.lineTo(i*sz,c.height);ctx.stroke();}
-        for(let i=0;i<rows;i++){ctx.beginPath();ctx.moveTo(0,i*sz);ctx.lineTo(c.width,i*sz);ctx.stroke();}
-        // Food
+        for(let i=0;i<=cols;i++){ctx.beginPath();ctx.moveTo(i*sz,0);ctx.lineTo(i*sz,c.height);ctx.stroke();}
+        for(let i=0;i<=rows;i++){ctx.beginPath();ctx.moveTo(0,i*sz);ctx.lineTo(c.width,i*sz);ctx.stroke();}
+        // Food glow
+        ctx.shadowColor='#f97316';ctx.shadowBlur=8;
         ctx.fillStyle='#f97316';ctx.beginPath();ctx.arc(food.x*sz+sz/2,food.y*sz+sz/2,sz/2-1,0,Math.PI*2);ctx.fill();
+        ctx.shadowBlur=0;
         // Snake
-        snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#00e1ff':'#58a6ff';ctx.fillRect(s.x*sz+1,s.y*sz+1,sz-2,sz-2);if(i===0){ctx.fillStyle='#0d1117';ctx.fillRect(s.x*sz+3,s.y*sz+3,3,3);ctx.fillRect(s.x*sz+sz-6,s.y*sz+3,3,3);}});
-        document.getElementById('gameScore').textContent='Score: '+score+(gameOver?' · GAME OVER — Press R to restart':'');
+        snake.forEach((s,i)=>{
+            const alpha=1-i*0.03;
+            ctx.fillStyle=i===0?'#00e1ff':`rgba(88,166,255,${Math.max(alpha,0.3)})`;
+            const r=i===0?3:2;
+            ctx.beginPath();ctx.roundRect(s.x*sz+1,s.y*sz+1,sz-2,sz-2,[r]);ctx.fill();
+            if(i===0){ctx.fillStyle='#0d1117';ctx.fillRect(s.x*sz+3,s.y*sz+3,2,2);ctx.fillRect(s.x*sz+sz-5,s.y*sz+3,2,2);}
+        });
+        let msg='Score: '+score;
+        if(gameOver)msg+=' · GAME OVER';
+        document.getElementById('gameScore').textContent=msg;
     }
     function update(){
         if(gameOver)return;
-        const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-        if(head.x<0||head.x>=cols||head.y<0||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)){gameOver=true;draw();return;}
+        const head={x:snake[0].x+snakeDir.x,y:snake[0].y+snakeDir.y};
+        if(head.x<0||head.x>=cols||head.y<0||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)){gameOver=true;draw();if(navigator.vibrate)navigator.vibrate(200);return;}
         snake.unshift(head);
-        if(head.x===food.x&&head.y===food.y){score++;place();VDna.addXp(3);}else snake.pop();
+        if(head.x===food.x&&head.y===food.y){score++;place();VDna.addXp(3);if(navigator.vibrate)navigator.vibrate(30);}else snake.pop();
         draw();
     }
     if(snakeGame)clearInterval(snakeGame);
-    snakeGame=setInterval(update,120);draw();
+    snakeGame=setInterval(update,130);draw();
+
+    // Keyboard
     const handler=e=>{
         if(!document.getElementById('gameOverlay').classList.contains('show')){document.removeEventListener('keydown',handler);return;}
-        if(e.key==='r'||e.key==='R'){snake=[{x:10,y:10}];dir={x:1,y:0};score=0;gameOver=false;place();return;}
+        if(e.key==='r'||e.key==='R'){restartSnake();return;}
         const map={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}};
-        if(map[e.key]){const d=map[e.key];if(d.x!==-dir.x||d.y!==-dir.y){dir=d;}e.preventDefault();}
+        if(map[e.key]){const d=map[e.key];if(d.x!==-snakeDir.x||d.y!==-snakeDir.y){snakeDir=d;}e.preventDefault();}
     };
     document.addEventListener('keydown',handler);
-    // Touch controls
-    let tx=0,ty=0;
-    c.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
-    c.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)){dir=dx>0?{x:1,y:0}:{x:-1,y:0};}else{dir=dy>0?{x:0,y:1}:{x:0,y:-1};}},{passive:true});
 }
+
+// D-pad buttons (mobile)
+document.querySelectorAll('.game-dpad-btn').forEach(btn=>{
+    const dirMap={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+    const handle=()=>{
+        const d=dirMap[btn.dataset.dir];
+        if(d&&(d.x!==-snakeDir.x||d.y!==-snakeDir.y)){snakeDir=d;}
+        if(snakeState&&snakeState.gameOver)restartSnake();
+    };
+    btn.addEventListener('touchstart',e=>{e.preventDefault();handle();},{passive:false});
+    btn.addEventListener('mousedown',e=>{e.preventDefault();handle();});
+});
+
+// Swipe on entire overlay (mobile)
+(function(){
+    let tx=0,ty=0;
+    const el=document.getElementById('gameOverlay');
+    el.addEventListener('touchstart',e=>{if(e.target.closest('.game-btn,.game-dpad-btn'))return;tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+    el.addEventListener('touchend',e=>{
+        if(e.target.closest('.game-btn,.game-dpad-btn'))return;
+        const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+        const minSwipe=30;
+        if(Math.abs(dx)<minSwipe&&Math.abs(dy)<minSwipe)return;
+        let d;
+        if(Math.abs(dx)>Math.abs(dy)){d=dx>0?{x:1,y:0}:{x:-1,y:0};}else{d=dy>0?{x:0,y:1}:{x:0,y:-1};}
+        if(d.x!==-snakeDir.x||d.y!==-snakeDir.y)snakeDir=d;
+    },{passive:true});
+})();
 
 // ═════════════════════════════════════════════════
 // FEATURE: KEYBOARD SHORTCUTS
