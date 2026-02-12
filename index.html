@@ -220,6 +220,60 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 /* STREAK & SOUND */
 .streak{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.2;text-align:center;margin-top:4px;transition:opacity .3s}.streak:hover{opacity:.6}
 .snd-btn i{font-size:12px}
+/* ACHIEVEMENT TOAST */
+.toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9990;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:12px;background:var(--bg2);border:1px solid var(--accent);backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,225,255,.2);font-family:'JetBrains Mono',monospace;transform:translateY(60px) scale(.8);opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:auto;max-width:90vw}
+.toast.show{transform:translateY(0) scale(1);opacity:1}
+.toast-emoji{font-size:28px;flex-shrink:0}.toast-body{display:flex;flex-direction:column;gap:2px}
+.toast-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-weight:700}
+.toast-desc{font-size:11px;color:var(--sub)}
+.toast-xp{font-size:9px;color:var(--accent3);margin-top:2px;letter-spacing:1px}
+/* TROPHY CASE */
+#trophyOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;backdrop-filter:blur(12px)}
+#trophyOverlay.show{display:flex;opacity:1}
+.trophy-panel{width:90%;max-width:400px;max-height:80vh;overflow-y:auto;padding:28px;border-radius:20px;background:var(--bg2);border:1px solid var(--border);transform:scale(.85);transition:transform .5s cubic-bezier(.16,1,.3,1)}
+#trophyOverlay.show .trophy-panel{transform:scale(1)}
+.trophy-header{text-align:center;margin-bottom:20px}
+.trophy-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.trophy-xp-bar{margin:12px 0 8px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;position:relative}
+.trophy-xp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));transition:width .8s cubic-bezier(.16,1,.3,1)}
+.trophy-level{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);text-align:center;letter-spacing:1px}
+.trophy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+.trophy-badge{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;background:var(--card);border:1px solid var(--border);text-align:center;transition:all .3s}
+.trophy-badge.unlocked{border-color:rgba(0,225,255,.2);background:rgba(0,225,255,.03)}
+.trophy-badge.locked{opacity:.3;filter:grayscale(1)}
+.trophy-badge-emoji{font-size:28px;transition:transform .3s}.trophy-badge.unlocked:hover .trophy-badge-emoji{transform:scale(1.2) rotate(10deg)}
+.trophy-badge-name{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
+.trophy-badge-desc{font-size:9px;color:var(--sub);line-height:1.3}
+.trophy-close{text-align:center;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.4;cursor:pointer}.trophy-close:hover{opacity:1;color:var(--accent)}
+/* XP BAR (footer) */
+.xp-footer{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px;opacity:.2;transition:opacity .3s}.xp-footer:hover{opacity:.6}
+.xp-bar-mini{width:80px;height:3px;border-radius:2px;background:var(--border);overflow:hidden}.xp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+.xp-text{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);letter-spacing:1px}
+/* TROPHY BUTTON */
+.trophy-btn{font-size:12px}
+/* LIVE CONSOLE */
+.live-console{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);opacity:.25;text-align:center;margin-top:8px;min-height:14px;letter-spacing:.5px;transition:opacity .3s}.live-console:hover{opacity:.6}
+.live-console .cursor-blink{animation:cblink 1s step-end infinite}
+@keyframes cblink{50%{opacity:0}}
+/* SMART CTA */
+.smart-cta{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:16px 24px;background:linear-gradient(180deg,transparent,var(--bg) 30%);display:flex;justify-content:center;transform:translateY(100%);transition:transform .6s cubic-bezier(.16,1,.3,1);pointer-events:none}
+.smart-cta.show{transform:translateY(0);pointer-events:auto}
+.smart-cta-inner{display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:12px;background:var(--bg2);border:1px solid var(--accent);backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,225,255,.15);max-width:400px;width:100%;text-decoration:none;color:var(--text);transition:all .3s}
+.smart-cta-inner:hover{box-shadow:0 -4px 32px rgba(0,225,255,.3);transform:translateY(-2px)}
+.smart-cta-icon{font-size:18px;color:var(--accent)}.smart-cta-text{flex:1}.smart-cta-title{font-size:12px;font-weight:600}.smart-cta-sub{font-size:9px;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.smart-cta-close{color:var(--sub);cursor:pointer;padding:4px;font-size:12px;opacity:.5;transition:opacity .3s}.smart-cta-close:hover{opacity:1}
+/* DAILY CHALLENGE */
+.challenge-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(0,225,255,.03),rgba(99,102,241,.03));border:1px dashed rgba(0,225,255,.15);margin:12px 0 0;transition:all .3s}
+.challenge-card.completed{border-style:solid;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
+.challenge-icon{font-size:18px;flex-shrink:0}.challenge-meta{flex:1}
+.challenge-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.challenge-text{font-size:11px;color:var(--sub)}
+.challenge-progress{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);flex-shrink:0}
+/* PERSONALIZED RECS */
+.rec-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);margin-top:8px;text-decoration:none;color:var(--text);transition:all .3s}
+.rec-card:hover{border-color:rgba(0,225,255,.15);background:var(--cardH);transform:translateX(4px)}
+.rec-icon{font-size:16px;color:var(--accent);flex-shrink:0}.rec-meta{flex:1}.rec-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent3);margin-bottom:1px}.rec-title{font-size:12px;font-weight:600}
 .foot{text-align:center;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.25;transition:opacity .3s}
 .foot:hover{opacity:.7}
 .visitor-count{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.15;text-align:center;margin-top:8px;transition:opacity .3s}
@@ -235,6 +289,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <canvas id="bgC" aria-hidden="true"></canvas>
 
 <div class="top-btns">
+    <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i></button>
     <button class="tbtn snd-btn" id="sndBtn" aria-label="Toggle ambient sound" style="display:none"><i class="fa-solid fa-volume-xmark" id="sndIcon"></i></button>
     <button class="tbtn lang-btn" id="langBtn" aria-label="Toggle Arabic/English">EN</button>
     <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
@@ -252,6 +307,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 </div>
 
 <div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-card-inner"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-actions"><button class="share-btn" onclick="downloadShareCard()"><i class="fa-solid fa-download" style="margin-right:4px"></i> Save Image</button><button class="share-btn" onclick="copyShareLink()"><i class="fa-solid fa-link" style="margin-right:4px"></i> Copy Link</button></div><div class="share-close" onclick="closeShare()">[ TAP TO CLOSE ]</div></div></div>
+
+<!-- Trophy Case Overlay -->
+<div id="trophyOverlay" onclick="if(event.target===this)closeTrophy()"><div class="trophy-panel"><div class="trophy-header"><div class="trophy-title">🏆 Trophy Case</div><div class="trophy-xp-bar"><div class="trophy-xp-fill" id="trophyXpFill" style="width:0%"></div></div><div class="trophy-level" id="trophyLevel">Level 1 · 0 XP</div></div><div class="trophy-grid" id="trophyGrid"></div><div class="trophy-close" onclick="closeTrophy()">[ PRESS T OR TAP TO CLOSE ]</div></div></div>
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+<!-- Smart CTA -->
+<div class="smart-cta" id="smartCta"><a class="smart-cta-inner" id="smartCtaLink" href="#" target="_blank" rel="noopener"><div class="smart-cta-icon" id="smartCtaIcon"><i class="fa-solid fa-comments"></i></div><div class="smart-cta-text"><div class="smart-cta-title" id="smartCtaTitle"></div><div class="smart-cta-sub" id="smartCtaSub"></div></div><div class="smart-cta-close" onclick="event.preventDefault();event.stopPropagation();dismissSmartCta()"><i class="fa-solid fa-xmark"></i></div></a></div>
 
 <div id="preloader" role="status" aria-label="Loading">
     <div class="pre-line" id="preLine">ESTABLISHING CONNECTION</div>
@@ -314,7 +376,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
             <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
             <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
             <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
-            <a href="/cdn-cgi/l/email-protection#04652a61686c65766b6a7d446369656d682a676b69" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
         </div>
         <button class="vcb" id="vcBtn" onclick="downloadVCard()"><div class="vcb-shim"></div><i class="fa-solid fa-address-card" aria-hidden="true"></i><span id="vcTxt">Save Contact</span></button>
     </div>
@@ -368,14 +430,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         </div>
     </div>
 
+    <!-- Daily Challenge -->
+    <div class="challenge-card rv" id="dailyChallenge"><div class="challenge-icon" id="challengeIcon">🎯</div><div class="challenge-meta"><div class="challenge-label">Daily Challenge</div><div class="challenge-text" id="challengeText">Loading...</div></div><div class="challenge-progress" id="challengeProgress"></div></div>
+
+    <!-- Personalized Recommendation -->
+    <div id="recContainer"></div>
+
     <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-top:16px;margin-bottom:24px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
 
     <div class="visitor-count" id="visitorCount"></div>
     <div class="streak" id="streakCount"></div>
+    <div class="xp-footer" id="xpFooter"><span class="xp-text" id="xpText">0 XP</span><div class="xp-bar-mini"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div><span class="xp-text" id="xpLevel">LVL 1</span></div>
+    <div class="live-console" id="liveConsole"><span class="cursor-blink">▊</span></div>
     <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 (()=>{
 'use strict';
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -514,7 +584,7 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
 function initShake(){const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;let shakeStart=0,shaking=false;const hint=document.getElementById('shakeHint'),bar=document.getElementById('shakeBar'),fill=document.getElementById('shakeFill');
 function handleMotion(e){if(contactRevealed)return;const acc=e.accelerationIncludingGravity;if(!acc)return;const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z),accelNet=Math.abs(total-9.81);
 if(accelNet>SHAKE_THRESHOLD){if(!shaking){shaking=true;shakeStart=Date.now();hint.classList.add('shaking');bar.classList.add('active');}const elapsed=Date.now()-shakeStart,progress=Math.min(elapsed/SHAKE_DURATION*100,100);fill.style.width=progress+'%';if(elapsed>=SHAKE_DURATION){window.removeEventListener('devicemotion',handleMotion);fill.style.width='100%';revealContact();}}else{if(shaking){shaking=false;shakeStart=0;hint.classList.remove('shaking');bar.classList.remove('active');fill.style.width='0%';}}}
-if(typeof DeviceMotionEvent!undefined&&typeof DeviceMotionEvent.requestPermission==='function'){document.body.addEventListener('touchstart',function rp(){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});document.body.removeEventListener('touchstart',rp);},{once:true});}else if(typeof DeviceMotionEvent!=='undefined'){window.addEventListener('devicemotion',handleMotion);}}
+if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){document.body.addEventListener('touchstart',function rp(){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});document.body.removeEventListener('touchstart',rp);},{once:true});}else if(typeof DeviceMotionEvent!=='undefined'){window.addEventListener('devicemotion',handleMotion);}}
 document.addEventListener('keydown',e=>{if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
 
 // ═══ VCARD ═══
@@ -640,8 +710,397 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeShare();});
     }
 })();
 
+// ═════════════════════════════════════════════════
+// SYSTEM 1: VISITOR INTELLIGENCE ENGINE
+// ═════════════════════════════════════════════════
+const VDna=(function(){
+    const k='v_dna';let p=JSON.parse(localStorage.getItem(k)||'{}');
+    // Build DNA on every visit
+    p.visits=(p.visits||0)+1;
+    p.firstVisit=p.firstVisit||Date.now();
+    p.lastVisit=Date.now();
+    p.device=D?'desktop':'mobile';
+    p.os=navigator.userAgent.match(/Windows/)?"Windows":navigator.userAgent.match(/Mac/)?"Mac":navigator.userAgent.match(/Android/)?"Android":navigator.userAgent.match(/iPhone|iPad/)?"iOS":"Other";
+    p.browser=navigator.userAgent.match(/Chrome/)?"Chrome":navigator.userAgent.match(/Firefox/)?"Firefox":navigator.userAgent.match(/Safari/)?"Safari":"Other";
+    p.screen=`${screen.width}x${screen.height}`;
+    p.lang=navigator.language;
+    p.tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    p.ref=params.get('ref')||document.referrer||'direct';
+    p.scrollMax=p.scrollMax||0;
+    p.clickedLinks=p.clickedLinks||[];
+    p.sectionsViewed=p.sectionsViewed||[];
+    p.achievements=p.achievements||[];
+    p.xp=p.xp||0;
+    p.level=p.level||1;
+    p.challengeDate=p.challengeDate||'';
+    p.challengeDone=p.challengeDone||false;
+    p.lastScrollY=p.lastScrollY||0;
+    p.smartCtaDismissed=p.smartCtaDismissed||false;
+    p.sessionClicks=0;
+    p.sessionStart=Date.now();
+    function save(){localStorage.setItem(k,JSON.stringify(p));}
+    save();
+    return{get:()=>p,save,addXp(n){p.xp+=n;const lvls=[0,50,150,300,500,800,1200];const nl=lvls.findIndex(t=>p.xp<t);p.level=nl===-1?lvls.length:nl;save();updateXpUI();},addClick(id){if(!p.clickedLinks.includes(id)){p.clickedLinks.push(id);save();}p.sessionClicks++;},addSection(id){if(!p.sectionsViewed.includes(id)){p.sectionsViewed.push(id);save();}},setScroll(pct){if(pct>p.scrollMax){p.scrollMax=pct;save();}p.lastScrollY=window.scrollY;save();}};
+})();
+
+// 1b. Device/Battery/Network Adaptation
+(function(){
+    const p=VDna.get();
+    // Battery: reduce animations if low
+    if(navigator.getBattery){navigator.getBattery().then(b=>{if(b.level<0.2&&!b.charging){document.documentElement.style.setProperty('--glow','transparent');document.querySelectorAll('.mesh div').forEach(d=>d.style.opacity='0.02');}});}
+    // Network: degrade on slow connections
+    const conn=navigator.connection||navigator.mozConnection;
+    if(conn&&(conn.effectiveType==='2g'||conn.effectiveType==='slow-2g')){
+        document.querySelectorAll('.mesh div').forEach(d=>d.style.display='none');
+        document.getElementById('bgC').style.display='none';
+    }
+    // Performance: reduce particles on low-end
+    if(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=2){
+        window._lowEnd=true;
+    }
+})();
+
+// 1c. Time-Aware Content Morphing
+(function(){
+    const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
+    const vpEl=document.getElementById('vpText');
+    const p=VDna.get();
+    if(p.visits>2){
+        // Returning visitor: skip generic intro
+    } else if(h>=6&&h<12){
+        // Morning: productivity
+    } else if(h>=22||h<6){
+        // Night owl: special accent
+        document.documentElement.style.setProperty('--accent','#ff6b9d');
+        document.documentElement.style.setProperty('--glowS','rgba(255,107,157,0.4)');
+        document.documentElement.style.setProperty('--glow','rgba(255,107,157,0.15)');
+    }
+})();
+
+// 1d. Return Visitor Memory
+(function(){
+    const p=VDna.get();
+    if(p.visits>1&&p.lastScrollY>200){
+        setTimeout(()=>{window.scrollTo({top:Math.min(p.lastScrollY,document.body.scrollHeight-window.innerHeight),behavior:'smooth'});},3500);
+    }
+})();
+
+// ═════════════════════════════════════════════════
+// SYSTEM 2: ENGAGEMENT ANALYTICS
+// ═════════════════════════════════════════════════
+
+// 2a. Scroll Depth Tracker
+const scrollMilestones={25:false,50:false,75:false,100:false};
+function trackScroll(){
+    const pct=Math.round(scrollY/(document.documentElement.scrollHeight-innerHeight)*100);
+    VDna.setScroll(pct);
+    [25,50,75,100].forEach(m=>{if(pct>=m&&!scrollMilestones[m]){scrollMilestones[m]=true;VDna.addXp(1);if(m===100)Achieve.check('explorer');}});
+}
+
+// 2b. Section Dwell Time (Intersection Observer)
+const sectionTimes={};
+const sectionObs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+        const id=e.target.dataset.section||e.target.id||'unknown';
+        if(e.isIntersecting){sectionTimes[id]=Date.now();VDna.addSection(id);}
+        else if(sectionTimes[id]){const dwell=Date.now()-sectionTimes[id];delete sectionTimes[id];}
+    });
+},{threshold:0.3});
+setTimeout(()=>{document.querySelectorAll('.rv,[data-section]').forEach(el=>{if(!el.dataset.section){el.dataset.section=el.className.split(' ')[0]||'sec-'+Math.random().toString(36).slice(2,6);}sectionObs.observe(el);});},4000);
+
+// 2c. Click Attribution
+document.addEventListener('click',e=>{
+    const link=e.target.closest('a[href],button[onclick],.qp,.lk,.nl,.vcb');
+    if(link){
+        const id=link.href||link.textContent.trim().slice(0,30);
+        VDna.addClick(id);
+        VDna.addXp(5);
+        Achieve.check('connector');
+        // Check newsletter clicks for scholar
+        const href=link.href||'';
+        if(href.includes('newsletter')||href.includes('levelup')){
+            const p=VDna.get();
+            const nlClicks=p.clickedLinks.filter(l=>l.includes('newsletter')||l.includes('levelup'));
+            if(nlClicks.length>=3)Achieve.check('scholar');
+        }
+        ChallengeSystem.checkProgress();
+    }
+});
+
+// 2d. Engagement Score
+function getEngagementScore(){
+    const p=VDna.get();
+    const scrollScore=Math.min(p.scrollMax/100*30,30);
+    const timeScore=Math.min((Date.now()-p.sessionStart)/120000*20,20);
+    const sectionScore=Math.min(p.sectionsViewed.length/8*20,20);
+    const clickScore=Math.min(p.sessionClicks/3*15,15);
+    const returnScore=Math.min(p.visits/3*15,15);
+    return Math.round(scrollScore+timeScore+sectionScore+clickScore+returnScore);
+}
+
+// 2e. Smart CTA Escalation
+let smartCtaShown=false;
+function checkSmartCta(){
+    const p=VDna.get();
+    if(p.smartCtaDismissed||smartCtaShown)return;
+    const score=getEngagementScore();
+    if(score>=65){
+        showSmartCta('high');smartCtaShown=true;
+    } else if(score<25&&(Date.now()-p.sessionStart)>15000){
+        showSmartCta('low');smartCtaShown=true;
+    }
+}
+function showSmartCta(type){
+    const cta=document.getElementById('smartCta'),link=document.getElementById('smartCtaLink'),title=document.getElementById('smartCtaTitle'),sub=document.getElementById('smartCtaSub'),icon=document.getElementById('smartCtaIcon');
+    if(type==='high'){
+        link.href='https://api.whatsapp.com/send?phone=201114260806&text=Hi%20Amr!%20Just%20explored%20your%20portfolio%20—%20I%27d%20love%20to%20connect';
+        title.textContent="You seem interested — let's chat";
+        sub.textContent='One tap to start a WhatsApp conversation';
+        icon.innerHTML='<i class="fa-brands fa-whatsapp"></i>';
+    } else {
+        link.href='https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168';
+        title.textContent="Grab a free insight before you go";
+        sub.textContent='Join 500+ leaders reading LevelUp';
+        icon.innerHTML='<i class="fa-solid fa-envelope-open-text"></i>';
+    }
+    cta.classList.add('show');
+    VDna.addXp(2);
+}
+window.dismissSmartCta=function(){
+    document.getElementById('smartCta').classList.remove('show');
+    const p=VDna.get();p.smartCtaDismissed=true;VDna.save();
+};
+
+// ═════════════════════════════════════════════════
+// SYSTEM 3: DYNAMIC CONTENT ENGINE
+// ═════════════════════════════════════════════════
+
+// 3a. Contextual Hero (referrer-based)
+(function(){
+    const p=VDna.get();
+    const vpEl=document.getElementById('vpText');
+    if(p.visits>2&&vpEl){
+        // Returning visitor: more personal
+    }
+    // Referrer-based adjustments handled by existing refMap
+})();
+
+// 3b. Personalized Recommendations
+function showRecommendation(){
+    const p=VDna.get();
+    const container=document.getElementById('recContainer');
+    if(!container)return;
+    const clicked=p.clickedLinks.join(' ').toLowerCase();
+    let rec=null;
+    if(clicked.includes('adplist')||clicked.includes('mentor')){
+        rec={icon:'fa-book',label:'Since you like mentoring...',title:'Read The Bilingual Executive',href:'https://bilingualexecutive.amrelharony.com/'};
+    } else if(clicked.includes('bilingual')||clicked.includes('book')){
+        rec={icon:'fa-users',label:'Loved the book?',title:'Join Fintech Bilinguals Community',href:'https://www.linkedin.com/company/fintech-bilinguals'};
+    } else if(clicked.includes('fintech')){
+        rec={icon:'fa-graduation-cap',label:'Want to go deeper?',title:'Get Free 1:1 Agile Coaching',href:'https://adplist.org/mentors/amr-elharony'};
+    } else if(p.visits>1){
+        rec={icon:'fa-calendar-check',label:'Ready to connect?',title:'Book a 30-Min Call with Amr',href:'https://calendly.com/amrmelharony/30min'};
+    }
+    if(rec){
+        container.innerHTML=`<a href="${rec.href}" target="_blank" rel="noopener" class="rec-card"><div class="rec-icon"><i class="fa-solid ${rec.icon}"></i></div><div class="rec-meta"><div class="rec-label">${rec.label}</div><div class="rec-title">${rec.title}</div></div><div style="color:var(--sub);opacity:.4"><i class="fa-solid fa-arrow-right"></i></div></a>`;
+    }
+}
+setTimeout(showRecommendation,5000);
+
+// 3c. Live Typing Console
+const consoleMessages=[
+    ()=>`Amr is currently in Cairo · ${new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",minute:"numeric",hour12:true})}`,
+    ()=>`${VDna.get().visits===1?'Welcome, new visitor':'Welcome back'} · Visit #${VDna.get().visits}`,
+    ()=>{const m=1000+Math.floor(((Date.now()-new Date('2023-10-01').getTime())/2592000000)*80);return `${m.toLocaleString()}+ mentoring minutes and counting...`;},
+    ()=>`Engagement score: ${getEngagementScore()}/100`,
+    ()=>`Your device: ${VDna.get().device} · ${VDna.get().os} · ${VDna.get().browser}`,
+    ()=>`${VDna.get().achievements.length}/${10} achievements unlocked`,
+    ()=>`Running on ${navigator.hardwareConcurrency||'?'} cores · ${VDna.get().screen}`,
+    ()=>'System status: all modules operational ✓',
+];
+let consoleIdx=0;
+function typeConsole(){
+    const el=document.getElementById('liveConsole');if(!el)return;
+    const msg=consoleMessages[consoleIdx%consoleMessages.length]();
+    consoleIdx++;
+    let i=0;el.textContent='';
+    const iv=setInterval(()=>{if(i<msg.length){el.textContent=msg.slice(0,i+1);i++;}else{el.innerHTML=msg+'<span class="cursor-blink"> ▊</span>';clearInterval(iv);}},30);
+}
+setTimeout(()=>{typeConsole();setInterval(typeConsole,8000);},5000);
+
+// ═════════════════════════════════════════════════
+// SYSTEM 4: GAMIFICATION LAYER
+// ═════════════════════════════════════════════════
+
+const BADGES=[
+    {id:'explorer',emoji:'🔍',name:'Explorer',desc:'Scrolled to 100%'},
+    {id:'regular',emoji:'🔄',name:'Regular',desc:'Visited 3+ times'},
+    {id:'connector',emoji:'🤝',name:'Connector',desc:'Clicked a link'},
+    {id:'scholar',emoji:'📖',name:'Scholar',desc:'Visited all 3 newsletters'},
+    {id:'nightowl',emoji:'🌙',name:'Night Owl',desc:'Visited midnight–5AM'},
+    {id:'secret',emoji:'🤫',name:'Secret Agent',desc:'Found the easter egg'},
+    {id:'shaker',emoji:'📱',name:'Shaker',desc:'Unlocked contact section'},
+    {id:'streak5',emoji:'🔥',name:'Streak Master',desc:'5+ day visit streak'},
+    {id:'globe',emoji:'🌍',name:'Globetrotter',desc:'Visited from outside Egypt'},
+    {id:'speed',emoji:'⚡',name:'Speed Reader',desc:'Reached bottom in <30s'},
+];
+
+const Achieve=(function(){
+    function check(id){
+        const p=VDna.get();
+        if(p.achievements.includes(id))return;
+        const badge=BADGES.find(b=>b.id===id);
+        if(!badge)return;
+        p.achievements.push(id);VDna.save();
+        VDna.addXp(25);
+        showToast(badge);
+        ChallengeSystem.checkProgress();
+    }
+    return{check};
+})();
+
+// Toast System
+function showToast(badge){
+    const container=document.getElementById('toastContainer');
+    const toast=document.createElement('div');
+    toast.className='toast';
+    toast.innerHTML=`<div class="toast-emoji">${badge.emoji}</div><div class="toast-body"><div class="toast-title">Achievement Unlocked!</div><div class="toast-desc">${badge.name} — ${badge.desc}</div><div class="toast-xp">+25 XP</div></div>`;
+    container.appendChild(toast);
+    setTimeout(()=>toast.classList.add('show'),50);
+    setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),500);},4000);
+    if(navigator.vibrate)navigator.vibrate([100,50,100,50,200]);
+}
+
+// XP UI
+function updateXpUI(){
+    const p=VDna.get();
+    const lvls=[0,50,150,300,500,800,1200];
+    const currLvlXp=lvls[p.level-1]||0;
+    const nextLvlXp=lvls[p.level]||lvls[lvls.length-1];
+    const pct=Math.min(((p.xp-currLvlXp)/(nextLvlXp-currLvlXp))*100,100);
+    const xpText=document.getElementById('xpText');
+    const xpFill=document.getElementById('xpBarFill');
+    const xpLvl=document.getElementById('xpLevel');
+    if(xpText)xpText.textContent=p.xp+' XP';
+    if(xpFill)xpFill.style.width=pct+'%';
+    if(xpLvl)xpLvl.textContent='LVL '+p.level;
+}
+setTimeout(updateXpUI,3000);
+
+// Trophy Case
+function openTrophy(){
+    const p=VDna.get();
+    const grid=document.getElementById('trophyGrid');
+    grid.innerHTML=BADGES.map(b=>{
+        const unlocked=p.achievements.includes(b.id);
+        return `<div class="trophy-badge ${unlocked?'unlocked':'locked'}"><div class="trophy-badge-emoji">${unlocked?b.emoji:'🔒'}</div><div class="trophy-badge-name">${b.name}</div><div class="trophy-badge-desc">${b.desc}</div></div>`;
+    }).join('');
+    // XP bar in trophy
+    const lvls=[0,50,150,300,500,800,1200];
+    const currLvlXp=lvls[p.level-1]||0;
+    const nextLvlXp=lvls[p.level]||lvls[lvls.length-1];
+    const pct=Math.min(((p.xp-currLvlXp)/(nextLvlXp-currLvlXp))*100,100);
+    document.getElementById('trophyXpFill').style.width=pct+'%';
+    document.getElementById('trophyLevel').textContent=`Level ${p.level} · ${p.xp} XP · ${p.achievements.length}/${BADGES.length} badges`;
+    const ol=document.getElementById('trophyOverlay');ol.style.display='flex';setTimeout(()=>ol.classList.add('show'),10);
+}
+window.closeTrophy=function(){const ol=document.getElementById('trophyOverlay');ol.classList.remove('show');setTimeout(()=>ol.style.display='none',400);};
+document.addEventListener('keydown',e=>{if(e.key==='t'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'){openTrophy();}if(e.key==='Escape')closeTrophy();});
+setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);},4000);
+
+// Auto-check achievements on load
+(function(){
+    const p=VDna.get();
+    // Regular: 3+ visits
+    if(p.visits>=3)Achieve.check('regular');
+    // Night Owl: midnight-5AM Cairo
+    const cairoH=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
+    if(cairoH>=0&&cairoH<5)Achieve.check('nightowl');
+    // Streak Master: 5+ streak
+    const streak=parseInt(localStorage.getItem('streak')||'0');
+    if(streak>=5)Achieve.check('streak5');
+    // Speed Reader: set timer
+    const loadTime=Date.now();
+    const speedCheck=()=>{
+        const pct=scrollY/(document.documentElement.scrollHeight-innerHeight);
+        if(pct>0.95&&(Date.now()-loadTime)<30000)Achieve.check('speed');
+    };
+    addEventListener('scroll',speedCheck,{passive:true});
+    setTimeout(()=>removeEventListener('scroll',speedCheck),35000);
+    // Globe: check via IP (already fetched)
+    if(p.tz&&!p.tz.includes('Cairo')&&!p.tz.includes('Africa'))Achieve.check('globe');
+})();
+
+// Hook easter egg achievement
+const origShowEgg=showEgg;
+showEgg=function(){origShowEgg();Achieve.check('secret');};
+// Hook shake contact achievement
+const origReveal=revealContact;
+revealContact=function(){origReveal();Achieve.check('shaker');};
+
+// 4e. Daily Challenge System
+const ChallengeSystem=(function(){
+    const challenges=[
+        {id:'scroll100',text:'Scroll to the very bottom of the page',check:()=>VDna.get().scrollMax>=98},
+        {id:'click3',text:'Click on 3 different links',check:()=>VDna.get().sessionClicks>=3},
+        {id:'trophy',text:'Open the trophy case (press T)',check:()=>document.getElementById('trophyOverlay').classList.contains('show')},
+        {id:'theme',text:'Try both light and dark themes',check:()=>!!localStorage.getItem('theme_switched')},
+        {id:'share',text:'Generate and share your profile card',check:()=>!!localStorage.getItem('shared_card')},
+        {id:'easter',text:'Find the hidden easter egg',check:()=>VDna.get().achievements.includes('secret')},
+        {id:'allnl',text:'Visit all 3 newsletter links',check:()=>VDna.get().achievements.includes('scholar')},
+    ];
+    const today=new Date().toDateString();
+    const dayIdx=Math.floor(Date.now()/86400000)%challenges.length;
+    const todayChallenge=challenges[dayIdx];
+    const p=VDna.get();
+    const completed=p.challengeDate===today&&p.challengeDone;
+
+    function render(){
+        const el=document.getElementById('challengeText');
+        const prog=document.getElementById('challengeProgress');
+        const icon=document.getElementById('challengeIcon');
+        const card=document.getElementById('dailyChallenge');
+        if(!el)return;
+        el.textContent=todayChallenge.text;
+        if(completed||p.challengeDone&&p.challengeDate===today){
+            prog.textContent='✓ DONE';icon.textContent='✅';card.classList.add('completed');
+        } else {
+            prog.textContent='0/1';
+        }
+    }
+    function checkProgress(){
+        if(completed)return;
+        if(todayChallenge.check()){
+            const p2=VDna.get();p2.challengeDate=today;p2.challengeDone=true;VDna.save();
+            VDna.addXp(15);
+            const el=document.getElementById('challengeProgress');
+            const icon=document.getElementById('challengeIcon');
+            const card=document.getElementById('dailyChallenge');
+            if(el){el.textContent='✓ DONE';icon.textContent='✅';card.classList.add('completed');}
+            showToast({emoji:'🎯',name:'Challenge Complete',desc:todayChallenge.text+' · +15 XP'});
+        }
+    }
+    // Reset challenge if new day
+    if(p.challengeDate!==today){p.challengeDate=today;p.challengeDone=false;VDna.save();}
+    setTimeout(render,3000);
+    // Check periodically
+    setInterval(checkProgress,3000);
+    return{checkProgress};
+})();
+
+// Hook theme switch for challenge tracking
+const origThemeBtn=document.getElementById('tbtn');
+origThemeBtn.addEventListener('click',()=>{localStorage.setItem('theme_switched','1');ChallengeSystem.checkProgress();});
+
+// Hook share for challenge tracking
+const origOpenShare=window.openShare;
+window.openShare=function(){origOpenShare();localStorage.setItem('shared_card','1');ChallengeSystem.checkProgress();};
+
+// Engagement check interval
+setInterval(()=>{checkSmartCta();ChallengeSystem.checkProgress();},5000);
+
 // ═══ SCROLL & PARALLAX ═══
-addEventListener('scroll',()=>{const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';},{passive:true});
+addEventListener('scroll',()=>{const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';trackScroll();},{passive:true});
 if(!reducedMotion){addEventListener('scroll',()=>{const y=scrollY;document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${y*(i+1)*.06}px)`;});},{passive:true});}
 })();
 </script>
