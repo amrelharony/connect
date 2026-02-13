@@ -381,7 +381,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .game-hint{font-family:'JetBrains Mono',monospace;font-size:7px;color:#2d3748;padding:0 14px 4px}
 .game-btns{display:flex;gap:8px;justify-content:center;padding:8px 14px}
 .game-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:6px;border:1px solid #1a2332;background:#0d1420;color:#6b7280;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;flex:1}.game-btn:hover,.game-btn:active{border-color:#00e1ff;color:#00e1ff}
-@media(max-width:600px){.game-hint{display:none}.game-touch-hint{display:block!important}}
+@media(max-width:600px){.game-hint{display:none}}
 /* KEYBOARD SHORTCUTS */
 #shortcutOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(12px);pointer-events:none}
 #shortcutOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -496,7 +496,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <div class="game-level-bar"><span class="game-level-text" id="levelText">Q1</span><div class="game-level-track"><div class="game-level-fill" id="levelFill" style="width:0%"></div></div></div>
     <div class="game-msg" id="gameMsg">Collect 💰 coins to grow your portfolio</div>
     <div class="game-hint">Arrow keys · R restart · ESC close</div>
-    <div class="game-touch-hint" id="gameTouchHint" style="display:none;font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5568;padding:6px 14px;text-align:center">👆 Swipe anywhere to move</div>
+    <div id="gameTouchHint" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#58a6ff;padding:8px 14px;text-align:center;opacity:1;transition:opacity 1s">👆 Swipe anywhere to move</div>
     <div class="game-btns"><button class="game-btn" onclick="restartSnake()">↻ New Trade</button><button class="game-btn" onclick="closeGame()">✕ Close</button></div>
 </div></div>
 <!-- Keyboard Shortcuts Overlay -->
@@ -2031,9 +2031,9 @@ function startSnake(){
     if(snakeGame)clearInterval(snakeGame);
     snakeGame=setInterval(update,speed);
     document.getElementById('gameMsg').textContent='Collect 💰 coins · Avoid 💣 bombs · Grow your portfolio';
-    // Show touch hint on mobile
+    // Show touch hint then fade
     const touchHint=document.getElementById('gameTouchHint');
-    if(touchHint&&'ontouchstart' in window){touchHint.style.display='block';setTimeout(()=>{touchHint.style.opacity='0';touchHint.style.transition='opacity 1s';setTimeout(()=>{touchHint.style.display='none';},1000);},4000);}
+    if(touchHint){touchHint.style.opacity='1';touchHint.style.display='block';setTimeout(()=>{touchHint.style.opacity='0';},4000);}
     draw();
 
     const handler=e=>{
