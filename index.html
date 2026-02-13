@@ -102,6 +102,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .imp-item{text-align:center}.imp-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);line-height:1.2}
 .imp-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px}
 
+/* WEATHER WIDGET */
+.weather-widget{position:fixed;top:16px;left:16px;z-index:100;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 6px;border-radius:20px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sub);opacity:0;transition:opacity .5s;cursor:default}
+.weather-widget.show{opacity:1}
+.weather-icon{font-size:16px;line-height:1}
+.weather-temp{font-weight:600;color:var(--text)}
+.weather-desc{font-size:7px;letter-spacing:.5px;opacity:.6}
 /* SOCIAL PROOF TICKER */
 .ticker-wrap{overflow:hidden;margin:16px -24px 0;position:relative}
 .ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none}
@@ -421,7 +427,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .tc-auto-fill{height:100%;border-radius:1px;background:var(--accent);opacity:.3;width:0%;transition:width 6s linear}
 .tc-auto-fill.running{width:100%}
 /* PRINT RESUME */
-@media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
+@media print{body{background:#fff!important;color:#000!important;overflow:visible!important}#preloader,.noise,.sbar,.cg,.cd,.mesh,#bgC,.top-btns,.weather-widget,.toast-container,.combo-indicator,.smart-cta,.xp-footer,.live-console,.visitor-count,.streak,.foot,#trophyOverlay,#shortcutOverlay,#termOverlay,#gameOverlay,#shareOverlay,#easterEgg,canvas,.vcb,.rec-card,#recContainer{display:none!important}.rv{opacity:1!important;transform:none!important}#app{opacity:1!important;max-width:700px;margin:0 auto;padding:20px}.sa{opacity:1!important;transform:none!important}.print-only{display:block!important}.cert-card{break-inside:avoid;page-break-inside:avoid;border-color:#ddd!important;background:#fff!important}*{color:#000!important;border-color:#ddd!important}}
 .print-only{display:none}
 </style>
 </head>
@@ -433,6 +439,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 <div class="mesh"><div class="b1"></div><div class="b2"></div><div class="b3"></div></div>
 <canvas id="bgC" aria-hidden="true"></canvas>
 
+<div class="weather-widget" id="weatherWidget"><span class="weather-icon" id="weatherIcon">⏳</span><span class="weather-temp" id="weatherTemp">--°C</span></div>
 <div class="top-btns">
     <button class="tbtn" id="termBtn" aria-label="Open terminal" onclick="openTerm()" style="display:none"><i class="fa-solid fa-terminal"></i></button>
     <button class="tbtn" id="gameBtn" aria-label="Play game" onclick="openGame()" style="display:none"><i class="fa-solid fa-gamepad"></i></button>
@@ -750,22 +757,101 @@ window.toggleFlip=()=>document.getElementById('fc').classList.toggle('flipped');
 
 // ═══ STATUS (with smart greeting) ═══
 function updStatus(){
-    const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
+    const now=new Date();
+    const cairoOpts={timeZone:'Africa/Cairo'};
+    const h=parseInt(now.toLocaleString('en-US',{...cairoOpts,hour:'numeric',hour12:false}));
+    const dayName=now.toLocaleString('en-US',{...cairoOpts,weekday:'long'});
     const dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
     let msg,col;
-    if(h>=9&&h<17){msg=isArabic?"القاهرة · بناء التكنولوجيا المالية":"CAIRO · BUILDING FINTECH";col="#22c55e";}
-    else if(h>=17&&h<23){msg=isArabic?"القاهرة · إرشاد":"CAIRO · MENTORING";col="#a855f7";}
-    else{msg=isArabic?"القاهرة · استراحة":"CAIRO · RECHARGING";col="#f97316";}
+
+    // Check weekend (Egypt: Friday & Saturday)
+    const isWeekend=(dayName==='Friday'||dayName==='Saturday');
+
+    // Check if today is a holiday (loaded async, defaults to false)
+    const isHoliday=window._cairoHolidayToday||false;
+    const holidayName=window._cairoHolidayName||'';
+
+    if(isHoliday){
+        msg='CAIRO · 🎉 '+holidayName.toUpperCase();col='#eab308';
+    } else if(isWeekend){
+        msg=dayName==='Friday'?'CAIRO · 🕌 FRIDAY REST':'CAIRO · WEEKEND MODE';col='#f97316';
+    } else if(h>=9&&h<17){
+        msg='CAIRO · BUILDING FINTECH';col='#22c55e';
+    } else if(h>=17&&h<23){
+        msg='CAIRO · MENTORING';col='#a855f7';
+    } else {
+        msg='CAIRO · RECHARGING';col='#f97316';
+    }
+
     dot.style.background=col;
     if(reducedMotion){txt.textContent=msg;return;}
     txt.textContent='';let i=0;(function t(){if(i<msg.length){txt.textContent+=msg[i];i++;setTimeout(t,35);}})();
-    // Show separate greeting bar if referrer-based
     if(customGreeting){
         const bar=document.getElementById('greetBar');
         const gt=document.getElementById('greetTxt');
         if(bar&&gt){bar.style.display='block';gt.textContent=customGreeting;}
     }
 }
+
+// ═══ EGYPT HOLIDAYS (via Nager.Date free API) ═══
+(async function(){
+    try{
+        const yr=new Date().getFullYear();
+        const res=await fetch('https://date.nager.at/api/v3/PublicHolidays/'+yr+'/EG');
+        if(res.ok){
+            const holidays=await res.json();
+            const today=new Date().toLocaleString('en-CA',{timeZone:'Africa/Cairo'}).split(',')[0];// YYYY-MM-DD
+            const match=holidays.find(h=>h.date===today);
+            if(match){
+                window._cairoHolidayToday=true;
+                window._cairoHolidayName=match.localName||match.name;
+                updStatus();// Re-render with holiday
+            }
+        }
+    }catch(e){}
+})();
+
+// ═══ CAIRO WEATHER (Open-Meteo free API, no key) ═══
+(async function(){
+    const CACHE_KEY='cairoWeather';const TTL=3600000;// 1 hour
+    const weatherIcons={'0':'☀️','1':'🌤️','2':'⛅','3':'☁️','45':'🌫️','48':'🌫️','51':'🌦️','53':'🌧️','55':'🌧️','56':'🌨️','57':'🌨️','61':'🌧️','63':'🌧️','65':'🌧️','66':'🌨️','67':'🌨️','71':'🌨️','73':'🌨️','75':'❄️','77':'❄️','80':'🌦️','81':'🌧️','82':'⛈️','85':'🌨️','86':'🌨️','95':'⛈️','96':'⛈️','99':'⛈️'};
+
+    function render(data){
+        const w=document.getElementById('weatherWidget');
+        const ico=document.getElementById('weatherIcon');
+        const tmp=document.getElementById('weatherTemp');
+        if(!w||!ico||!tmp)return;
+        ico.textContent=weatherIcons[String(data.code)]||'🌡️';
+        tmp.textContent=Math.round(data.temp)+'°C';
+        w.classList.add('show');
+    }
+
+    function getCached(){
+        try{const raw=localStorage.getItem(CACHE_KEY);if(!raw)return null;const{data,ts}=JSON.parse(raw);if(Date.now()-ts<TTL)return data;return null;}catch(e){return null;}
+    }
+
+    try{
+        const cached=getCached();
+        if(cached){render(cached);return;}
+        // Cairo: 30.0444°N, 31.2357°E
+        const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.0444&longitude=31.2357&current=temperature_2m,weather_code&timezone=Africa%2FCairo');
+        if(res.ok){
+            const json=await res.json();
+            const data={temp:json.current.temperature_2m,code:json.current.weather_code};
+            localStorage.setItem(CACHE_KEY,JSON.stringify({data,ts:Date.now()}));
+            render(data);
+        }
+    }catch(e){}
+
+    // Refresh every hour
+    setInterval(async()=>{
+        try{
+            localStorage.removeItem(CACHE_KEY);
+            const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.0444&longitude=31.2357&current=temperature_2m,weather_code&timezone=Africa%2FCairo');
+            if(res.ok){const json=await res.json();const data={temp:json.current.temperature_2m,code:json.current.weather_code};localStorage.setItem(CACHE_KEY,JSON.stringify({data,ts:Date.now()}));render(data);}
+        }catch(e){}
+    },3600000);
+})();
 
 // ═══ LIVE MENTORING COUNTER ═══
 // Base: 1000 mins as of Oct 2023. ~80 mins/month estimated growth.
@@ -871,7 +957,7 @@ const _langEl=document.createElement('button');_langEl.id='langBtn';_langEl.styl
 })();
 
 // ═══ AVAILABILITY ═══
-(function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
+(function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');const isHoliday=window._cairoHolidayToday||false;if(isHoliday)el.textContent='Holiday · Back next working day';else if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
 
 // ═══ SHARE CARD ═══
 window.openShare=function(){
