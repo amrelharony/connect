@@ -55,8 +55,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 .sbar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:1000}
 
 /* TOP BUTTONS */
-.top-btns{position:fixed;top:16px;right:16px;z-index:100;display:flex;gap:8px}
-.tbtn{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .3s}
+.top-btns{position:fixed;top:16px;right:16px;z-index:100;display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);border-radius:20px;overflow:hidden;transition:all .3s}
+.tbtn{width:32px;height:32px;border:none;background:transparent;color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;transition:all .2s;padding:0;position:relative}
+.tbtn:hover{color:var(--accent)}
+.tbtn .trophy-btn-dot{position:absolute;top:4px;right:4px}
+/* Mobile: collapse to single dot, expand on tap */
+@media(max-width:600px){
+.top-btns{gap:0;border-radius:16px;max-height:32px;overflow:hidden;transition:max-height .3s ease,box-shadow .3s}
+.top-btns::after{content:'⋮';position:absolute;top:0;right:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub);pointer-events:none;transition:opacity .2s}
+.top-btns.expanded{max-height:200px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.top-btns.expanded::after{opacity:0}
+}
 .tbtn:hover,.tbtn:focus-visible{color:var(--accent);border-color:var(--accent);transform:rotate(20deg) scale(1.05);outline:none}
 .lang-btn{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
 .lang-btn:hover,.lang-btn:focus-visible{transform:scale(1.05);rotate:0deg}
@@ -619,13 +628,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <div class="cert-grid" id="certGrid">
         <a href="https://www.credly.com/badges/eec32200-0842-43d7-8ba5-336367850fd3" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎯</div><div class="cert-name"><strong>PMP</strong>Project Management</div><div class="cert-org">PMI · 2022</div></a>
         <a href="https://www.credly.com/badges/ffebe8e4-ee4f-44bc-b8c2-b91659b128e7" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🔄</div><div class="cert-name"><strong>SAFe® 6 SM</strong>Scrum Master</div><div class="cert-org">Scaled Agile · 2025</div></a>
-        <a href="https://www.credly.com/badges/5d2548d0-8425-4d55-8ed6-d0f32095c1c8" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📋</div><div class="cert-name"><strong>PSM II</strong>Pro Scrum Master</div><div class="cert-org">Scrum.org · 2025</div></a>
+        <a href="https://www.credly.com/badges/72258978-34b5-498b-b79b-d5c1f1bf26fe" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📋</div><div class="cert-name"><strong>PSM II</strong>Pro Scrum Master</div><div class="cert-org">Scrum.org · 2025</div></a>
         <a href="https://www.credly.com/badges/72258978-34b5-498b-b79b-d5c1f1bf26fe" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📦</div><div class="cert-name"><strong>PSPO II</strong>Product Owner</div><div class="cert-org">Scrum.org · 2025</div></a>
-        <a href="https://www.credly.com/badges/c8e9e735-7e32-4947-baec-3df79627af6e" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📊</div><div class="cert-name"><strong>PMI-ACP</strong>Agile Certified</div><div class="cert-org">PMI · 2025</div></a>
-        <a href="https://www.credly.com/badges/a7f59e05-13a7-4de2-aa0a-577d2d3be6e6" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🧠</div><div class="cert-name"><strong>PSK I</strong>Scrum + Kanban</div><div class="cert-org">Scrum.org · 2025</div></a>
-        <a href="https://www.credly.com/badges/beca0beb-d17d-4856-80ff-9fb770aa3478" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏗️</div><div class="cert-name"><strong>ICAgile ATF</strong>Agile Team Facilit.</div><div class="cert-org">ICAgile · 2025</div></a>
+        <a href="https://www.credly.com/badges/ffebe8e4-ee4f-44bc-b8c2-b91659b128e7" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📊</div><div class="cert-name"><strong>PMI-ACP</strong>Agile Certified</div><div class="cert-org">PMI · 2025</div></a>
+        <a href="https://www.credly.com/badges/c8e9e735-7e32-4947-baec-3df79627af6e" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🧠</div><div class="cert-name"><strong>PSK I</strong>Scrum + Kanban</div><div class="cert-org">Scrum.org · 2025</div></a>
+        <a href="https://www.credly.com/badges/a7f59e05-13a7-4de2-aa0a-577d2d3be6e6" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏗️</div><div class="cert-name"><strong>ICAgile ATF</strong>Agile Team Facilit.</div><div class="cert-org">ICAgile · 2025</div></a>
         <a href="https://certificates.cdmp.info/3bb25e30-c242-47b5-a3ae-d972fb8b7ee1" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">💾</div><div class="cert-name"><strong>CDMP</strong>Data Management</div><div class="cert-org">DAMA · 2026</div></a>
-        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQFo34ujncSchA/profile-treasury-image-shrink_1280_1280/B4DZkf0AldGgAQ-/0/1757175352139?e=1771567200&v=beta&t=CPWI7AdeggbKDUX7EZ1ohg2JYDapokoswxt9cCjuyKg" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏦</div><div class="cert-name"><strong>CEDF</strong>Digital Finance</div><div class="cert-org">Frankfurt School · 2019</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQFo34ujncSchA/profile-treasury-image-shrink_1280_1280/B4DZkf0AldGgAQ-/0/1757175352139?e=1771588800&v=beta&t=bE9j3hyEb9F6y4xxgSCJfvoXb02-vsVnCuVSJLB1jKM" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏦</div><div class="cert-name"><strong>CEDF</strong>Digital Finance</div><div class="cert-org">Frankfurt School · 2019</div></a>
         <a href="https://www.datacamp.com/certificate/DA0026927366011" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📈</div><div class="cert-name"><strong>Datacamp Pro</strong>Data Analyst</div><div class="cert-org">Datacamp · 2023</div></a>
         <a href="https://cp.certmetrics.com/atlassian/en/public/badge/c?id=5ecee96d9286180c30565dce&ccat=30&date=2025-11-2" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">⚙️</div><div class="cert-name"><strong>Jira Cloud</strong>Management</div><div class="cert-org">Atlassian · 2025</div></a>
         <a href="https://media.licdn.com/dms/image/v2/D4D2DAQEplmYsSyDekg/profile-treasury-image-shrink_1280_1280/profile-treasury-image-shrink_1280_1280/0/1707366993200?e=1771567200&v=beta&t=CKwIiV2jOhNbZOzQxxibKT58VhWqSDhrUl_J18hLW1w" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎓</div><div class="cert-name"><strong>DBA</strong>Digital Transform.</div><div class="cert-org">Helwan Univ. · 2023</div></a>
@@ -746,6 +755,19 @@ const hs='a,button,.pf,.lk,.nl';document.addEventListener('mouseover',e=>{if(e.t
 document.querySelectorAll('.lk').forEach(card=>{const sp=card.querySelector('.ls');let cxx=0,cyy=0,tx=0,ty=0;
 card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(sp)sp.style.background=`radial-gradient(250px circle at ${x}px ${y}px,var(--glow),transparent 70%)`;tx=((y-r.height/2)/(r.height/2))*-6;ty=((x-r.width/2)/(r.width/2))*6;});
 card.addEventListener('mouseleave',()=>{tx=0;ty=0;});(function spr(){cxx+=(tx-cxx)*.12;cyy+=(ty-cyy)*.12;if(Math.abs(tx-cxx)>.01||Math.abs(ty-cyy)>.01||tx!==0)card.style.transform=`perspective(800px) rotateX(${cxx}deg) rotateY(${cyy}deg) scale3d(1.01,1.01,1.01)`;else card.style.transform='';requestAnimationFrame(spr);})();});}
+
+// ═══ MOBILE TOOLBAR TOGGLE ═══
+(function(){
+    const tb=document.querySelector('.top-btns');if(!tb)return;
+    let expanded=false;
+    tb.addEventListener('click',function(e){
+        if(window.innerWidth>600)return;
+        if(!expanded){e.preventDefault();e.stopPropagation();expanded=true;tb.classList.add('expanded');return;}
+    });
+    document.addEventListener('click',function(e){
+        if(expanded&&!tb.contains(e.target)){expanded=false;tb.classList.remove('expanded');}
+    });
+})();
 
 // ═══ THEME ═══
 function applyTheme(m){const i=document.getElementById('ticon'),l=m==='light';document.body.classList.toggle('light-mode',l);i.className=l?'fa-solid fa-moon':'fa-solid fa-sun';pC=l?{r:15,g:23,b:42}:{r:0,g:225,b:255};const q=document.getElementById('qri');if(q){const fg=l?'0066ff':'00e1ff',bg=l?'f4f6fb':'06080f';q.src=`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=${fg}&bgcolor=${bg}`;}}
