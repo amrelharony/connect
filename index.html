@@ -208,8 +208,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 [dir="rtl"] .vp{direction:rtl;text-align:center}
 [dir="rtl"] .li{margin-right:0;margin-left:14px}
 
-/* AVAILABILITY */
-.avail{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);opacity:.5;margin:4px 0 8px;letter-spacing:.5px}.avail i{color:var(--accent);font-size:8px}
 /* READING */
 .reading-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);margin:12px 0 0}
 .reading-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:var(--bg)}
@@ -576,8 +574,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <span class="conf-badge">TechUp Women</span>
     </div>
 
-    <div class="avail rv"><i class="fa-solid fa-circle"></i> <span id="availTxt">Checking...</span></div>
-
     <div class="shake-hint" id="shakeHint"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> Met me in person? Shake your phone</div>
     <div class="shake-bar" id="shakeBar"><div class="shake-fill" id="shakeFill"></div></div>
     <div class="desk-hint" id="deskHint"><i class="fa-solid fa-keyboard" aria-hidden="true" style="margin-right:4px;"></i> Met me? Press <strong style="color:var(--accent);">S</strong> to save my contact</div>
@@ -810,7 +806,7 @@ function updStatus(){
     } else if(h>=17&&h<23){
         msg='CAIRO · MENTORING';col='#a855f7';
     } else {
-        msg='CAIRO · RECHARGING';col='#f97316';
+        msg='CAIRO · OFFLINE';col='#f97316';
     }
 
     dot.style.background=col;
@@ -986,9 +982,7 @@ const _langEl=document.createElement('button');_langEl.id='langBtn';_langEl.styl
         }).catch(()=>{});
 })();
 
-// ═══ AVAILABILITY ═══
-(function(){const h=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));const d=new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",weekday:"long"});const el=document.getElementById('availTxt');const isHoliday=window._cairoHolidayToday||false;if(isHoliday)el.textContent='Holiday · Back next working day';else if(d==='Friday'||d==='Saturday')el.textContent='Weekend · Back Sunday 9AM Cairo';else if(h>=9&&h<17)el.textContent='Typically responds within 2 hours';else if(h>=17&&h<21)el.textContent='Evening · Responds by tomorrow 9AM';else el.textContent='Offline · Next available 9AM Cairo';})();
-
+    
 // ═══ SHARE CARD ═══
 window.openShare=function(){
     const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');
