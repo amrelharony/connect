@@ -764,7 +764,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
   function init() {
     initZenMode();
     // initPdfResume(); // Disabled for now
-    initSurpriseMe();
+    // initSurpriseMe(); // Disabled for now
     initEmojiCursor();
     updateShortcutsPanel();
 
