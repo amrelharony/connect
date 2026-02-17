@@ -153,87 +153,26 @@
 
 
 /* ═══════════════════════════════════════════
-   2. LIVE MENTORSHIP STATS
+   2. MENTORSHIP INLINE BADGE
    ═══════════════════════════════════════════ */
 
-.mentorship-live {
-  display: flex;
+.mentor-inline-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  margin: 8px 0;
-  transition: all .3s;
-}
-.mentorship-live:hover {
-  border-color: rgba(0,225,255,.12);
-  background: var(--cardH);
-}
-.mentor-icon-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 18px;
-  color: #fff;
-  position: relative;
-}
-.mentor-pulse-ring {
-  position: absolute;
-  inset: -4px;
-  border-radius: 14px;
-  border: 1.5px solid #22c55e;
-  opacity: 0;
-  animation: mentorPulse 3s ease-in-out infinite;
-}
-@keyframes mentorPulse {
-  0%, 100% { opacity: 0; transform: scale(1); }
-  50% { opacity: .3; transform: scale(1.15); }
-}
-.mentor-stats {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.mentor-stats-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.mentor-stats-number {
+  gap: 5px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-}
-.mentor-stats-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
+  font-size: 7px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--sub);
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(34,197,94,.06);
+  border: 1px solid rgba(34,197,94,.15);
+  color: #22c55e;
+  margin-left: 8px;
+  white-space: nowrap;
 }
-.mentor-stats-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .5px;
-  color: var(--accent);
-  opacity: .7;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.mentor-stats-sub .live-dot {
+.mentor-inline-badge .live-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -246,62 +185,9 @@
   0%, 100% { opacity: .4; }
   50% { opacity: 1; }
 }
-.mentor-book-btn {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
-  cursor: pointer;
-  transition: all .3s;
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.mentor-book-btn:hover {
-  background: rgba(0,225,255,.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--glow);
-}
-
-/* Progress bar under stats */
-.mentor-progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-.mentor-progress-bar {
-  flex: 1;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--border);
-  overflow: hidden;
-}
-.mentor-progress-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #22c55e, var(--accent));
-  transition: width 1.5s cubic-bezier(.16,1,.3,1);
-}
-.mentor-progress-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 7px;
-  letter-spacing: .5px;
-  color: var(--sub);
-  opacity: .5;
-  white-space: nowrap;
-}
 
 @media print {
-  .mentorship-live { border-color: #ddd !important; background: #fafafa !important; }
-  .mentor-pulse-ring, .live-dot { display: none !important; }
-  .mentor-book-btn { display: none !important; }
+  .mentor-inline-badge { display: none !important; }
 }
 
 
@@ -612,127 +498,22 @@
   // ═══════════════════════════════════════════════════
 
   function initMentorshipStats() {
-    // Calculate live mentoring minutes
-    // Base: 1000 mins as of Oct 2023. ~80 mins/month estimated growth.
-    const BASE_MINS = 1000;
-    const START_DATE = new Date('2023-10-01');
-    const now = new Date();
-    const monthsElapsed =
-      (now.getFullYear() - START_DATE.getFullYear()) * 12 +
-      (now.getMonth() - START_DATE.getMonth());
-    const totalMins = BASE_MINS + Math.floor(monthsElapsed * 80);
+    // Inject a compact stats badge into the existing ADPList card (no separate card)
+    const adpCard = document.querySelector('a.lk[href*="adplist.org"]');
+    if (!adpCard) return;
 
-    // Estimate next milestone
-    const milestones = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000, 7500, 10000];
-    const nextMilestone = milestones.find(m => m > totalMins) || 10000;
-    const progressPct = Math.min(
-      ((totalMins - (milestones[milestones.indexOf(nextMilestone) - 1] || 0)) /
-       (nextMilestone - (milestones[milestones.indexOf(nextMilestone) - 1] || 0))) * 100,
-      100
-    );
+    const subtitle = adpCard.querySelector('.lsu');
+    if (!subtitle) return;
 
-    // Estimate open slots based on day/time
-    const cairoH = parseInt(
-      now.toLocaleString('en-US', { timeZone: 'Africa/Cairo', hour: 'numeric', hour12: false })
-    );
-    const dayName = now.toLocaleString('en-US', { timeZone: 'Africa/Cairo', weekday: 'long' });
-    const isWeekend = dayName === 'Friday' || dayName === 'Saturday';
+    // Static mentoring minutes (update manually when needed)
+    const TOTAL_MINS = 2400;
 
-    let slotMessage = '';
-    let slotCount = 0;
-    if (isWeekend) {
-      slotCount = 3;
-      slotMessage = `${slotCount} slots available this weekend`;
-    } else if (cairoH >= 17 && cairoH < 22) {
-      slotCount = 2;
-      slotMessage = `${slotCount} evening slots open today`;
-    } else if (cairoH >= 9 && cairoH < 17) {
-      slotCount = 1;
-      slotMessage = 'Limited slots — evenings only';
-    } else {
-      slotCount = 4;
-      slotMessage = `${slotCount} slots open this week`;
-    }
-
-    // Find insertion point — after the link cards, before "THE JOURNEY"
-    const journeyDivider = document.querySelector('.nd');
-    const linkContainer = document.querySelector('[style*="flex-direction:column"]');
-    if (!linkContainer) return;
-
-    // Build the widget
-    const card = document.createElement('div');
-    card.className = 'mentorship-live sa sa-up';
-    card.id = 'mentorshipLive';
-    card.innerHTML = `
-      <div class="mentor-icon-wrap">
-        🎓
-        <div class="mentor-pulse-ring"></div>
-      </div>
-      <div class="mentor-stats">
-        <div class="mentor-stats-row">
-          <span class="mentor-stats-number" id="mentorLiveCount">0</span>
-          <span class="mentor-stats-label">Mentoring Minutes</span>
-        </div>
-        <div class="mentor-stats-sub">
-          <span class="live-dot"></span>
-          <span id="mentorSlotMsg">${slotMessage}</span>
-        </div>
-        <div class="mentor-progress-wrap">
-          <div class="mentor-progress-bar">
-            <div class="mentor-progress-fill" id="mentorProgressFill" style="width:0%"></div>
-          </div>
-          <span class="mentor-progress-label">Next: ${nextMilestone.toLocaleString()}</span>
-        </div>
-      </div>
-      <a href="https://adplist.org/mentors/amr-elharony"
-         target="_blank" rel="noopener"
-         class="mentor-book-btn"
-         id="mentorBookBtn">
-        Book Free
-      </a>
-    `;
-
-    // Insert after the link cards
-    linkContainer.insertAdjacentElement('afterend', card);
-
-    // Animate counter
-    animateValue('mentorLiveCount', totalMins, 1800);
-
-    // Animate progress bar
-    setTimeout(() => {
-      const fill = document.getElementById('mentorProgressFill');
-      if (fill) fill.style.width = progressPct + '%';
-    }, 2500);
-
-    // Hook book button to open ADPList widget if available
-    const bookBtn = document.getElementById('mentorBookBtn');
-    if (bookBtn) {
-      bookBtn.addEventListener('click', (e) => {
-        if (window._adpToggleWidget) {
-          e.preventDefault();
-          window._adpToggleWidget();
-          // Scroll to widget
-          const wrap = document.getElementById('adpWidgetWrap');
-          if (wrap) {
-            setTimeout(() => {
-              wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 400);
-          }
-        }
-        if (window.VDna) window.VDna.addXp(3);
-      });
-    }
-
-    // Intersection Observer for scroll-triggered animation
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('vis');
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.2 });
-    obs.observe(card);
+    // Create inline stats badge
+    const statsBadge = document.createElement('span');
+    statsBadge.className = 'mentor-inline-badge';
+    statsBadge.id = 'mentorInlineBadge';
+    statsBadge.innerHTML = `<span class="live-dot"></span> ${TOTAL_MINS.toLocaleString()}+ mins`;
+    subtitle.appendChild(statsBadge);
   }
 
   function animateValue(elId, target, duration) {
