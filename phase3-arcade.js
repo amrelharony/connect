@@ -1,19 +1,22 @@
 // ═══════════════════════════════════════════════════════════════
-// PHASE 3: THE AMR ARCADE — amrelharony.com
+// PHASE 3: THE AMR ARCADE — amrelharony.com (DEEPENED v2)
 // Drop-in: <script src="phase3-arcade.js" defer></script>
 //
 // Features:
 //   1. Arcade Hub (gamepad icon / > play command)
 //   2. Time-of-Day Base Game assignment
-//   3. Sprint Stacker (Morning — Tetris metaphor)
+//   3. Sprint Stacker (Morning — Tetris) + NEXT PIECE PREVIEW
 //   4. Data Mesh Router (Afternoon — Pipe mania)
 //   5. FinTech Trader (Evening — wraps existing Snake)
-//   6. Bilingual Swipe (Night — jargon matching)
-//   7. Scope Defender (Level 5 — Space Invaders boss)
+//   6. Bilingual Swipe (Night — jargon matching) + DIFFICULTY SCALING
+//   7. Scope Defender (Level 5 — Space Invaders boss) + POWER-UPS
 //   8. XP unlock progression
 //   9. Rage Click Bug Bash easter egg
+//  10. CROSS-GAME LEADERBOARD (unified arcade score)
+//  11. SHARE CARD (downloadable score image)
 //
-// Lazy-loaded: No game canvas runs until user opens a game
+// Deepened: Next preview, 4-option hard mode, per-card timer,
+//           power-ups (☕🛡️📦), combined leaderboard, share cards
 // ═══════════════════════════════════════════════════════════════
 (function PhaseThreeArcade() {
   'use strict';
@@ -33,7 +36,7 @@
   };
 
   const GAME_ORDER = ['stacker','router','trader','bilingual','defender'];
-  const LEVEL_XP = [0, 50, 150, 300, 500]; // XP needed for levels 1-5
+  const LEVEL_XP = [0, 50, 150, 300, 500];
 
   // ───────────────────────────────────────
   // STATE
@@ -45,17 +48,10 @@
   }
   function saveArcadeState(s) { localStorage.setItem('arcade_state', JSON.stringify(s)); }
 
-  function getPlayerLevel() {
-    if (window.VDna) return window.VDna.get().level || 1;
-    return 1;
-  }
-  function getPlayerXP() {
-    if (window.VDna) return window.VDna.get().xp || 0;
-    return 0;
-  }
+  function getPlayerLevel() { return window.VDna ? (window.VDna.get().level || 1) : 1; }
+  function getPlayerXP() { return window.VDna ? (window.VDna.get().xp || 0) : 0; }
   function addXP(n) { if (window.VDna) window.VDna.addXp(n); }
 
-  // Determine base game from Cairo time
   function getBaseGame() {
     const h = parseInt(new Date().toLocaleString('en-US',{timeZone:'Africa/Cairo',hour:'numeric',hour12:false}));
     if (h >= 6 && h < 12)  return 'stacker';
@@ -64,7 +60,6 @@
     return 'bilingual';
   }
 
-  // Initialize base game on first visit
   function initBaseGame() {
     const s = getArcadeState();
     if (!s.baseGame) {
@@ -79,18 +74,21 @@
     const s = getArcadeState();
     const game = GAMES[gameId];
     if (!game) return false;
-    // Base game always unlocked
     if (s.baseGame === gameId) return true;
-    // Already in unlocked list
     if (s.unlockedGames.includes(gameId)) return true;
-    // Check level
     const lvl = getPlayerLevel();
     if (lvl >= game.unlockLevel) {
-      // Auto-unlock
       if (!s.unlockedGames.includes(gameId)) { s.unlockedGames.push(gameId); saveArcadeState(s); }
       return true;
     }
     return false;
+  }
+
+  // ─── NEW: Cross-game combined score ───
+  function getCombinedScore() {
+    const s = getArcadeState();
+    const hs = s.highScores || {};
+    return Object.values(hs).reduce((sum, v) => sum + (v || 0), 0);
   }
 
   // ───────────────────────────────────────
@@ -115,6 +113,11 @@
 .arcade-xp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#00e1ff,#6366f1,#a855f7);transition:width .8s cubic-bezier(.16,1,.3,1)}
 .arcade-xp-text{font-family:'JetBrains Mono',monospace;font-size:8px;color:#4a5568;white-space:nowrap}
 .arcade-base-tag{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#22c55e;margin-top:8px}
+
+/* NEW: Combined score banner */
+.arcade-combined{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.12)}
+.arcade-combined-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#fbbf24}
+.arcade-combined-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:#6b7280}
 
 /* GAME CARDS */
 .arcade-grid{display:flex;flex-direction:column;gap:8px}
@@ -142,7 +145,7 @@
 
 .arcade-close{text-align:center;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5568;opacity:.4;cursor:pointer}.arcade-close:hover{opacity:1;color:#00e1ff}
 
-/* GAME OVERLAY (shared by all mini-games) */
+/* GAME OVERLAY */
 #miniGameOverlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;pointer-events:none}
 #miniGameOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
 .mg-container{width:96%;max-width:400px;max-height:90vh;overflow-y:auto;border-radius:16px;background:#080c14;border:1px solid #1a2332;transform:scale(.9);transition:transform .4s cubic-bezier(.16,1,.3,1)}
@@ -182,6 +185,25 @@
 .swipe-pip{width:8px;height:3px;border-radius:2px;background:#1a2332;transition:background .3s}
 .swipe-pip.done{background:#22c55e}.swipe-pip.wrong-pip{background:#ef4444}.swipe-pip.current{background:#00e1ff}
 
+/* NEW: Bilingual timer bar */
+.swipe-timer-wrap{height:3px;margin:0 14px 4px;border-radius:2px;background:#111827;overflow:hidden;opacity:0;transition:opacity .3s}
+.swipe-timer-wrap.active{opacity:1}
+.swipe-timer-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#ef4444,#fbbf24,#22c55e);transition:width .1s linear;width:100%}
+.swipe-difficulty{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;text-align:center;padding:2px;color:#f97316;opacity:0;transition:opacity .3s}
+.swipe-difficulty.show{opacity:.6}
+
+/* NEW: Share card button */
+.mg-share-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:6px;border:1px solid rgba(99,102,241,.2);background:rgba(99,102,241,.06);color:#6366f1;cursor:pointer;transition:all .2s;flex:1;text-align:center;-webkit-tap-highlight-color:transparent}
+.mg-share-btn:hover{border-color:#6366f1;color:#6366f1;background:rgba(99,102,241,.12)}
+
+/* NEW: Power-up indicator */
+.sd-powerup-bar{display:flex;gap:6px;justify-content:center;padding:2px 14px;min-height:18px}
+.sd-powerup-active{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 8px;border-radius:4px;animation:puPulse 1s ease-in-out infinite}
+.sd-pu-speed{color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.15)}
+.sd-pu-shield{color:#3b82f6;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15)}
+.sd-pu-triple{color:#a855f7;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15)}
+@keyframes puPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
 /* CONFETTI */
 .confetti-piece{position:fixed;pointer-events:none;z-index:10001;font-size:14px;animation:confettiFall 3s ease-out forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
@@ -201,14 +223,12 @@
   // ARCADE HUB UI
   // ───────────────────────────────────────
   function createArcadeHub() {
-    // Overlay
     const overlay = document.createElement('div');
     overlay.id = 'arcadeOverlay';
     overlay.addEventListener('click', e => { if (e.target === overlay) closeArcade(); });
     overlay.innerHTML = `<div class="arcade-hub" id="arcadeHub"></div>`;
     document.body.appendChild(overlay);
 
-    // Mini-game overlay (shared canvas container)
     const gameOv = document.createElement('div');
     gameOv.id = 'miniGameOverlay';
     gameOv.addEventListener('click', e => { if (e.target === gameOv) closeMiniGame(); });
@@ -229,6 +249,7 @@
     const currLvlXp = LEVEL_XP[lvl - 1] || 0;
     const nextLvlXp = LEVEL_XP[lvl] || LEVEL_XP[LEVEL_XP.length - 1];
     const xpPct = Math.min(((xp - currLvlXp) / (nextLvlXp - currLvlXp)) * 100, 100);
+    const combinedScore = getCombinedScore();
 
     let cards = '';
     GAME_ORDER.forEach(id => {
@@ -237,12 +258,7 @@
       const isBase = state.baseGame === id;
       const isBoss = id === 'defender';
       const hs = state.highScores[id] || 0;
-      const cls = [
-        'arcade-card',
-        !unlocked ? 'locked' : '',
-        isBase ? 'base-game' : '',
-        isBoss ? 'boss-card' : ''
-      ].filter(Boolean).join(' ');
+      const cls = ['arcade-card', !unlocked ? 'locked' : '', isBase ? 'base-game' : '', isBoss ? 'boss-card' : ''].filter(Boolean).join(' ');
 
       cards += `
         <div class="${cls}" data-game="${id}" ${unlocked ? '' : 'title="Locked"'}>
@@ -255,7 +271,7 @@
           </div>
           <div class="arcade-card-right">
             ${unlocked
-              ? `<div class="arcade-card-score">${hs > 0 ? '$' + hs.toLocaleString() : '—'}</div>
+              ? `<div class="arcade-card-score">${hs > 0 ? hs.toLocaleString() : '—'}</div>
                  <div class="arcade-card-plays">${g.period} ${g.time}</div>`
               : `<div class="arcade-card-lock">🔒</div>
                  <div class="arcade-card-unlock">Level ${g.unlockLevel}</div>`}
@@ -272,6 +288,11 @@
           <div class="arcade-xp-track"><div class="arcade-xp-fill" style="width:${xpPct}%"></div></div>
           <span class="arcade-xp-text">${xp} XP</span>
         </div>
+        ${combinedScore > 0 ? `
+        <div class="arcade-combined">
+          <span class="arcade-combined-val">🏆 ${combinedScore.toLocaleString()}</span>
+          <span class="arcade-combined-label">Combined Arcade Score</span>
+        </div>` : ''}
         <div class="arcade-base-tag"><i class="fa-solid fa-clock" style="font-size:8px"></i> Your base: ${GAMES[state.baseGame]?.name || '...'} (${GAMES[state.baseGame]?.period || ''})</div>
       </div>
       <div class="arcade-grid">${cards}</div>
@@ -279,7 +300,6 @@
       <div class="arcade-close" onclick="window._closeArcade()">[ ESC or tap to close ]</div>
     `;
 
-    // Bind card clicks
     hub.querySelectorAll('.arcade-card:not(.locked)').forEach(card => {
       card.addEventListener('click', () => {
         const gid = card.dataset.game;
@@ -289,15 +309,8 @@
     });
   }
 
-  function openArcade() {
-    initBaseGame();
-    renderArcadeHub();
-    document.getElementById('arcadeOverlay').classList.add('show');
-    addXP(1);
-  }
-  function closeArcade() {
-    document.getElementById('arcadeOverlay')?.classList.remove('show');
-  }
+  function openArcade() { initBaseGame(); renderArcadeHub(); document.getElementById('arcadeOverlay').classList.add('show'); addXP(1); }
+  function closeArcade() { document.getElementById('arcadeOverlay')?.classList.remove('show'); }
   window._closeArcade = closeArcade;
   window._openArcade = openArcade;
 
@@ -307,23 +320,15 @@
   let activeGameCleanup = null;
 
   function launchGame(gameId) {
-    if (gameId === 'trader') {
-      // Use existing snake game
-      if (typeof window.openGame === 'function') window.openGame();
-      return;
-    }
+    if (gameId === 'trader') { if (typeof window.openGame === 'function') window.openGame(); return; }
     const container = document.getElementById('mgContainer');
     if (!container) return;
-    // Clean up previous game
     if (activeGameCleanup) { activeGameCleanup(); activeGameCleanup = null; }
-
     const g = GAMES[gameId];
     document.getElementById('miniGameOverlay').classList.add('show');
-
     const s = getArcadeState();
     s.totalPlays = (s.totalPlays || 0) + 1;
     saveArcadeState(s);
-
     switch (gameId) {
       case 'stacker':   activeGameCleanup = GameStacker(container, g); break;
       case 'router':    activeGameCleanup = GameRouter(container, g); break;
@@ -339,19 +344,136 @@
 
   function recordScore(gameId, score) {
     const s = getArcadeState();
-    if (!s.highScores[gameId] || score > s.highScores[gameId]) {
-      s.highScores[gameId] = score;
-    }
+    if (!s.highScores[gameId] || score > s.highScores[gameId]) s.highScores[gameId] = score;
     saveArcadeState(s);
     addXP(Math.floor(score / 50) + 5);
   }
 
+
+  // ═══════════════════════════════════════
+  // SHARE CARD GENERATOR (all games)
+  // ═══════════════════════════════════════
+  function generateShareCard(gameName, gameIcon, gameColor, score, extra) {
+    const W = 600, H = 315;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const cx = cv.getContext('2d');
+
+    // Background
+    const bg = cx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#080c14');
+    bg.addColorStop(1, '#0d1420');
+    cx.fillStyle = bg;
+    cx.fillRect(0, 0, W, H);
+
+    // Border
+    cx.strokeStyle = gameColor + '40';
+    cx.lineWidth = 2;
+    cx.strokeRect(1, 1, W - 2, H - 2);
+
+    // Subtle grid
+    cx.strokeStyle = 'rgba(255,255,255,.02)';
+    cx.lineWidth = 0.5;
+    for (let i = 0; i < W; i += 30) { cx.beginPath(); cx.moveTo(i, 0); cx.lineTo(i, H); cx.stroke(); }
+    for (let i = 0; i < H; i += 30) { cx.beginPath(); cx.moveTo(0, i); cx.lineTo(W, i); cx.stroke(); }
+
+    // Game icon
+    cx.font = '56px serif';
+    cx.textAlign = 'left';
+    cx.fillText(gameIcon, 30, 80);
+
+    // Game name
+    cx.font = 'bold 28px JetBrains Mono, monospace';
+    cx.fillStyle = '#e2e8f0';
+    cx.fillText(gameName, 100, 65);
+
+    // Tagline
+    cx.font = '12px JetBrains Mono, monospace';
+    cx.fillStyle = gameColor;
+    cx.fillText('AMR ARCADE — amrelharony.com', 100, 85);
+
+    // Score
+    cx.font = 'bold 64px JetBrains Mono, monospace';
+    cx.fillStyle = gameColor;
+    cx.textAlign = 'center';
+    cx.fillText(score.toLocaleString(), W / 2, 175);
+
+    // Score label
+    cx.font = '14px JetBrains Mono, monospace';
+    cx.fillStyle = '#4a5568';
+    cx.fillText('POINTS', W / 2, 200);
+
+    // Extra line
+    if (extra) {
+      cx.font = '13px JetBrains Mono, monospace';
+      cx.fillStyle = '#6b7280';
+      cx.fillText(extra, W / 2, 230);
+    }
+
+    // Date
+    cx.font = '10px JetBrains Mono, monospace';
+    cx.fillStyle = '#2d3748';
+    cx.textAlign = 'right';
+    cx.fillText(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }), W - 20, H - 16);
+
+    // Branding
+    cx.textAlign = 'left';
+    cx.fillStyle = '#2d3748';
+    cx.fillText('🕹️ Play at amrelharony.com', 20, H - 16);
+
+    // Glow accent line
+    const glow = cx.createLinearGradient(0, 0, W, 0);
+    glow.addColorStop(0, 'transparent');
+    glow.addColorStop(0.3, gameColor + '60');
+    glow.addColorStop(0.7, gameColor + '60');
+    glow.addColorStop(1, 'transparent');
+    cx.fillStyle = glow;
+    cx.fillRect(0, H - 3, W, 3);
+
+    return cv;
+  }
+
+  function showShareButton(container, gameName, gameIcon, gameColor, score, extra) {
+    const btnsDiv = container.querySelector('.mg-btns');
+    if (!btnsDiv) return;
+    // Remove old share btn
+    btnsDiv.querySelector('.mg-share-btn')?.remove();
+
+    const btn = document.createElement('button');
+    btn.className = 'mg-share-btn';
+    btn.textContent = '📸 Share Score';
+    btn.addEventListener('click', () => {
+      const cv = generateShareCard(gameName, gameIcon, gameColor, score, extra);
+      cv.toBlob(blob => {
+        if (!blob) return;
+        // Try native share first
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], `amr-arcade-${gameName.toLowerCase().replace(/\s+/g, '-')}.png`, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], text: `I scored ${score.toLocaleString()} in ${gameName} on amrelharony.com! 🕹️` }).catch(() => {});
+            return;
+          }
+        }
+        // Fallback: download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `amr-arcade-${gameName.toLowerCase().replace(/\s+/g, '-')}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+    btnsDiv.insertBefore(btn, btnsDiv.firstChild);
+  }
+
+
   // ═══════════════════════════════════════════════════
-  // GAME 1: SPRINT STACKER (Tetris-style)
+  // GAME 1: SPRINT STACKER (Tetris) + NEXT PIECE PREVIEW
   // ═══════════════════════════════════════════════════
   function GameStacker(container, meta) {
     const COLS = 10, ROWS = 18, SZ = 16;
-    const W = COLS * SZ, H = ROWS * SZ;
+    const W = COLS * SZ + 60, H = ROWS * SZ; // +60 for next preview
+    const BW = COLS * SZ; // board width
     let score = 0, lines = 0, level = 1, gameOver = false, paused = false;
     let interval = null, rafId = null;
 
@@ -368,29 +490,37 @@
       <div class="mg-btns"><button class="mg-btn" onclick="window._ssRestart()">↻ New Sprint</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
 
     const cv = document.getElementById('ssCanvas'), cx = cv.getContext('2d');
-    // Board: 0 = empty, >0 = color index
     const board = Array.from({length:ROWS}, () => Array(COLS).fill(0));
     const COLORS = ['','#22c55e','#00e1ff','#6366f1','#a855f7','#f97316','#ef4444','#fbbf24'];
-    // Tetrominos
     const SHAPES = [
-      [[1,1,1,1]],                     // I
-      [[1,1],[1,1]],                    // O
-      [[0,1,0],[1,1,1]],               // T
-      [[1,0,0],[1,1,1]],               // L
-      [[0,0,1],[1,1,1]],               // J
-      [[0,1,1],[1,1,0]],               // S
-      [[1,1,0],[0,1,1]],               // Z
+      [[1,1,1,1]],
+      [[1,1],[1,1]],
+      [[0,1,0],[1,1,1]],
+      [[1,0,0],[1,1,1]],
+      [[0,0,1],[1,1,1]],
+      [[0,1,1],[1,1,0]],
+      [[1,1,0],[0,1,1]],
     ];
 
-    let cur = null, cx2, cy2;
+    let cur = null, curX, curY;
+    let nextPiece = null; // NEW: Next piece preview
+
+    function pickPiece() {
+      const idx = Math.floor(Math.random() * SHAPES.length);
+      return { shape: SHAPES[idx].map(r => [...r]), color: idx + 1 };
+    }
 
     function spawn() {
-      const idx = Math.floor(Math.random() * SHAPES.length);
-      const shape = SHAPES[idx].map(r => [...r]);
-      cur = { shape, color: idx + 1 };
-      cx2 = Math.floor((COLS - shape[0].length) / 2);
-      cy2 = 0;
-      if (collides(cx2, cy2, shape)) { gameOver = true; endGame(); }
+      // Use next piece if available, otherwise pick fresh
+      if (nextPiece) {
+        cur = nextPiece;
+      } else {
+        cur = pickPiece();
+      }
+      nextPiece = pickPiece(); // Generate next preview
+      curX = Math.floor((COLS - cur.shape[0].length) / 2);
+      curY = 0;
+      if (collides(curX, curY, cur.shape)) { gameOver = true; endGame(); }
     }
 
     function collides(px, py, sh) {
@@ -408,10 +538,9 @@
       for (let r = 0; r < cur.shape.length; r++)
         for (let c = 0; c < cur.shape[r].length; c++)
           if (cur.shape[r][c]) {
-            const ny = cy2 + r;
-            if (ny >= 0) board[ny][cx2 + c] = cur.color;
+            const ny = curY + r;
+            if (ny >= 0) board[ny][curX + c] = cur.color;
           }
-      // Clear lines
       let cleared = 0;
       for (let r = ROWS - 1; r >= 0; r--) {
         if (board[r].every(v => v > 0)) {
@@ -425,6 +554,8 @@
         score += pts * level;
         lines += cleared;
         level = Math.floor(lines / 5) + 1;
+        if (interval) clearInterval(interval);
+        interval = setInterval(tick, Math.max(100, 500 - level * 30));
         document.getElementById('ssMsg').innerHTML = `<span class="bonus">+${pts * level} pts — ${cleared} sprint${cleared > 1 ? 's' : ''} delivered!</span>`;
       }
       updateHUD();
@@ -434,31 +565,31 @@
     function rotate() {
       const sh = cur.shape;
       const rot = sh[0].map((_, i) => sh.map(r => r[i]).reverse());
-      if (!collides(cx2, cy2, rot)) cur.shape = rot;
+      if (!collides(curX, curY, rot)) cur.shape = rot;
     }
-
-    function move(dx) { if (!collides(cx2 + dx, cy2, cur.shape)) cx2 += dx; }
-    function drop() { while (!collides(cx2, cy2 + 1, cur.shape)) cy2++; lock(); }
+    function move(dx) { if (!collides(curX + dx, curY, cur.shape)) curX += dx; }
+    function drop() { while (!collides(curX, curY + 1, cur.shape)) curY++; lock(); }
 
     function tick() {
       if (gameOver || paused) return;
-      if (!collides(cx2, cy2 + 1, cur.shape)) cy2++;
+      if (!collides(curX, curY + 1, cur.shape)) curY++;
       else lock();
     }
 
     function updateHUD() {
-      const el = id => document.getElementById(id);
-      el('ssScore').textContent = score;
-      el('ssLines').textContent = lines;
-      el('ssLevel').textContent = level;
+      document.getElementById('ssScore').textContent = score;
+      document.getElementById('ssLines').textContent = lines;
+      document.getElementById('ssLevel').textContent = level;
     }
 
     function draw() {
       cx.fillStyle = '#080c14'; cx.fillRect(0, 0, W, H);
-      // Grid
+
+      // Grid lines (board area only)
       cx.strokeStyle = 'rgba(0,225,255,.03)'; cx.lineWidth = 0.3;
       for (let i = 0; i <= COLS; i++) { cx.beginPath(); cx.moveTo(i*SZ, 0); cx.lineTo(i*SZ, H); cx.stroke(); }
-      for (let i = 0; i <= ROWS; i++) { cx.beginPath(); cx.moveTo(0, i*SZ); cx.lineTo(W, i*SZ); cx.stroke(); }
+      for (let i = 0; i <= ROWS; i++) { cx.beginPath(); cx.moveTo(0, i*SZ); cx.lineTo(BW, i*SZ); cx.stroke(); }
+
       // Board
       for (let r = 0; r < ROWS; r++)
         for (let c = 0; c < COLS; c++)
@@ -468,17 +599,18 @@
             cx.fillStyle = 'rgba(255,255,255,.08)';
             cx.fillRect(c*SZ+1, r*SZ+1, SZ-2, (SZ-2)/3);
           }
+
       // Current piece + ghost
       if (cur && !gameOver) {
         // Ghost
-        let gy = cy2;
-        while (!collides(cx2, gy + 1, cur.shape)) gy++;
+        let gy = curY;
+        while (!collides(curX, gy + 1, cur.shape)) gy++;
         cx.globalAlpha = 0.15;
         for (let r = 0; r < cur.shape.length; r++)
           for (let c = 0; c < cur.shape[r].length; c++)
             if (cur.shape[r][c]) {
               cx.fillStyle = COLORS[cur.color];
-              cx.fillRect((cx2+c)*SZ+1, (gy+r)*SZ+1, SZ-2, SZ-2);
+              cx.fillRect((curX+c)*SZ+1, (gy+r)*SZ+1, SZ-2, SZ-2);
             }
         cx.globalAlpha = 1;
         // Piece
@@ -486,11 +618,37 @@
           for (let c = 0; c < cur.shape[r].length; c++)
             if (cur.shape[r][c]) {
               cx.fillStyle = COLORS[cur.color];
-              cx.fillRect((cx2+c)*SZ+1, (cy2+r)*SZ+1, SZ-2, SZ-2);
+              cx.fillRect((curX+c)*SZ+1, (curY+r)*SZ+1, SZ-2, SZ-2);
               cx.fillStyle = 'rgba(255,255,255,.12)';
-              cx.fillRect((cx2+c)*SZ+1, (cy2+r)*SZ+1, SZ-2, (SZ-2)/3);
+              cx.fillRect((curX+c)*SZ+1, (curY+r)*SZ+1, SZ-2, (SZ-2)/3);
             }
       }
+
+      // ─── NEXT PIECE PREVIEW ───
+      const npX = BW + 6, npY = 4;
+      cx.fillStyle = 'rgba(255,255,255,.02)';
+      cx.fillRect(npX, npY, 50, 52);
+      cx.strokeStyle = 'rgba(0,225,255,.08)';
+      cx.lineWidth = 1;
+      cx.strokeRect(npX, npY, 50, 52);
+      cx.fillStyle = '#2d3748';
+      cx.font = '7px JetBrains Mono';
+      cx.textAlign = 'center';
+      cx.fillText('NEXT', npX + 25, npY + 10);
+
+      if (nextPiece && !gameOver) {
+        const sh = nextPiece.shape;
+        const npSZ = 10;
+        const offX = npX + 25 - (sh[0].length * npSZ) / 2;
+        const offY = npY + 18 + (3 - sh.length) * npSZ / 2;
+        for (let r = 0; r < sh.length; r++)
+          for (let c = 0; c < sh[r].length; c++)
+            if (sh[r][c]) {
+              cx.fillStyle = COLORS[nextPiece.color];
+              cx.fillRect(offX + c*npSZ + 1, offY + r*npSZ + 1, npSZ - 2, npSZ - 2);
+            }
+      }
+
       // Game over
       if (gameOver) {
         cx.fillStyle = 'rgba(8,12,20,.85)'; cx.fillRect(0, 0, W, H);
@@ -508,21 +666,23 @@
       if (interval) clearInterval(interval);
       recordScore('stacker', score);
       document.getElementById('ssMsg').innerHTML = `<span class="warn">Sprint failed! Final: ${score} story points · ${lines} sprints</span>`;
+      showShareButton(container, 'Sprint Stacker', '🧱', meta.color, score, `${lines} sprints delivered · Velocity ${level}`);
       draw();
     }
 
     function restart() {
       for (let r = 0; r < ROWS; r++) board[r].fill(0);
       score = 0; lines = 0; level = 1; gameOver = false; paused = false;
+      nextPiece = null;
       if (interval) clearInterval(interval);
       spawn();
-      interval = setInterval(tick, Math.max(100, 500 - level * 30));
+      interval = setInterval(tick, 500);
       updateHUD();
       document.getElementById('ssMsg').textContent = 'Pack features into sprints — clear rows to deliver!';
+      container.querySelector('.mg-share-btn')?.remove();
       draw();
     }
 
-    // Controls
     const keyHandler = e => {
       if (!document.getElementById('miniGameOverlay')?.classList.contains('show')) return;
       if (gameOver) { if (e.key === 'r' || e.key === 'R') restart(); return; }
@@ -538,11 +698,10 @@
     };
     document.addEventListener('keydown', keyHandler);
 
-    // Touch controls
     let tx = 0, ty = 0;
-    const touchStart = e => { if (e.target.closest('.mg-btn')) return; tx = e.touches[0].clientX; ty = e.touches[0].clientY; };
+    const touchStart = e => { if (e.target.closest('.mg-btn,.mg-share-btn')) return; tx = e.touches[0].clientX; ty = e.touches[0].clientY; };
     const touchEnd = e => {
-      if (e.target.closest('.mg-btn') || gameOver) return;
+      if (e.target.closest('.mg-btn,.mg-share-btn') || gameOver) return;
       const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
       if (Math.abs(dx) < 15 && Math.abs(dy) < 15) { rotate(); return; }
       if (Math.abs(dx) > Math.abs(dy)) { move(dx > 0 ? 1 : -1); }
@@ -556,7 +715,6 @@
     interval = setInterval(tick, 500);
     draw();
 
-    // Return cleanup function
     return () => {
       if (interval) clearInterval(interval);
       if (rafId) cancelAnimationFrame(rafId);
@@ -577,16 +735,15 @@
     let score = 0, routesComplete = 0, timer = 45, gameOver = false;
     let timerInterval = null, rafId = null;
 
-    // Pipe types: connections [top, right, bottom, left]
     const PIPE_TYPES = [
-      { id:'straight_v', conn:[1,0,1,0], sym:'║' },
-      { id:'straight_h', conn:[0,1,0,1], sym:'═' },
-      { id:'bend_tr',    conn:[1,1,0,0], sym:'╚' },
-      { id:'bend_br',    conn:[0,1,1,0], sym:'╔' },
-      { id:'bend_bl',    conn:[0,0,1,1], sym:'╗' },
-      { id:'bend_tl',    conn:[1,0,0,1], sym:'╝' },
-      { id:'cross',      conn:[1,1,1,1], sym:'╬' },
-      { id:'tee_t',      conn:[1,1,0,1], sym:'╩' },
+      { id:'straight_v', conn:[1,0,1,0] },
+      { id:'straight_h', conn:[0,1,0,1] },
+      { id:'bend_tr',    conn:[1,1,0,0] },
+      { id:'bend_br',    conn:[0,1,1,0] },
+      { id:'bend_bl',    conn:[0,0,1,1] },
+      { id:'bend_tl',    conn:[1,0,0,1] },
+      { id:'cross',      conn:[1,1,1,1] },
+      { id:'tee_t',      conn:[1,1,0,1] },
     ];
 
     const DOMAINS = [
@@ -609,17 +766,13 @@
       <div class="mg-btns"><button class="mg-btn" onclick="window._drRestart()">↻ New Routes</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
 
     const cv = document.getElementById('drCanvas'), cx = cv.getContext('2d');
-    let grid = [];
-    let source = { r: 0, c: 3 };
-    let target = { r: 6, c: 3 };
-    let currentDomain = null;
+    let grid = [], source = { r: 0, c: 3 }, target = { r: 6, c: 3 }, currentDomain = null;
 
     function initGrid() {
       grid = Array.from({length:ROWS}, () =>
         Array.from({length:COLS}, () => {
           const pipe = { ...PIPE_TYPES[Math.floor(Math.random() * PIPE_TYPES.length)] };
           pipe.conn = [...pipe.conn];
-          // Random rotations
           const rotations = Math.floor(Math.random() * 4);
           for (let i = 0; i < rotations; i++) pipe.conn = [pipe.conn[3], pipe.conn[0], pipe.conn[1], pipe.conn[2]];
           return pipe;
@@ -635,11 +788,10 @@
       const p = grid[r][c];
       p.conn = [p.conn[3], p.conn[0], p.conn[1], p.conn[2]];
       if (navigator.vibrate) navigator.vibrate(15);
-      // Check if route is complete
       if (checkConnection()) {
         score++;
         routesComplete++;
-        timer = Math.min(timer + 5, 60); // Bonus time
+        timer = Math.min(timer + 5, 60);
         document.getElementById('drMsg').innerHTML = `<span class="bonus">✅ Route to ${currentDomain.emoji} ${currentDomain.name} connected! +5s</span>`;
         setTimeout(() => { initGrid(); draw(); }, 600);
       }
@@ -647,12 +799,10 @@
     }
 
     function checkConnection() {
-      // BFS from source to target
       const visited = Array.from({length:ROWS}, () => Array(COLS).fill(false));
       const queue = [source];
       visited[source.r][source.c] = true;
-      const dirs = [[-1,0,0,2],[0,1,1,3],[1,0,2,0],[0,-1,3,1]]; // [dr,dc,fromDir,toDir]
-
+      const dirs = [[-1,0,0,2],[0,1,1,3],[1,0,2,0],[0,-1,3,1]];
       while (queue.length) {
         const {r, c} = queue.shift();
         if (r === target.r && c === target.c) return true;
@@ -670,20 +820,15 @@
 
     function draw() {
       cx.fillStyle = '#080c14'; cx.fillRect(0, 0, W, H);
-      // Grid cells
       for (let r = 0; r < ROWS; r++)
         for (let c = 0; c < COLS; c++) {
           const p = grid[r][c];
           const x = c * SZ, y = r * SZ;
           const isSource = r === source.r && c === source.c;
           const isTarget = r === target.r && c === target.c;
-
-          // Cell background
           cx.fillStyle = isSource ? 'rgba(0,225,255,.08)' : isTarget ? (currentDomain?.color || '#22c55e') + '12' : 'rgba(255,255,255,.01)';
           cx.fillRect(x + 1, y + 1, SZ - 2, SZ - 2);
           cx.strokeStyle = 'rgba(255,255,255,.04)'; cx.strokeRect(x, y, SZ, SZ);
-
-          // Draw pipe connections as lines
           const mx = x + SZ/2, my = y + SZ/2;
           cx.strokeStyle = isSource || isTarget ? (currentDomain?.color || '#00e1ff') : 'rgba(0,225,255,.4)';
           cx.lineWidth = 3; cx.lineCap = 'round';
@@ -691,21 +836,11 @@
           if (p.conn[1]) { cx.beginPath(); cx.moveTo(mx, my); cx.lineTo(x + SZ, my); cx.stroke(); }
           if (p.conn[2]) { cx.beginPath(); cx.moveTo(mx, my); cx.lineTo(mx, y + SZ); cx.stroke(); }
           if (p.conn[3]) { cx.beginPath(); cx.moveTo(mx, my); cx.lineTo(x, my); cx.stroke(); }
-          // Center dot
           cx.fillStyle = 'rgba(0,225,255,.2)';
           cx.beginPath(); cx.arc(mx, my, 2, 0, Math.PI*2); cx.fill();
-
-          // Source/target labels
-          if (isSource) {
-            cx.fillStyle = '#00e1ff'; cx.font = 'bold 9px JetBrains Mono'; cx.textAlign = 'center';
-            cx.fillText('SRC', mx, my + 3);
-          }
-          if (isTarget) {
-            cx.fillStyle = currentDomain?.color || '#22c55e'; cx.font = '14px serif'; cx.textAlign = 'center';
-            cx.fillText(currentDomain?.emoji || '🎯', mx, my + 5);
-          }
+          if (isSource) { cx.fillStyle = '#00e1ff'; cx.font = 'bold 9px JetBrains Mono'; cx.textAlign = 'center'; cx.fillText('SRC', mx, my + 3); }
+          if (isTarget) { cx.fillStyle = currentDomain?.color || '#22c55e'; cx.font = '14px serif'; cx.textAlign = 'center'; cx.fillText(currentDomain?.emoji || '🎯', mx, my + 5); }
         }
-
       if (gameOver) {
         cx.fillStyle = 'rgba(8,12,20,.88)'; cx.fillRect(0, 0, W, H);
         cx.fillStyle = '#ef4444'; cx.font = 'bold 14px JetBrains Mono'; cx.textAlign = 'center';
@@ -713,7 +848,6 @@
         cx.fillStyle = '#e2e8f0'; cx.font = '12px JetBrains Mono';
         cx.fillText(routesComplete + ' routes completed', W/2, H/2 + 10);
       }
-
       document.getElementById('drScore').textContent = routesComplete;
       document.getElementById('drTimer').textContent = timer;
       document.getElementById('drDomain').textContent = currentDomain?.emoji || '—';
@@ -724,6 +858,7 @@
       if (timerInterval) clearInterval(timerInterval);
       recordScore('router', routesComplete * 100);
       document.getElementById('drMsg').innerHTML = `<span class="warn">Time's up! ${routesComplete} routes · ${routesComplete * 100} pts</span>`;
+      showShareButton(container, 'Data Mesh Router', '🔀', meta.color, routesComplete * 100, `${routesComplete} routes connected`);
       draw();
     }
 
@@ -733,10 +868,10 @@
       initGrid();
       timerInterval = setInterval(() => { timer--; if (timer <= 0) endGame(); draw(); }, 1000);
       document.getElementById('drMsg').textContent = 'Click pipes to rotate — connect source to domain!';
+      container.querySelector('.mg-share-btn')?.remove();
       draw();
     }
 
-    // Click handler
     const clickHandler = e => {
       const rect = cv.getBoundingClientRect();
       const x = e.clientX - rect.left, y = e.clientY - rect.top;
@@ -761,28 +896,30 @@
 
 
   // ═══════════════════════════════════════════════════
-  // GAME 3: BILINGUAL SWIPE (Jargon matching)
+  // GAME 3: BILINGUAL SWIPE + DIFFICULTY SCALING
   // ═══════════════════════════════════════════════════
   function GameBilingual(container, meta) {
     const PAIRS = [
-      { tech:'API Gateway',           biz:'Single front door for all customer requests',     wrong:['Database backup schedule','Annual revenue forecast'] },
-      { tech:'Microservices',         biz:'Small independent teams owning their own products', wrong:['Quarterly board reports','Hardware procurement'] },
-      { tech:'CI/CD Pipeline',        biz:'Ship features to customers faster with less risk',  wrong:['Budget approval workflow','Office relocation plan'] },
-      { tech:'Data Lake',             biz:'Central storage where all company data lives',      wrong:['Customer loyalty program','Branch renovation plan'] },
-      { tech:'Kubernetes',            biz:'Auto-scaling infrastructure that heals itself',      wrong:['Employee training budget','Vendor management system'] },
-      { tech:'Machine Learning Model',biz:'System that learns from data to predict outcomes',  wrong:['Manual reporting process','Paper filing system'] },
-      { tech:'ETL Pipeline',          biz:'Automatically clean & move data where it\'s needed', wrong:['Customer complaint form','Meeting room booking'] },
-      { tech:'OAuth 2.0',             biz:'Secure login without sharing your password',         wrong:['Annual audit checklist','Staff attendance sheet'] },
-      { tech:'Event-Driven Architecture', biz:'Systems react instantly when something happens', wrong:['Weekly status email','Monthly planning cycle'] },
-      { tech:'Feature Flags',         biz:'Release features to select customers for safe testing', wrong:['HR onboarding checklist','Compliance documentation'] },
-      { tech:'GraphQL',               biz:'Let clients ask for exactly the data they need',     wrong:['Financial reconciliation','Inventory audit'] },
-      { tech:'Docker Container',      biz:'Package software so it runs the same everywhere',    wrong:['Physical server room','Spreadsheet template'] },
-      { tech:'Scrum Sprint',          biz:'Two-week focused cycle to deliver working software', wrong:['Annual strategic plan','Five-year forecast'] },
-      { tech:'Kanban Board',          biz:'Visual workflow showing what\'s in progress',         wrong:['Org chart hierarchy','Budget allocation matrix'] },
-      { tech:'Technical Debt',        biz:'Shortcuts taken now that cost more to fix later',    wrong:['Company loan payments','Office lease agreement'] },
+      { tech:'API Gateway',           biz:'Single front door for all customer requests',     wrong:['Database backup schedule','Annual revenue forecast','Server migration plan'] },
+      { tech:'Microservices',         biz:'Small independent teams owning their own products', wrong:['Quarterly board reports','Hardware procurement','Annual leave policy'] },
+      { tech:'CI/CD Pipeline',        biz:'Ship features to customers faster with less risk',  wrong:['Budget approval workflow','Office relocation plan','Vendor evaluation criteria'] },
+      { tech:'Data Lake',             biz:'Central storage where all company data lives',      wrong:['Customer loyalty program','Branch renovation plan','Meeting room booking'] },
+      { tech:'Kubernetes',            biz:'Auto-scaling infrastructure that heals itself',      wrong:['Employee training budget','Vendor management system','Annual audit checklist'] },
+      { tech:'Machine Learning Model',biz:'System that learns from data to predict outcomes',  wrong:['Manual reporting process','Paper filing system','Staff attendance sheet'] },
+      { tech:'ETL Pipeline',          biz:'Automatically clean & move data where it\'s needed', wrong:['Customer complaint form','Meeting room booking','Office supply ordering'] },
+      { tech:'OAuth 2.0',             biz:'Secure login without sharing your password',         wrong:['Annual audit checklist','Staff attendance sheet','Budget reconciliation'] },
+      { tech:'Event-Driven Architecture', biz:'Systems react instantly when something happens', wrong:['Weekly status email','Monthly planning cycle','Yearly performance review'] },
+      { tech:'Feature Flags',         biz:'Release features to select customers for safe testing', wrong:['HR onboarding checklist','Compliance documentation','Travel expense form'] },
+      { tech:'GraphQL',               biz:'Let clients ask for exactly the data they need',     wrong:['Financial reconciliation','Inventory audit','Board meeting minutes'] },
+      { tech:'Docker Container',      biz:'Package software so it runs the same everywhere',    wrong:['Physical server room','Spreadsheet template','Desk assignment chart'] },
+      { tech:'Scrum Sprint',          biz:'Two-week focused cycle to deliver working software', wrong:['Annual strategic plan','Five-year forecast','Quarterly earnings call'] },
+      { tech:'Kanban Board',          biz:'Visual workflow showing what\'s in progress',         wrong:['Org chart hierarchy','Budget allocation matrix','Seating arrangement'] },
+      { tech:'Technical Debt',        biz:'Shortcuts taken now that cost more to fix later',    wrong:['Company loan payments','Office lease agreement','Insurance premium'] },
     ];
 
     let currentIdx = 0, score = 0, streak = 0, total = 8, gameOver = false;
+    let cardTimer = null, cardTimeLeft = 0;
+    const TIMER_DURATION = 10; // seconds for hard mode timer
     const shuffled = [...PAIRS].sort(() => Math.random() - 0.5).slice(0, total);
 
     container.innerHTML = `
@@ -792,17 +929,89 @@
         <div class="mg-hud-item"><div class="mg-hud-val" id="bsStreak">0</div><div class="mg-hud-label">Streak</div></div>
         <div class="mg-hud-item"><div class="mg-hud-val" id="bsLeft">${total}</div><div class="mg-hud-label">Remaining</div></div>
       </div>
+      <div class="swipe-difficulty" id="bsDifficulty"></div>
+      <div class="swipe-timer-wrap" id="bsTimerWrap"><div class="swipe-timer-fill" id="bsTimerFill"></div></div>
       <div class="swipe-progress" id="bsPips">${shuffled.map((_,i)=>`<div class="swipe-pip${i===0?' current':''}"></div>`).join('')}</div>
       <div class="swipe-area" id="bsArea"></div>
       <div class="mg-msg" id="bsMsg">Match the tech term to its business translation</div>
       <div class="mg-btns"><button class="mg-btn" onclick="window._bsRestart()">↻ New Round</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
 
+    function getOptionCount() {
+      // After 3 streak: 4 options instead of 3
+      return streak >= 3 ? 4 : 3;
+    }
+    function isTimerMode() {
+      // After 5 streak: timed mode
+      return streak >= 5;
+    }
+
+    function startCardTimer() {
+      stopCardTimer();
+      if (!isTimerMode()) {
+        document.getElementById('bsTimerWrap').classList.remove('active');
+        return;
+      }
+      document.getElementById('bsTimerWrap').classList.add('active');
+      cardTimeLeft = TIMER_DURATION * 10; // 100ms ticks
+      document.getElementById('bsTimerFill').style.width = '100%';
+      cardTimer = setInterval(() => {
+        cardTimeLeft--;
+        const pct = (cardTimeLeft / (TIMER_DURATION * 10)) * 100;
+        document.getElementById('bsTimerFill').style.width = pct + '%';
+        if (cardTimeLeft <= 0) {
+          stopCardTimer();
+          // Time's up for this card = wrong answer
+          handleTimeout();
+        }
+      }, 100);
+    }
+
+    function stopCardTimer() {
+      if (cardTimer) { clearInterval(cardTimer); cardTimer = null; }
+    }
+
+    function handleTimeout() {
+      streak = 0;
+      const pips = document.querySelectorAll('.swipe-pip');
+      if (pips[currentIdx]) pips[currentIdx].classList.add('wrong-pip');
+      // Highlight correct answer
+      document.querySelectorAll('.swipe-opt').forEach(o => {
+        o.style.pointerEvents = 'none';
+        if (o.dataset.answer === 'correct') o.classList.add('correct');
+      });
+      document.getElementById('bsMsg').innerHTML = `<span class="warn">⏱️ Time's up! See the correct answer</span>`;
+      document.getElementById('bsStreak').textContent = '0';
+      updateDifficultyLabel();
+      setTimeout(() => {
+        const card = document.getElementById('bsCard');
+        if (card) card.classList.add('gone-left');
+        setTimeout(() => { currentIdx++; renderCard(); }, 400);
+      }, 1200);
+    }
+
+    function updateDifficultyLabel() {
+      const el = document.getElementById('bsDifficulty');
+      if (streak >= 5) {
+        el.textContent = '🔥 HARD MODE — 4 options + timed!';
+        el.classList.add('show');
+      } else if (streak >= 3) {
+        el.textContent = '⚡ 4 OPTIONS UNLOCKED';
+        el.classList.add('show');
+      } else {
+        el.classList.remove('show');
+      }
+    }
+
     function renderCard() {
+      stopCardTimer();
       if (currentIdx >= total) { endGame(); return; }
       const area = document.getElementById('bsArea');
       const pair = shuffled[currentIdx];
-      // Shuffle options: 1 correct + 2 wrong
-      const options = [pair.biz, ...pair.wrong].sort(() => Math.random() - 0.5);
+      const optCount = getOptionCount();
+
+      // Build options: 1 correct + (optCount-1) wrong
+      const wrongOptions = pair.wrong.slice(0, optCount - 1);
+      const options = [pair.biz, ...wrongOptions].sort(() => Math.random() - 0.5);
 
       area.innerHTML = `
         <div class="swipe-card" id="bsCard">
@@ -813,26 +1022,24 @@
           </div>
         </div>`;
 
-      // Bind option clicks
       area.querySelectorAll('.swipe-opt').forEach(opt => {
         opt.addEventListener('click', () => handleAnswer(opt));
       });
 
-      // Update pips
       const pips = document.querySelectorAll('.swipe-pip');
-      pips.forEach((p, i) => {
-        p.classList.toggle('current', i === currentIdx);
-      });
-
+      pips.forEach((p, i) => p.classList.toggle('current', i === currentIdx));
       document.getElementById('bsLeft').textContent = total - currentIdx;
+
+      updateDifficultyLabel();
+      startCardTimer();
     }
 
     function handleAnswer(opt) {
       if (gameOver) return;
+      stopCardTimer();
       const isCorrect = opt.dataset.answer === 'correct';
       const card = document.getElementById('bsCard');
 
-      // Highlight all options
       document.querySelectorAll('.swipe-opt').forEach(o => {
         o.style.pointerEvents = 'none';
         if (o.dataset.answer === 'correct') o.classList.add('correct');
@@ -845,8 +1052,12 @@
         score++;
         streak++;
         if (pips[currentIdx]) pips[currentIdx].classList.add('done');
-        const pts = 50 * (streak >= 3 ? 2 : 1);
-        document.getElementById('bsMsg').innerHTML = `<span class="good">✅ Correct! +${pts} pts${streak >= 3 ? ' 🔥×' + streak : ''}</span>`;
+        const multiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
+        const pts = 50 * multiplier;
+        let bonusText = '';
+        if (streak === 3) bonusText = ' ⚡ 4 options unlocked!';
+        if (streak === 5) bonusText = ' 🔥 Timed mode activated!';
+        document.getElementById('bsMsg').innerHTML = `<span class="good">✅ Correct! +${pts} pts${streak >= 3 ? ' ×' + multiplier : ''}${bonusText}</span>`;
         if (navigator.vibrate) navigator.vibrate(20);
       } else {
         streak = 0;
@@ -857,8 +1068,8 @@
 
       document.getElementById('bsScore').textContent = score;
       document.getElementById('bsStreak').textContent = streak;
+      updateDifficultyLabel();
 
-      // Animate card out, next card in
       setTimeout(() => {
         if (card) card.classList.add(isCorrect ? 'gone-right' : 'gone-left');
         setTimeout(() => { currentIdx++; renderCard(); }, 400);
@@ -867,6 +1078,9 @@
 
     function endGame() {
       gameOver = true;
+      stopCardTimer();
+      document.getElementById('bsTimerWrap').classList.remove('active');
+      document.getElementById('bsDifficulty').classList.remove('show');
       const area = document.getElementById('bsArea');
       const pct = Math.round(score / total * 100);
       const grade = pct >= 90 ? '🌟 Bilingual Master!' : pct >= 70 ? '📘 Strong Translator!' : pct >= 50 ? '📝 Getting There!' : '📖 Keep Learning!';
@@ -880,33 +1094,40 @@
       const totalPts = score * 50;
       recordScore('bilingual', totalPts);
       document.getElementById('bsMsg').innerHTML = `<span class="bonus">Final score: ${totalPts} pts — ${grade}</span>`;
+      showShareButton(container, 'Bilingual Swipe', '🌐', meta.color, totalPts, `${score}/${total} correct · ${pct}%`);
     }
 
     function restart() {
       currentIdx = 0; score = 0; streak = 0; gameOver = false;
+      stopCardTimer();
       shuffled.length = 0;
       shuffled.push(...[...PAIRS].sort(() => Math.random() - 0.5).slice(0, total));
       document.getElementById('bsPips').innerHTML = shuffled.map((_, i) => `<div class="swipe-pip${i === 0 ? ' current' : ''}"></div>`).join('');
       document.getElementById('bsScore').textContent = '0';
       document.getElementById('bsStreak').textContent = '0';
       document.getElementById('bsMsg').textContent = 'Match the tech term to its business translation';
+      container.querySelector('.mg-share-btn')?.remove();
       renderCard();
     }
 
     window._bsRestart = restart;
     renderCard();
 
-    return () => { delete window._bsRestart; };
+    return () => { stopCardTimer(); delete window._bsRestart; };
   }
 
 
   // ═══════════════════════════════════════════════════
-  // GAME 4: SCOPE DEFENDER (Space Invaders — BOSS)
+  // GAME 4: SCOPE DEFENDER (Boss) + POWER-UPS
   // ═══════════════════════════════════════════════════
   function GameDefender(container, meta) {
     const W = 300, H = 340;
     let score = 0, lives = 3, wave = 1, gameOver = false;
     let interval = null, rafId = null;
+
+    // Power-up state
+    let powerUps = []; // falling items
+    let activePU = { speed: 0, shield: 0, triple: 0 }; // timers in frames
 
     container.innerHTML = `
       <div class="mg-title-bar"><div class="mg-title" style="color:${meta.color}">🛡️ Scope Defender — FINAL BOSS</div></div>
@@ -915,14 +1136,14 @@
         <div class="mg-hud-item"><div class="mg-hud-val" id="sdWave">1</div><div class="mg-hud-label">Wave</div></div>
         <div class="mg-hud-item"><div class="mg-hud-val" id="sdLives">❤️❤️❤️</div><div class="mg-hud-label">Sprint Health</div></div>
       </div>
+      <div class="sd-powerup-bar" id="sdPowerUps"></div>
       <div class="mg-canvas-wrap"><canvas id="sdCanvas" class="mg-canvas" width="${W}" height="${H}"></canvas></div>
       <div class="mg-msg" id="sdMsg">Defend the sprint! Shoot down scope creep & prod bugs</div>
-      <div class="mg-hint">← → move · Space shoot · Auto-fire on mobile</div>
+      <div class="mg-hint">← → move · Space shoot · Catch power-ups!</div>
       <div class="mg-btns"><button class="mg-btn" onclick="window._sdRestart()">↻ New Wave</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
 
     const cv = document.getElementById('sdCanvas'), cx = cv.getContext('2d');
 
-    // Player
     let player = { x: W / 2, w: 30, h: 14 };
     let bullets = [];
     let enemies = [];
@@ -936,6 +1157,12 @@
       { emoji:'💣', name:'P0 Bug', points:50, hp:3, w:26, h:26 },
     ];
 
+    const PU_TYPES = [
+      { emoji:'☕', name:'Speed Boost', color:'#fbbf24', key:'speed', duration: 300 },
+      { emoji:'🛡️', name:'Shield',      color:'#3b82f6', key:'shield', duration: 1 }, // 1 = absorbs 1 hit
+      { emoji:'📦', name:'Triple Shot', color:'#a855f7', key:'triple', duration: 300 },
+    ];
+
     function spawnWave() {
       enemies = [];
       const rows = Math.min(3 + Math.floor(wave / 2), 5);
@@ -943,11 +1170,7 @@
       for (let r = 0; r < rows; r++)
         for (let c = 0; c < cols; c++) {
           const type = ENEMY_TYPES[Math.min(r, ENEMY_TYPES.length - 1)];
-          enemies.push({
-            x: 30 + c * 30, y: 20 + r * 28,
-            ...type, hp: type.hp,
-            baseX: 30 + c * 30
-          });
+          enemies.push({ x: 30 + c * 30, y: 20 + r * 28, ...type, hp: type.hp, baseX: 30 + c * 30 });
         }
       enemySpeed = 0.4 + wave * 0.15;
       enemyDir = 1;
@@ -955,9 +1178,16 @@
 
     function shoot() {
       const now = Date.now();
-      if (now - lastShot < 250) return;
+      const cooldown = activePU.speed > 0 ? 150 : 250;
+      if (now - lastShot < cooldown) return;
       lastShot = now;
-      bullets.push({ x: player.x, y: H - 24, dy: -5 });
+      if (activePU.triple > 0) {
+        bullets.push({ x: player.x - 6, y: H - 24, dy: -5 });
+        bullets.push({ x: player.x,     y: H - 24, dy: -5 });
+        bullets.push({ x: player.x + 6, y: H - 24, dy: -5 });
+      } else {
+        bullets.push({ x: player.x, y: H - 24, dy: -5 });
+      }
     }
 
     function spawnParticles(x, y, color, count) {
@@ -968,8 +1198,28 @@
       }
     }
 
+    function spawnPowerUp(x, y) {
+      // 12% chance to drop a power-up
+      if (Math.random() > 0.12) return;
+      const type = PU_TYPES[Math.floor(Math.random() * PU_TYPES.length)];
+      powerUps.push({ x, y, ...type, dy: 1.2 });
+    }
+
+    function updatePowerUpHUD() {
+      const bar = document.getElementById('sdPowerUps');
+      let html = '';
+      if (activePU.speed > 0) html += `<span class="sd-powerup-active sd-pu-speed">☕ Speed ${Math.ceil(activePU.speed / 60)}s</span>`;
+      if (activePU.shield > 0) html += `<span class="sd-powerup-active sd-pu-shield">🛡️ Shield</span>`;
+      if (activePU.triple > 0) html += `<span class="sd-powerup-active sd-pu-triple">📦 Triple ${Math.ceil(activePU.triple / 60)}s</span>`;
+      bar.innerHTML = html;
+    }
+
     function update() {
       if (gameOver) return;
+
+      // Decrement power-up timers
+      if (activePU.speed > 0) activePU.speed--;
+      if (activePU.triple > 0) activePU.triple--;
 
       // Move bullets
       bullets.forEach(b => b.y += b.dy);
@@ -988,10 +1238,17 @@
 
       // Check if enemies reached bottom
       if (enemies.some(e => e.y + e.h >= H - 30)) {
-        lives--;
-        if (lives <= 0) { endGame(); return; }
-        enemies.forEach(e => e.y -= 30);
-        document.getElementById('sdMsg').innerHTML = '<span class="warn">⚠️ Scope creep reached the sprint!</span>';
+        if (activePU.shield > 0) {
+          activePU.shield = 0;
+          enemies.forEach(e => e.y -= 30);
+          document.getElementById('sdMsg').innerHTML = '<span class="good">🛡️ Shield absorbed the hit!</span>';
+          spawnParticles(W / 2, H - 30, '#3b82f6', 10);
+        } else {
+          lives--;
+          if (lives <= 0) { endGame(); return; }
+          enemies.forEach(e => e.y -= 30);
+          document.getElementById('sdMsg').innerHTML = '<span class="warn">⚠️ Scope creep reached the sprint!</span>';
+        }
       }
 
       // Bullet-enemy collisions
@@ -1005,6 +1262,7 @@
             if (e.hp <= 0) {
               score += e.points;
               spawnParticles(e.x, e.y, '#22c55e', 6);
+              spawnPowerUp(e.x, e.y); // NEW: chance to drop power-up
               enemies.splice(ei, 1);
               document.getElementById('sdMsg').innerHTML = `<span class="good">${e.emoji} ${e.name} squashed! +${e.points}</span>`;
             } else {
@@ -1015,6 +1273,22 @@
         }
       }
 
+      // Move power-ups + collect
+      for (let pi = powerUps.length - 1; pi >= 0; pi--) {
+        const pu = powerUps[pi];
+        pu.y += pu.dy;
+        // Collect if near player
+        if (pu.y >= H - 24 && Math.abs(pu.x - player.x) < 20) {
+          activePU[pu.key] = pu.duration;
+          powerUps.splice(pi, 1);
+          spawnParticles(player.x, H - 20, pu.color, 8);
+          document.getElementById('sdMsg').innerHTML = `<span class="bonus">${pu.emoji} ${pu.name} activated!</span>`;
+          if (navigator.vibrate) navigator.vibrate(40);
+          continue;
+        }
+        if (pu.y > H + 10) powerUps.splice(pi, 1);
+      }
+
       // Wave cleared
       if (enemies.length === 0) {
         wave++;
@@ -1023,13 +1297,14 @@
       }
 
       // Auto-fire on mobile
-      if (isMobile && Date.now() - lastShot > 400) shoot();
+      if (isMobile && Date.now() - lastShot > (activePU.speed > 0 ? 200 : 400)) shoot();
 
       // Particles
       particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
       particles = particles.filter(p => p.life > 0);
 
       updateHUD();
+      updatePowerUpHUD();
     }
 
     function updateHUD() {
@@ -1047,32 +1322,51 @@
       for (let i = 0; i < H; i += 20) { cx.beginPath(); cx.moveTo(0, i); cx.lineTo(W, i); cx.stroke(); }
 
       // Player (shield shape)
-      cx.fillStyle = '#00e1ff';
+      const playerColor = activePU.shield > 0 ? '#3b82f6' : activePU.speed > 0 ? '#fbbf24' : '#00e1ff';
+      cx.fillStyle = playerColor;
       cx.beginPath();
       cx.moveTo(player.x, H - 20);
       cx.lineTo(player.x - player.w/2, H - 6);
       cx.lineTo(player.x + player.w/2, H - 6);
       cx.closePath();
       cx.fill();
-      // Glow
-      cx.shadowColor = '#00e1ff'; cx.shadowBlur = 8;
-      cx.fill();
-      cx.shadowBlur = 0;
+      cx.shadowColor = playerColor; cx.shadowBlur = 8; cx.fill(); cx.shadowBlur = 0;
+
+      // Shield visual
+      if (activePU.shield > 0) {
+        cx.strokeStyle = 'rgba(59,130,246,.3)';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.arc(player.x, H - 13, 20, 0, Math.PI * 2);
+        cx.stroke();
+      }
 
       // Bullets
+      const bulletColor = activePU.triple > 0 ? '#a855f7' : '#22c55e';
       bullets.forEach(b => {
-        cx.fillStyle = '#22c55e';
+        cx.fillStyle = bulletColor;
         cx.fillRect(b.x - 1, b.y, 2, 8);
-        cx.shadowColor = '#22c55e'; cx.shadowBlur = 4;
+        cx.shadowColor = bulletColor; cx.shadowBlur = 4;
         cx.fillRect(b.x - 1, b.y, 2, 8);
         cx.shadowBlur = 0;
+      });
+
+      // Power-ups (falling)
+      cx.font = '16px serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+      powerUps.forEach(pu => {
+        // Glow ring
+        cx.strokeStyle = pu.color + '40';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.arc(pu.x, pu.y, 12, 0, Math.PI * 2);
+        cx.stroke();
+        cx.fillText(pu.emoji, pu.x, pu.y);
       });
 
       // Enemies
       cx.font = '18px serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
       enemies.forEach(e => {
         cx.fillText(e.emoji, e.x, e.y);
-        // HP indicator for multi-hit enemies
         if (ENEMY_TYPES.find(t => t.emoji === e.emoji)?.hp > 1) {
           cx.fillStyle = e.hp > 1 ? 'rgba(239,68,68,.6)' : 'rgba(239,68,68,.3)';
           cx.fillRect(e.x - 8, e.y + 12, 16 * (e.hp / ENEMY_TYPES.find(t => t.emoji === e.emoji).hp), 2);
@@ -1096,7 +1390,6 @@
       if (gameOver) {
         cx.fillStyle = 'rgba(6,9,16,.9)'; cx.fillRect(0, 0, W, H);
         cx.fillStyle = '#fbbf24'; cx.font = 'bold 16px JetBrains Mono'; cx.textAlign = 'center';
-
         const s = getArcadeState();
         if (score >= 300 && !s.bossBeaten) {
           cx.fillText('🏆 BOSS DEFEATED!', W/2, H/2 - 20);
@@ -1121,22 +1414,25 @@
       gameOver = true;
       if (interval) clearInterval(interval);
       recordScore('defender', score);
+      showShareButton(container, 'Scope Defender', '🛡️', meta.color, score, `Wave ${wave} · ${lives > 0 ? 'Boss defeated!' : 'Sprint collapsed'}`);
       draw();
     }
 
     function restart() {
       score = 0; lives = 3; wave = 1; gameOver = false;
-      bullets = []; particles = [];
+      bullets = []; particles = []; powerUps = [];
+      activePU = { speed: 0, shield: 0, triple: 0 };
       player.x = W / 2;
       if (interval) clearInterval(interval);
       spawnWave();
       interval = setInterval(update, 16);
       updateHUD();
+      document.getElementById('sdPowerUps').innerHTML = '';
       document.getElementById('sdMsg').textContent = 'Defend the sprint! Shoot down scope creep & prod bugs';
+      container.querySelector('.mg-share-btn')?.remove();
       rafId = requestAnimationFrame(draw);
     }
 
-    // Controls
     const keys = {};
     const keyDown = e => {
       if (!document.getElementById('miniGameOverlay')?.classList.contains('show')) return;
@@ -1148,22 +1444,22 @@
     document.addEventListener('keydown', keyDown);
     document.addEventListener('keyup', keyUp);
 
-    // Movement loop
+    const moveSpeed = 4;
     const moveLoop = setInterval(() => {
       if (gameOver) return;
-      if (keys['ArrowLeft']) player.x = Math.max(player.w/2, player.x - 4);
-      if (keys['ArrowRight']) player.x = Math.min(W - player.w/2, player.x + 4);
+      const spd = activePU.speed > 0 ? moveSpeed * 1.6 : moveSpeed;
+      if (keys['ArrowLeft']) player.x = Math.max(player.w/2, player.x - spd);
+      if (keys['ArrowRight']) player.x = Math.min(W - player.w/2, player.x + spd);
     }, 16);
 
-    // Touch controls
     const touchMove = e => {
-      if (e.target.closest('.mg-btn')) return;
+      if (e.target.closest('.mg-btn,.mg-share-btn')) return;
       const rect = cv.getBoundingClientRect();
       const x = (e.touches[0].clientX - rect.left) / rect.width * W;
       player.x = Math.max(player.w/2, Math.min(W - player.w/2, x));
     };
     cv.addEventListener('touchmove', touchMove, {passive:true});
-    cv.addEventListener('touchstart', e => { if (!e.target.closest('.mg-btn')) shoot(); }, {passive:true});
+    cv.addEventListener('touchstart', e => { if (!e.target.closest('.mg-btn,.mg-share-btn')) shoot(); }, {passive:true});
 
     window._sdRestart = restart;
     spawnWave();
@@ -1200,9 +1496,7 @@
         setTimeout(() => el.remove(), 5000);
       }, i * 60);
     }
-    // Vibrate celebration
     if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
-    // XP bonus
     addXP(100);
   }
 
@@ -1236,8 +1530,6 @@
       bug.textContent = '🐞';
       bug.style.left = startX + 'px';
       bug.style.top = startY + 'px';
-
-      // Random scurry direction
       const bx = (Math.random() - 0.5) * 300;
       const by = (Math.random() - 0.5) * 300;
       const br = (Math.random() - 0.5) * 360;
@@ -1248,7 +1540,6 @@
       bug.addEventListener('click', e => {
         e.stopPropagation();
         bugsSquashed++;
-        // Splat
         const splat = document.createElement('span');
         splat.className = 'bug-splat';
         splat.textContent = '💥';
@@ -1257,14 +1548,9 @@
         document.body.appendChild(splat);
         setTimeout(() => splat.remove(), 600);
         bug.remove();
-
         addXP(50);
         if (navigator.vibrate) navigator.vibrate([30, 20, 60]);
-
-        // Award badge
         if (window.Achieve) window.Achieve.check('qa_tester');
-
-        // If VDna doesn't have qa_tester badge, show a manual toast
         if (bugsSquashed === 1) {
           const toast = document.createElement('div');
           toast.className = 'toast';
@@ -1282,32 +1568,27 @@
 
 
   // ═══════════════════════════════════════════════════
-  // WIRE UP: Replace existing game button, Terminal cmd
+  // WIRE UP
   // ═══════════════════════════════════════════════════
   function wireUp() {
-    // Replace existing game button to open Arcade Hub
     const gameBtn = document.getElementById('gameBtn');
     if (gameBtn) {
       gameBtn.removeAttribute('onclick');
       gameBtn.addEventListener('click', openArcade);
     }
 
-    // Add terminal command
     if (window.TermCmds) {
       window.TermCmds.play = () => { closeMiniGame(); setTimeout(openArcade, 300); return '<span class="term-green">Launching Amr Arcade...</span>'; };
       window.TermCmds.arcade = window.TermCmds.play;
     }
 
-    // Global close mini-game
     window._closeMG = closeMiniGame;
 
-    // Keyboard: Escape closes mini-game, G opens arcade
     document.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'Escape') { closeMiniGame(); closeArcade(); }
     });
 
-    // Add shortcut to panel if exists
     const panel = document.querySelector('.shortcut-panel');
     if (panel) {
       const closeDiv = panel.querySelector('.sc-close');
@@ -1332,7 +1613,7 @@
     initBugBash();
 
     console.log(
-      '%c🕹️ Phase 3 Loaded %c Amr Arcade · 5 Games · Bug Bash',
+      '%c🕹️ Phase 3 Loaded %c Amr Arcade · 5 Games · Power-Ups · Share Cards',
       'background:#a855f7;color:#fff;padding:4px 8px;border-radius:4px 0 0 4px;font-weight:bold;',
       'background:#1a2332;color:#a855f7;padding:4px 8px;border-radius:0 4px 4px 0;'
     );
