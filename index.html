@@ -879,10 +879,6 @@ function updStatus(){
     },3600000);
 })();
 
-// ═══ LIVE MENTORING COUNTER ═══
-// Base: 1000 mins as of Oct 2023. ~80 mins/month estimated growth.
-function getMentoringMins(){const base=1000,startDate=new Date('2023-10-01'),now=new Date(),months=(now.getFullYear()-startDate.getFullYear())*12+(now.getMonth()-startDate.getMonth());return base+Math.floor(months*80);}
-function animateCounter(el,target){if(reducedMotion){el.textContent=target.toLocaleString()+'+';return;}let curr=0;const dur=1500,step=Math.ceil(target/60);const iv=setInterval(()=>{curr=Math.min(curr+step,target);el.textContent=curr.toLocaleString()+'+';if(curr>=target)clearInterval(iv);},dur/60);}
 
 // ═══ TEXT SCRAMBLE ═══
 class Scr{constructor(el){this.el=el;this.ch='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';}
@@ -905,8 +901,7 @@ function launch(){
     document.querySelectorAll('.rt').forEach((t,i)=>{gsap.from(t,{scale:.7,opacity:0,y:10,duration:.5,delay:1.1+i*.1,ease:'back.out(2)',onComplete:()=>{gsap.set(t,{clearProps:'all'});t.style.opacity='1';}});});
     document.querySelectorAll('.lk').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,y:50,scale:.92,rotateX:10,filter:'blur(6px)'},{opacity:1,y:0,scale:1,rotateX:0,filter:'blur(0px)',duration:.8,delay:1.4+i*.12,ease:'power3.out',onComplete:()=>done(c)});});
     document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
-    // Animate mentoring counter
-    setTimeout(()=>animateCounter(document.getElementById('impNum2'),getMentoringMins()),1200);
+
     // Timeline stagger
     document.querySelectorAll('.tl-item').forEach((t,i)=>{gsap.fromTo(t,{opacity:0,x:-15},{opacity:1,x:0,duration:.5,delay:2.2+i*.12,ease:'power2.out'});});
 }
@@ -1022,7 +1017,7 @@ window.openShare=function(){
     const stats=[
         {val:'20+',label:'CERTIFICATIONS',icon:'🎓'},
         {val:'80+',label:'RECOMMENDATIONS',icon:'⭐'},
-        {val:getMentoringMins().toLocaleString()+'+',label:'MENTORING MINS',icon:'🗣️'},
+        {val:'2,300+',label:'MENTORING MINS',icon:'🗣️'},
         {val:'12+',label:'YEARS IN BANKING',icon:'🏦'}
     ];
     const statW=130;
@@ -1358,8 +1353,7 @@ setTimeout(showRecommendation,5000);
 const consoleMessages=[
     ()=>`Amr is currently in Cairo · ${new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",minute:"numeric",hour12:true})}`,
     ()=>`${VDna.get().visits===1?'Welcome, new visitor':'Welcome back'} · Visit #${VDna.get().visits}`,
-    ()=>{const m=1000+Math.floor(((Date.now()-new Date('2023-10-01').getTime())/2592000000)*80);return `${m.toLocaleString()}+ mentoring minutes and counting...`;},
-    ()=>`Engagement score: ${getEngagementScore()}/100`,
+    ()=>'2,300+ mentoring minutes and counting...',    ()=>`Engagement score: ${getEngagementScore()}/100`,
     ()=>`Your device: ${VDna.get().device} · ${VDna.get().os} · ${VDna.get().browser}`,
     ()=>`${VDna.get().achievements.length}/${15} achievements unlocked`,
     ()=>`Running on ${navigator.hardwareConcurrency||'?'} cores · ${VDna.get().screen}`,
