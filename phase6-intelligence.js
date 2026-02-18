@@ -125,132 +125,286 @@
 
 
 /* ═══════════════════════════════════════════
-   3. INTERACTIVE TIMELINE (WOW FACTOR)
+   ALWAYS-VISIBLE CTA BUTTONS
+   ═══════════════════════════════════════════ */
+.always-cta-row {
+  display: flex; gap: 8px; margin: 14px 0 4px;
+}
+.always-cta {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 12px; border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  text-decoration: none; transition: all .35s cubic-bezier(.16,1,.3,1);
+  position: relative; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.always-cta::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.08) 50%, transparent 60%);
+  transform: translateX(-100%); pointer-events: none;
+}
+.always-cta:hover::before { animation: shm .7s ease forwards; }
+@keyframes shm { to { transform: translateX(100%); } }
+.always-cta-linkedin {
+  background: linear-gradient(135deg, #0077b5, #005f8f);
+  color: #fff; border: 1px solid rgba(0,119,181,.3);
+}
+.always-cta-linkedin:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,119,181,.3); color: #fff; }
+.always-cta-cal {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--bg); border: 1px solid rgba(0,225,255,.2);
+}
+.always-cta-cal:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--glowS); color: var(--bg); }
+.always-cta i { font-size: 12px; }
+@media print { .always-cta-row { display: none !important; } }
+
+
+/* ═══════════════════════════════════════════
+   3. INTERACTIVE TIMELINE — ADVANCED ENGINE
    ═══════════════════════════════════════════ */
 
+/* --- Canvas particle backdrop --- */
+.tl-particle-canvas {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  border-radius: 12px; opacity: .6;
+}
+
+/* --- Filter pills --- */
 .tl-filters {
   display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
-  margin: 0 0 8px; padding: 0;
+  margin: 0 0 10px; padding: 0;
 }
 .tl-filter-btn {
   font-family: 'JetBrains Mono', monospace; font-size: 7px;
   letter-spacing: 1px; text-transform: uppercase;
-  padding: 3px 10px; border-radius: 100px;
-  border: 1px solid var(--border); background: transparent; color: var(--sub);
-  cursor: pointer; transition: all .25s; -webkit-tap-highlight-color: transparent;
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid var(--border); background: var(--card); color: var(--sub);
+  cursor: pointer; transition: all .3s cubic-bezier(.16,1,.3,1);
+  -webkit-tap-highlight-color: transparent; backdrop-filter: blur(6px);
 }
-.tl-filter-btn:hover { border-color: rgba(0,225,255,.2); color: var(--sub); }
-.tl-filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,225,255,.06); }
-
-/* Scroll-driven timeline line glow */
-.tl-line-glow {
-  position: absolute; top: 0; left: 5px; width: 3px;
-  transform: translateX(-1px);
-  background: linear-gradient(180deg, #00e1ff, #6366f1, #a855f7);
-  border-radius: 2px; height: 0%;
-  transition: height .15s linear;
-  box-shadow: 0 0 8px rgba(0,225,255,.3), 0 0 20px rgba(99,102,241,.15);
-  pointer-events: none; z-index: 1;
+.tl-filter-btn:hover { border-color: rgba(0,225,255,.25); color: var(--text); background: var(--cardH); }
+.tl-filter-btn.active {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(0,225,255,.08);
+  box-shadow: 0 0 12px rgba(0,225,255,.1), inset 0 0 12px rgba(0,225,255,.03);
 }
 
-/* Staggered item animations - applied AFTER GSAP finishes */
+/* --- SVG animated line (replaces static div line) --- */
+.tl-svg-line {
+  position: absolute; left: 0; top: 0; width: 12px; height: 100%;
+  z-index: 1; pointer-events: none; overflow: visible;
+}
+.tl-svg-path-bg { fill: none; stroke: var(--border); stroke-width: 1.5; }
+.tl-svg-path-glow {
+  fill: none; stroke: url(#tlLineGrad); stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(0,225,255,.5)) drop-shadow(0 0 12px rgba(99,102,241,.2));
+  transition: stroke-dashoffset .08s linear;
+}
+
+/* --- Enhanced items --- */
 .tl-item.tl-enhanced {
-  cursor: pointer;
+  cursor: pointer; flex-wrap: wrap; position: relative;
+  transition: all .5s cubic-bezier(.16,1,.3,1) !important;
 }
+
+/* Entrance: slide + blur + scale */
 .tl-item.tl-hidden {
   opacity: 0 !important;
-  transform: translateY(24px) !important;
-  transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1) !important;
+  transform: translateX(-16px) translateY(14px) scale(.97) !important;
+  filter: blur(3px);
 }
 .tl-item.tl-visible {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-  transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1) !important;
-}
-.tl-item.filtered-out {
-  opacity: .1 !important;
-  transform: scale(.96) !important;
-  pointer-events: none;
-  filter: grayscale(.6);
-  transition: opacity .4s, transform .4s, filter .4s !important;
+  opacity: 1 !important; transform: none !important; filter: none;
+  transition: opacity .6s cubic-bezier(.16,1,.3,1),
+              transform .6s cubic-bezier(.16,1,.3,1),
+              filter .6s cubic-bezier(.16,1,.3,1) !important;
 }
 
-/* Active item in viewport — subtle glow */
-.tl-item.tl-active .tl-dot {
-  box-shadow: 0 0 0 4px rgba(0,225,255,.12), 0 0 12px rgba(0,225,255,.25) !important;
-  border-color: var(--accent) !important;
-  background: var(--accent) !important;
-  transform: scale(1.3);
-  transition: all .4s cubic-bezier(.16,1,.3,1) !important;
+/* Filter out */
+.tl-item.filtered-out {
+  opacity: .08 !important; transform: scale(.94) translateX(8px) !important;
+  pointer-events: none; filter: grayscale(.8) blur(1px);
+  transition: all .45s cubic-bezier(.16,1,.3,1) !important;
 }
+
+/* --- Dot: orbital ring + radar ping --- */
+.tl-item.tl-enhanced .tl-dot {
+  transition: all .45s cubic-bezier(.16,1,.3,1);
+  z-index: 3;
+}
+.tl-item.tl-enhanced .tl-dot::before {
+  content: ''; position: absolute;
+  inset: -5px; border-radius: 50%;
+  border: 1px dashed transparent;
+  transition: border-color .4s;
+}
+.tl-item.tl-active .tl-dot::before {
+  border-color: rgba(0,225,255,.2);
+  animation: tlOrbit 4s linear infinite;
+}
+/* Radar ping on active */
+.tl-item.tl-active .tl-dot::after {
+  content: ''; position: absolute;
+  inset: -3px; border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  animation: tlPing 2s cubic-bezier(0,.6,.5,1) infinite;
+}
+.tl-item:not(.tl-active) .tl-dot::after { display: none; }
+
+@keyframes tlOrbit { to { transform: rotate(360deg); } }
+@keyframes tlPing {
+  0% { transform: scale(1); opacity: .7; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* Active dot glow */
+.tl-item.tl-active .tl-dot {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(0,225,255,.1), 0 0 16px rgba(0,225,255,.35) !important;
+  transform: scale(1.4);
+}
+
+/* Active item ambient glow */
 .tl-item.tl-active {
-  background: rgba(0,225,255,.02);
-  border-radius: 8px;
-  padding-top: 10px !important; padding-bottom: 10px !important;
-  transition: background .4s, padding .3s !important;
+  background: linear-gradient(90deg, rgba(0,225,255,.03), transparent 80%);
+  border-radius: 8px; padding: 10px 0 10px 16px !important;
+}
+
+/* --- Era headers: gradient text + animated bar --- */
+.tl-item.tl-era.tl-visible .tl-txt strong {
+  background: linear-gradient(90deg, var(--text), var(--accent));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tlEraShift 4s ease-in-out infinite alternate;
+}
+@keyframes tlEraShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+.tl-item.tl-era.tl-visible::after {
+  content: ''; position: absolute; bottom: -1px;
+  left: 36px; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: .15; animation: tlBarSlide .8s ease-out forwards;
+}
+@keyframes tlBarSlide { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); } }
+
+/* --- Year label glow on active --- */
+.tl-item.tl-active .tl-yr {
+  color: var(--accent) !important;
+  text-shadow: 0 0 8px rgba(0,225,255,.4);
+  transition: all .3s !important;
 }
 .tl-item:hover .tl-yr { color: var(--accent); }
 
-/* Expand region — must break out of tl-item flex */
+/* --- Expand card: glass morphism + 3D --- */
 .tl-item-expand {
   max-height: 0; overflow: hidden; opacity: 0;
-  transition: max-height .5s cubic-bezier(.16,1,.3,1), opacity .4s .1s, margin .3s;
-  margin: 0;
-  flex-basis: 100%; width: 100%; order: 99;
+  transition: max-height .55s cubic-bezier(.16,1,.3,1), opacity .4s .08s, margin .3s;
+  margin: 0; flex-basis: 100%; width: 100%; order: 99;
 }
-.tl-item.tl-enhanced { flex-wrap: wrap; }
-.tl-item-expand.open { max-height: 250px; opacity: 1; margin: 8px 0 0; }
+.tl-item-expand.open { max-height: 280px; opacity: 1; margin: 8px 0 0; }
 .tl-expand-content {
-  padding: 10px 12px; border-radius: 10px;
-  background: rgba(0,225,255,.02); border: 1px solid rgba(0,225,255,.06);
+  padding: 12px 14px; border-radius: 12px;
+  background: rgba(0,225,255,.02);
+  border: 1px solid rgba(0,225,255,.06);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   font-size: 10px; line-height: 1.7; color: var(--sub);
   position: relative; overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s;
+}
+.tl-expand-content:hover {
+  transform: perspective(600px) rotateX(1deg) rotateY(-1deg) scale(1.01);
+  box-shadow: 0 8px 24px rgba(0,225,255,.06);
 }
 .tl-expand-content::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: .3;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+  opacity: .4;
+}
+.tl-expand-content::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(0,225,255,.04), transparent 70%);
+  pointer-events: none;
 }
 .tl-expand-content strong { color: var(--text); }
 .tl-expand-metric {
   display: inline-flex; align-items: center; gap: 3px;
   font-family: 'JetBrains Mono', monospace; font-size: 8px;
-  padding: 2px 6px; border-radius: 4px;
-  background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.1);
-  color: #22c55e; margin: 4px 4px 0 0;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.12);
+  color: #22c55e; margin: 6px 4px 0 0;
+  box-shadow: 0 0 8px rgba(34,197,94,.06);
 }
 
-/* Year navigator (fixed sidebar) */
+/* --- Year navigator (fixed sidebar) --- */
 .tl-year-nav {
   position: fixed; right: 8px; top: 50%; transform: translateY(-50%);
-  z-index: 98; display: flex; flex-direction: column; gap: 2px;
+  z-index: 98; display: flex; flex-direction: column; gap: 1px;
   opacity: 0; transition: opacity .4s; pointer-events: none;
 }
 .tl-year-nav.show { opacity: 1; pointer-events: auto; }
 .tl-year-pip {
-  font-family: 'JetBrains Mono', monospace; font-size: 6px;
-  color: var(--sub); padding: 2px 6px; border-radius: 4px;
-  text-align: right; cursor: pointer; transition: all .2s;
-  letter-spacing: .5px; opacity: .4;
+  font-family: 'JetBrains Mono', monospace; font-size: 7px;
+  color: var(--sub); padding: 3px 8px; border-radius: 6px;
+  text-align: right; cursor: pointer; transition: all .3s cubic-bezier(.16,1,.3,1);
+  letter-spacing: .5px; opacity: .3; position: relative;
 }
 .tl-year-pip:hover { opacity: .7; color: var(--text); }
 .tl-year-pip.active {
-  color: var(--accent); background: rgba(0,225,255,.06);
-  transform: translateX(-3px); opacity: 1;
+  color: var(--accent); background: rgba(0,225,255,.08);
+  transform: translateX(-4px); opacity: 1;
+  box-shadow: 0 0 10px rgba(0,225,255,.08);
+}
+.tl-year-pip.active::before {
+  content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 3px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
 }
 
-body.zen-mode .tl-filters,
-body.zen-mode .tl-year-nav,
-body.zen-mode .tl-item-expand { display: none !important; }
-body.zen-mode .tl-line-glow { display: none; }
+/* --- Progress counter (above timeline) --- */
+.tl-progress-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 10px; opacity: 0; transition: opacity .5s;
+}
+.tl-progress-bar.show { opacity: 1; }
+.tl-progress-track {
+  flex: 1; height: 2px; border-radius: 1px; background: var(--border);
+  overflow: hidden; position: relative;
+}
+.tl-progress-fill {
+  height: 100%; border-radius: 1px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  transition: width .15s linear; position: relative;
+}
+.tl-progress-fill::after {
+  content: ''; position: absolute; right: 0; top: -2px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+}
+.tl-progress-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px;
+  color: var(--accent); letter-spacing: 1px; flex-shrink: 0; min-width: 28px;
+  text-align: right;
+}
 
-[dir="rtl"] .tl-line-glow { left: auto; right: 5px; }
+/* --- Zen / RTL / Mobile / Print --- */
+body.zen-mode .tl-filters, body.zen-mode .tl-year-nav,
+body.zen-mode .tl-item-expand, body.zen-mode .tl-particle-canvas,
+body.zen-mode .tl-svg-line, body.zen-mode .tl-progress-bar { display: none !important; }
+[dir="rtl"] .tl-svg-line { left: auto; right: 0; }
 [dir="rtl"] .tl-year-nav { right: auto; left: 8px; }
 [dir="rtl"] .tl-year-pip { text-align: left; }
-[dir="rtl"] .tl-year-pip.active { transform: translateX(3px); }
-
+[dir="rtl"] .tl-year-pip.active { transform: translateX(4px); }
 @media(max-width:600px) { .tl-year-nav { display: none !important; } }
-@media print { .tl-filters, .tl-item-expand, .tl-year-nav, .tl-line-glow { display: none !important; } }
+@media print {
+  .tl-filters, .tl-item-expand, .tl-year-nav,
+  .tl-svg-line, .tl-particle-canvas, .tl-progress-bar { display: none !important; }
+}
 
 
 /* ═══════════════════════════════════════════
@@ -556,26 +710,97 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
 
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 3: INTERACTIVE TIMELINE (WOW FACTOR)
+  // FEATURE 0: ALWAYS-VISIBLE CTA BUTTONS
+  // ═══════════════════════════════════════════════════
+
+  function initAlwaysCTA() {
+    // Smart insertion: try multiple strategies to find the right spot
+    // 1) After the last .lk (link card) row
+    // 2) After .bio or description area
+    // 3) Before .imp (impact numbers)
+    // 4) After #app > div first child flex container
+    let anchor = null;
+    let position = 'afterend';
+
+    // Strategy 1: Find last link card container
+    const allLinks = document.querySelectorAll('a.lk');
+    if (allLinks.length) {
+      const lastLk = allLinks[allLinks.length - 1];
+      // Walk up to the flex row containing link cards
+      anchor = lastLk.closest('div[style*="flex"]') || lastLk.closest('.rv') || lastLk.parentElement;
+    }
+
+    // Strategy 2: Find the bio/subtitle area
+    if (!anchor) {
+      anchor = document.querySelector('.bio') || document.querySelector('.sub-bio') || document.querySelector('.desc');
+    }
+
+    // Strategy 3: Insert before impact numbers section
+    if (!anchor) {
+      const imp = document.querySelector('.imp');
+      if (imp) { anchor = imp; position = 'beforebegin'; }
+    }
+
+    // Strategy 4: After the main profile container
+    if (!anchor) {
+      anchor = document.querySelector('#app > div > div') || document.querySelector('#app > div');
+      if (anchor) {
+        // Find a reasonable child element after the header
+        const children = anchor.children;
+        if (children.length > 3) { anchor = children[3]; position = 'afterend'; }
+      }
+    }
+
+    if (!anchor) return;
+
+    // Check we haven't already injected
+    if (document.querySelector('.always-cta-row')) return;
+
+    const row = document.createElement('div');
+    row.className = 'always-cta-row rv';
+    row.innerHTML = `
+      <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener"
+         class="always-cta always-cta-linkedin">
+        <i class="fa-brands fa-linkedin"></i> LinkedIn
+      </a>
+      <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener"
+         class="always-cta always-cta-cal">
+        <i class="fa-solid fa-calendar-check"></i> Book My Calendar
+      </a>`;
+
+    anchor.insertAdjacentElement(position, row);
+
+    // Animate in with GSAP if available
+    if (window.gsap) {
+      gsap.fromTo(row, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, delay: 2.2, ease: 'power3.out' });
+    } else {
+      row.style.opacity = '0'; row.style.transform = 'translateY(20px)';
+      row.style.transition = 'opacity .6s ease, transform .6s ease';
+      setTimeout(() => { row.style.opacity = '1'; row.style.transform = 'none'; }, 2200);
+    }
+  }
+
+
+  // ═══════════════════════════════════════════════════
+  // FEATURE 3: INTERACTIVE TIMELINE — ADVANCED ENGINE
   // ═══════════════════════════════════════════════════
 
   function initInteractiveTimeline() {
     const tlWrap = document.querySelector('.tl-wrap');
     if (!tlWrap) return;
-    const items = tlWrap.querySelectorAll('.tl-item');
+    const items = Array.from(tlWrap.querySelectorAll('.tl-item'));
     if (!items.length) return;
 
-    // Make tl-wrap relative for the glow line
     tlWrap.style.position = 'relative';
 
-    // Tag system
+    // ─── TAG CLASSIFICATION ───
     const TAGS = {
-      banking:  ['bank','banque','misr','operations','financial','treasury'],
-      agile:    ['scrum','agile','kanban','safe','sprint','delivery','pmp','lead'],
-      data:     ['data','analytics','cdmp','warehouse','pipeline','governance','mesh'],
-      speaking: ['speak','conference','seamless','devopsdays','keynote','panel','summit'],
-      learning: ['cert','degree','doctorate','dba','learn','study','university','award'],
-      author:   ['book','bilingual','executive','author','publish','write','community'],
+      banking:  ['bank','banque','misr','operations','financial','treasury','officer'],
+      agile:    ['scrum','agile','kanban','safe','sprint','delivery','pmp','lead','hybrid'],
+      data:     ['data','analytics','cdmp','warehouse','pipeline','governance','mesh','analyst'],
+      speaking: ['speak','conference','seamless','devopsdays','keynote','panel','summit','techne','forum'],
+      learning: ['cert','degree','doctorate','dba','learn','study','university','award','earned','mba'],
+      author:   ['book','bilingual','executive','author','publish','write','community','founded','launched'],
     };
 
     items.forEach(item => {
@@ -588,36 +813,168 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       item.dataset.tags = tags.join(',');
     });
 
-    // Expandable details
+    // ─── EXPANDABLE DETAILS ───
     const DETAILS = {
-      banking:  '<strong>Banking Operations & Finance</strong> — Front-office operations, transaction processing, compliance workflows. Foundation for data flows in financial institutions.',
-      agile:    '<strong>Agile Delivery Leadership</strong> — Scrum/Kanban facilitation, sprint planning, retrospectives, stakeholder alignment. <span class="tl-expand-metric">⚡ Hybrid framework adoption</span><span class="tl-expand-metric">📈 Improved team velocity</span>',
-      data:     '<strong>Data & Analytics</strong> — Data pipelines, governance frameworks, analytics platforms, cross-domain data products. <span class="tl-expand-metric">📊 Data-driven decisions</span>',
-      speaking: '<strong>Industry Engagement</strong> — Keynotes and panels at 7+ conferences, sharing insights on agile, fintech, and digital transformation across MENA.',
-      learning: '<strong>Continuous Learning</strong> — 20+ professional certifications, doctorate research, Banque Misr Best Learner Award. <span class="tl-expand-metric">🏆 Best Learner Award</span>',
-      author:   '<strong>Thought Leadership</strong> — Published "The Bilingual Executive", founded Fintech Bilinguals community, 2,400+ mentoring minutes on ADPList.',
+      banking:  '<strong>Banking Operations & Finance</strong> — Front-office ops, transaction processing, compliance workflows. Foundation for data flows in financial institutions. <span class="tl-expand-metric">🏦 12+ years experience</span>',
+      agile:    '<strong>Agile Delivery Leadership</strong> — Scrum/Kanban facilitation, sprint planning, retrospectives, stakeholder alignment. <span class="tl-expand-metric">⚡ Hybrid framework</span><span class="tl-expand-metric">📈 Team velocity +40%</span>',
+      data:     '<strong>Data & Analytics</strong> — Data pipelines, governance, analytics platforms, cross-domain products. <span class="tl-expand-metric">📊 Data-driven decisions</span><span class="tl-expand-metric">💾 CDMP certified</span>',
+      speaking: '<strong>Industry Engagement</strong> — Keynotes and panels at 9+ conferences across MENA, sharing insights on agile, fintech, and digital transformation. <span class="tl-expand-metric">🎤 9+ panel stages</span>',
+      learning: '<strong>Continuous Learning</strong> — 20+ certifications, doctorate research, Banque Misr Best Learner Award. <span class="tl-expand-metric">🏆 Best Learner Award</span><span class="tl-expand-metric">🎓 DBA completed</span>',
+      author:   '<strong>Thought Leadership</strong> — Published "The Bilingual Executive", founded Fintech Bilinguals, 2,300+ mentoring minutes on ADPList. <span class="tl-expand-metric">📚 Book launch</span><span class="tl-expand-metric">🤝 Community founder</span>',
     };
 
-    // Insert filter buttons ABOVE the timeline wrap
+    // ─── 1. HIDE EXISTING STATIC LINE ───
+    const staticLine = tlWrap.querySelector('.tl-line');
+    if (staticLine) staticLine.style.display = 'none';
+
+    // ─── 2. SVG ANIMATED LINE ───
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svgEl = document.createElementNS(svgNS, 'svg');
+    svgEl.setAttribute('class', 'tl-svg-line');
+    svgEl.setAttribute('preserveAspectRatio', 'none');
+    // Gradient definition
+    const defs = document.createElementNS(svgNS, 'defs');
+    const grad = document.createElementNS(svgNS, 'linearGradient');
+    grad.id = 'tlLineGrad'; grad.setAttribute('x1','0'); grad.setAttribute('y1','0');
+    grad.setAttribute('x2','0'); grad.setAttribute('y2','1');
+    const stops = [
+      { offset: '0%', color: '#00e1ff' },
+      { offset: '40%', color: '#6366f1' },
+      { offset: '100%', color: '#a855f7' },
+    ];
+    stops.forEach(s => {
+      const st = document.createElementNS(svgNS, 'stop');
+      st.setAttribute('offset', s.offset);
+      st.setAttribute('stop-color', s.color);
+      grad.appendChild(st);
+    });
+    defs.appendChild(grad);
+    svgEl.appendChild(defs);
+
+    // Two paths: bg + animated glow
+    const bgPath = document.createElementNS(svgNS, 'line');
+    bgPath.setAttribute('class', 'tl-svg-path-bg');
+    bgPath.setAttribute('x1', '6'); bgPath.setAttribute('y1', '0');
+    bgPath.setAttribute('x2', '6'); bgPath.setAttribute('y2', '100%');
+    svgEl.appendChild(bgPath);
+
+    const glowPath = document.createElementNS(svgNS, 'line');
+    glowPath.setAttribute('class', 'tl-svg-path-glow');
+    glowPath.setAttribute('x1', '6'); glowPath.setAttribute('y1', '0');
+    glowPath.setAttribute('x2', '6'); glowPath.setAttribute('y2', '100%');
+    svgEl.appendChild(glowPath);
+
+    tlWrap.appendChild(svgEl);
+
+    // Size SVG to wrap height
+    function sizeSVG() {
+      const h = tlWrap.scrollHeight;
+      svgEl.setAttribute('viewBox', `0 0 12 ${h}`);
+      svgEl.style.height = h + 'px';
+      bgPath.setAttribute('y2', h);
+      glowPath.setAttribute('y2', h);
+      const pathLen = h;
+      glowPath.style.strokeDasharray = pathLen;
+      glowPath.style.strokeDashoffset = pathLen;
+      glowPath._pathLen = pathLen;
+    }
+    // Defer sizing until layout is stable
+    setTimeout(sizeSVG, 100);
+    window.addEventListener('resize', () => { setTimeout(sizeSVG, 50); });
+
+    // ─── 3. CANVAS PARTICLE BACKDROP ───
+    const canvas = document.createElement('canvas');
+    canvas.className = 'tl-particle-canvas';
+    tlWrap.insertBefore(canvas, tlWrap.firstChild);
+    const ctx = canvas.getContext('2d');
+    let cW = 0, cH = 0, particles = [], canvasActive = false;
+
+    function sizeCanvas() {
+      cW = canvas.width = tlWrap.offsetWidth;
+      cH = canvas.height = tlWrap.scrollHeight;
+    }
+
+    class TLParticle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * cW;
+        this.y = Math.random() * cH;
+        this.vx = (Math.random() - 0.5) * 0.15;
+        this.vy = (Math.random() - 0.5) * 0.15;
+        this.r = Math.random() * 1.2 + 0.3;
+        this.alpha = Math.random() * 0.25 + 0.05;
+        this.phase = Math.random() * Math.PI * 2;
+      }
+      update() {
+        this.phase += 0.008;
+        this.x += this.vx + Math.sin(this.phase) * 0.05;
+        this.y += this.vy + Math.cos(this.phase * 0.7) * 0.03;
+        if (this.x < -5 || this.x > cW + 5 || this.y < -5 || this.y > cH + 5) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,225,255,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      sizeCanvas();
+      const count = Math.min(Math.floor(cW * cH / 8000), 40);
+      particles = [];
+      for (let i = 0; i < count; i++) particles.push(new TLParticle());
+    }
+
+    let animFrame = null;
+    function animateParticles() {
+      if (!canvasActive) return;
+      ctx.clearRect(0, 0, cW, cH);
+      particles.forEach(p => { p.update(); p.draw(); });
+      // Draw connection lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const d = dx * dx + dy * dy;
+          if (d < 5000) {
+            ctx.strokeStyle = `rgba(0,225,255,${0.03 * (1 - d / 5000)})`;
+            ctx.lineWidth = 0.4;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      animFrame = requestAnimationFrame(animateParticles);
+    }
+
+    // ─── 4. FILTER PILLS ───
     const filters = document.createElement('div');
     filters.className = 'tl-filters'; filters.id = 'tlFilters';
+    const filterIcons = { all: '✦', banking: '🏦', agile: '⚡', data: '📊', speaking: '🎤', learning: '🎓', author: '📚' };
     ['all', ...Object.keys(TAGS)].forEach(tag => {
       const btn = document.createElement('button');
       btn.className = 'tl-filter-btn' + (tag === 'all' ? ' active' : '');
-      btn.textContent = tag; btn.dataset.filter = tag;
+      btn.innerHTML = (filterIcons[tag] || '') + ' ' + tag;
+      btn.dataset.filter = tag;
       btn.addEventListener('click', () => filterTimeline(tag));
       filters.appendChild(btn);
     });
     tlWrap.parentNode.insertBefore(filters, tlWrap);
 
-    // Glow line overlay (fills as you scroll through timeline)
-    const glowLine = document.createElement('div');
-    glowLine.className = 'tl-line-glow';
-    glowLine.id = 'tlGlowLine';
-    // Insert directly into tl-wrap (same parent as .tl-line)
-    tlWrap.appendChild(glowLine);
+    // ─── 5. PROGRESS BAR ───
+    const progressBar = document.createElement('div');
+    progressBar.className = 'tl-progress-bar'; progressBar.id = 'tlProgressBar';
+    progressBar.innerHTML = `
+      <div class="tl-progress-track"><div class="tl-progress-fill" id="tlProgressFill"></div></div>
+      <span class="tl-progress-label" id="tlProgressLabel">0%</span>`;
+    tlWrap.parentNode.insertBefore(progressBar, tlWrap);
+    const progressFill = document.getElementById('tlProgressFill');
+    const progressLabel = document.getElementById('tlProgressLabel');
 
-    // Add expand regions + mark enhanced items
+    // ─── 6. EXPAND CARDS + MARK ITEMS ───
     items.forEach((item, idx) => {
       const tags = item.dataset.tags.split(',');
       const primaryTag = tags[0];
@@ -628,98 +985,136 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       expandDiv.innerHTML = `<div class="tl-expand-content">${detail}</div>`;
       item.appendChild(expandDiv);
 
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return; // Don't capture link clicks
         const isOpen = expandDiv.classList.contains('open');
         tlWrap.querySelectorAll('.tl-item-expand.open').forEach(d => d.classList.remove('open'));
-        if (!isOpen) expandDiv.classList.add('open');
+        if (!isOpen) {
+          expandDiv.classList.add('open');
+          // Haptic feedback
+          if (navigator.vibrate) navigator.vibrate(15);
+        }
       });
 
       item.classList.add('tl-enhanced');
     });
 
-    // Entrance animation: Wait for GSAP to finish (≈5s), then apply
-    // scroll-triggered entrance only to items still below fold
+    // ─── 7. ENTRANCE ANIMATION (after GSAP finishes) ───
     if (!RM) {
       setTimeout(() => {
         const viewH = window.innerHeight;
         items.forEach((item, idx) => {
           const r = item.getBoundingClientRect();
           if (r.top > viewH) {
-            // Below fold — hide for scroll reveal
             item.classList.add('tl-hidden');
-            item.style.transitionDelay = (idx % 4) * 0.08 + 's';
+            // Stagger delay based on position within each era group
+            item.style.transitionDelay = (idx % 5) * 0.06 + 's';
           } else {
-            // Already visible from GSAP — mark as visible
             item.classList.add('tl-visible');
           }
         });
-      }, 5000);
+      }, 4800);
     }
 
-    // Year navigator (desktop only)
+    // ─── 8. YEAR NAVIGATOR (desktop) ───
     const yearNav = document.createElement('div');
     yearNav.className = 'tl-year-nav'; yearNav.id = 'tlYearNav';
-    const years = new Set();
+    const years = [];
     items.forEach(item => {
       const yr = item.querySelector('.tl-yr');
-      if (yr) years.add(yr.textContent.trim());
+      if (yr) {
+        const y = yr.textContent.trim();
+        if (!years.includes(y)) years.push(y);
+      }
     });
-    [...years].forEach(y => {
+    years.forEach(y => {
       const pip = document.createElement('div');
       pip.className = 'tl-year-pip'; pip.textContent = y; pip.dataset.year = y;
       pip.addEventListener('click', () => {
-        const target = [...items].find(i => i.querySelector('.tl-yr')?.textContent.trim() === y);
+        const target = items.find(i => i.querySelector('.tl-yr')?.textContent.trim() === y);
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
       yearNav.appendChild(pip);
     });
     document.body.appendChild(yearNav);
 
-    // ─── SCROLL OBSERVER: entrance + active + glow line + year nav ───
-    let scrollRAF = null;
+    // ─── 9. MASTER SCROLL ENGINE ───
+    let rafId = null;
+    let lastProgress = -1;
+    let initialized = false;
+
     function onScroll() {
-      if (scrollRAF) return;
-      scrollRAF = requestAnimationFrame(() => {
-        scrollRAF = null;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
         const wrapRect = tlWrap.getBoundingClientRect();
         const viewH = window.innerHeight;
-
-        // Is timeline in view?
         const inView = wrapRect.top < viewH && wrapRect.bottom > 0;
+
+        // Year nav visibility
         yearNav.classList.toggle('show', inView && !isMobile);
+
+        // Progress bar visibility
+        progressBar.classList.toggle('show', inView);
+
+        // Canvas activation
+        if (inView && !canvasActive) {
+          canvasActive = true;
+          if (!initialized) { initParticles(); initialized = true; }
+          animateParticles();
+        } else if (!inView && canvasActive) {
+          canvasActive = false;
+          if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        }
 
         if (!inView) return;
 
-        // Glow line progress
-        const progress = Math.max(0, Math.min(1,
-          (viewH - wrapRect.top) / (wrapRect.height + viewH)
+        // ── SVG line draw progress ──
+        const rawProgress = Math.max(0, Math.min(1,
+          (viewH * 0.5 - wrapRect.top) / wrapRect.height
         ));
-        glowLine.style.height = (progress * 100) + '%';
+        // Smooth ease
+        const progress = rawProgress * rawProgress * (3 - 2 * rawProgress); // smoothstep
 
-        // Per-item checks
+        if (glowPath._pathLen && Math.abs(progress - lastProgress) > 0.001) {
+          lastProgress = progress;
+          const offset = glowPath._pathLen * (1 - progress);
+          glowPath.style.strokeDashoffset = offset;
+
+          // Progress bar
+          const pct = Math.round(progress * 100);
+          progressFill.style.width = pct + '%';
+          progressLabel.textContent = pct + '%';
+        }
+
+        // ── Per-item checks ──
         let activeYear = null;
         items.forEach(item => {
           const r = item.getBoundingClientRect();
-          const visible = r.top < viewH * 0.85 && r.bottom > viewH * 0.15;
-          const centered = r.top < viewH * 0.6 && r.bottom > viewH * 0.4;
+          const visible = r.top < viewH * 0.88 && r.bottom > viewH * 0.12;
+          const centered = r.top < viewH * 0.6 && r.bottom > viewH * 0.35;
 
-          // Entrance
+          // Entrance reveal
           if (visible && item.classList.contains('tl-hidden')) {
             item.classList.remove('tl-hidden');
             item.classList.add('tl-visible');
           }
 
           // Active highlight
-          item.classList.toggle('tl-active', centered && !item.classList.contains('filtered-out'));
+          const wasActive = item.classList.contains('tl-active');
+          const isActive = centered && !item.classList.contains('filtered-out');
+          if (isActive !== wasActive) {
+            item.classList.toggle('tl-active', isActive);
+          }
 
-          // Year nav
+          // Year nav tracking
           if (centered) {
             const yr = item.querySelector('.tl-yr');
             if (yr) activeYear = yr.textContent.trim();
           }
         });
 
-        // Update year nav
+        // Update year nav pips
         yearNav.querySelectorAll('.tl-year-pip').forEach(p => {
           p.classList.toggle('active', p.dataset.year === activeYear);
         });
@@ -727,23 +1122,33 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    // Initial trigger after GSAP animations complete
-    setTimeout(onScroll, 5200);
+    window.addEventListener('resize', () => {
+      if (initialized) { sizeCanvas(); sizeSVG(); }
+      onScroll();
+    }, { passive: true });
 
+    // Initial trigger after GSAP completes
+    setTimeout(() => { sizeSVG(); onScroll(); }, 5000);
+
+    // ─── 10. FILTER SYSTEM ───
     function filterTimeline(tag) {
-      document.querySelectorAll('.tl-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === tag));
+      document.querySelectorAll('.tl-filter-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.filter === tag)
+      );
       items.forEach(item => {
-        // Era (year header) items always stay visible
         const isEra = item.classList.contains('tl-era');
         if (tag === 'all' || isEra) {
           item.classList.remove('filtered-out');
         } else {
-          item.classList.toggle('filtered-out', !item.dataset.tags.split(',').includes(tag));
+          const match = item.dataset.tags.split(',').includes(tag);
+          item.classList.toggle('filtered-out', !match);
         }
       });
+      // Re-trigger entrance for newly visible items
+      setTimeout(onScroll, 100);
     }
 
+    // ─── 11. TERMINAL INTEGRATION ───
     if (window.TermCmds) {
       window.TermCmds.timeline = (args) => {
         const tag = (args || '').trim().toLowerCase();
@@ -756,7 +1161,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       };
     }
 
-    function scrollTo(sel) { const el = document.querySelector(sel); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+    function scrollTo(sel) { const el = document.querySelector(sel); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
 
 
@@ -967,6 +1372,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   // INIT
   // ═══════════════════════════════════════════════════
   function init() {
+    initAlwaysCTA();
     initCommandPalette();
     initAdminDashboard();
     initInteractiveTimeline();
