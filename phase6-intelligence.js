@@ -130,21 +130,22 @@
 
 .tl-filters {
   display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
-  margin: 8px 0 4px; padding: 0 8px;
+  margin: 0 0 8px; padding: 0;
 }
 .tl-filter-btn {
   font-family: 'JetBrains Mono', monospace; font-size: 7px;
   letter-spacing: 1px; text-transform: uppercase;
   padding: 3px 10px; border-radius: 100px;
-  border: 1px solid #1a2332; background: transparent; color: #4a5568;
+  border: 1px solid var(--border); background: transparent; color: var(--sub);
   cursor: pointer; transition: all .25s; -webkit-tap-highlight-color: transparent;
 }
-.tl-filter-btn:hover { border-color: rgba(0,225,255,.2); color: #8b949e; }
+.tl-filter-btn:hover { border-color: rgba(0,225,255,.2); color: var(--sub); }
 .tl-filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,225,255,.06); }
 
 /* Scroll-driven timeline line glow */
 .tl-line-glow {
-  position: absolute; top: 0; left: 50%; width: 3px; transform: translateX(-50%);
+  position: absolute; top: 0; left: 5px; width: 3px;
+  transform: translateX(-1px);
   background: linear-gradient(180deg, #00e1ff, #6366f1, #a855f7);
   border-radius: 2px; height: 0%;
   transition: height .15s linear;
@@ -152,50 +153,57 @@
   pointer-events: none; z-index: 1;
 }
 
-/* Staggered item animations */
-.tl-item {
-  transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+/* Staggered item animations - applied AFTER GSAP finishes */
+.tl-item.tl-enhanced {
   cursor: pointer;
 }
 .tl-item.tl-hidden {
-  opacity: 0;
-  transform: translateY(24px);
+  opacity: 0 !important;
+  transform: translateY(24px) !important;
+  transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1) !important;
 }
 .tl-item.tl-visible {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1) !important;
 }
 .tl-item.filtered-out {
   opacity: .1 !important;
-  transform: scale(.92) !important;
+  transform: scale(.96) !important;
   pointer-events: none;
   filter: grayscale(.6);
+  transition: opacity .4s, transform .4s, filter .4s !important;
 }
 
 /* Active item in viewport — subtle glow */
 .tl-item.tl-active .tl-dot {
-  box-shadow: 0 0 0 4px rgba(0,225,255,.12), 0 0 12px rgba(0,225,255,.2);
+  box-shadow: 0 0 0 4px rgba(0,225,255,.12), 0 0 12px rgba(0,225,255,.25) !important;
   border-color: var(--accent) !important;
+  background: var(--accent) !important;
   transform: scale(1.3);
-  transition: all .4s cubic-bezier(.16,1,.3,1);
+  transition: all .4s cubic-bezier(.16,1,.3,1) !important;
 }
 .tl-item.tl-active {
   background: rgba(0,225,255,.02);
-  border-radius: 10px;
+  border-radius: 8px;
+  padding-top: 10px !important; padding-bottom: 10px !important;
+  transition: background .4s, padding .3s !important;
 }
 .tl-item:hover .tl-yr { color: var(--accent); }
 
-/* Expand region */
+/* Expand region — must break out of tl-item flex */
 .tl-item-expand {
   max-height: 0; overflow: hidden; opacity: 0;
   transition: max-height .5s cubic-bezier(.16,1,.3,1), opacity .4s .1s, margin .3s;
   margin: 0;
+  flex-basis: 100%; width: 100%; order: 99;
 }
+.tl-item.tl-enhanced { flex-wrap: wrap; }
 .tl-item-expand.open { max-height: 250px; opacity: 1; margin: 8px 0 0; }
 .tl-expand-content {
   padding: 10px 12px; border-radius: 10px;
   background: rgba(0,225,255,.02); border: 1px solid rgba(0,225,255,.06);
-  font-size: 10px; line-height: 1.7; color: #8b949e;
+  font-size: 10px; line-height: 1.7; color: var(--sub);
   position: relative; overflow: hidden;
 }
 .tl-expand-content::before {
@@ -203,7 +211,7 @@
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   opacity: .3;
 }
-.tl-expand-content strong { color: #e2e8f0; }
+.tl-expand-content strong { color: var(--text); }
 .tl-expand-metric {
   display: inline-flex; align-items: center; gap: 3px;
   font-family: 'JetBrains Mono', monospace; font-size: 8px;
@@ -221,20 +229,25 @@
 .tl-year-nav.show { opacity: 1; pointer-events: auto; }
 .tl-year-pip {
   font-family: 'JetBrains Mono', monospace; font-size: 6px;
-  color: #2d3748; padding: 2px 6px; border-radius: 4px;
+  color: var(--sub); padding: 2px 6px; border-radius: 4px;
   text-align: right; cursor: pointer; transition: all .2s;
-  letter-spacing: .5px;
+  letter-spacing: .5px; opacity: .4;
 }
-.tl-year-pip:hover { color: #6b7280; }
+.tl-year-pip:hover { opacity: .7; color: var(--text); }
 .tl-year-pip.active {
   color: var(--accent); background: rgba(0,225,255,.06);
-  transform: translateX(-3px);
+  transform: translateX(-3px); opacity: 1;
 }
 
 body.zen-mode .tl-filters,
 body.zen-mode .tl-year-nav,
 body.zen-mode .tl-item-expand { display: none !important; }
 body.zen-mode .tl-line-glow { display: none; }
+
+[dir="rtl"] .tl-line-glow { left: auto; right: 5px; }
+[dir="rtl"] .tl-year-nav { right: auto; left: 8px; }
+[dir="rtl"] .tl-year-pip { text-align: left; }
+[dir="rtl"] .tl-year-pip.active { transform: translateX(3px); }
 
 @media(max-width:600px) { .tl-year-nav { display: none !important; } }
 @media print { .tl-filters, .tl-item-expand, .tl-year-nav, .tl-line-glow { display: none !important; } }
@@ -585,7 +598,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       author:   '<strong>Thought Leadership</strong> — Published "The Bilingual Executive", founded Fintech Bilinguals community, 2,400+ mentoring minutes on ADPList.',
     };
 
-    // Insert filter buttons
+    // Insert filter buttons ABOVE the timeline wrap
     const filters = document.createElement('div');
     filters.className = 'tl-filters'; filters.id = 'tlFilters';
     ['all', ...Object.keys(TAGS)].forEach(tag => {
@@ -595,19 +608,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       btn.addEventListener('click', () => filterTimeline(tag));
       filters.appendChild(btn);
     });
-    tlWrap.insertBefore(filters, tlWrap.firstChild);
+    tlWrap.parentNode.insertBefore(filters, tlWrap);
 
     // Glow line overlay (fills as you scroll through timeline)
     const glowLine = document.createElement('div');
     glowLine.className = 'tl-line-glow';
     glowLine.id = 'tlGlowLine';
-    const existingLine = tlWrap.querySelector('.tl-line');
-    if (existingLine) {
-      existingLine.style.position = 'relative';
-      existingLine.appendChild(glowLine);
-    }
+    // Insert directly into tl-wrap (same parent as .tl-line)
+    tlWrap.appendChild(glowLine);
 
-    // Add expand + hide items initially
+    // Add expand regions + mark enhanced items
     items.forEach((item, idx) => {
       const tags = item.dataset.tags.split(',');
       const primaryTag = tags[0];
@@ -624,12 +634,27 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         if (!isOpen) expandDiv.classList.add('open');
       });
 
-      // Start hidden for entrance animation
-      if (!RM) {
-        item.classList.add('tl-hidden');
-        item.style.transitionDelay = (idx % 4) * 0.08 + 's';
-      }
+      item.classList.add('tl-enhanced');
     });
+
+    // Entrance animation: Wait for GSAP to finish (≈5s), then apply
+    // scroll-triggered entrance only to items still below fold
+    if (!RM) {
+      setTimeout(() => {
+        const viewH = window.innerHeight;
+        items.forEach((item, idx) => {
+          const r = item.getBoundingClientRect();
+          if (r.top > viewH) {
+            // Below fold — hide for scroll reveal
+            item.classList.add('tl-hidden');
+            item.style.transitionDelay = (idx % 4) * 0.08 + 's';
+          } else {
+            // Already visible from GSAP — mark as visible
+            item.classList.add('tl-visible');
+          }
+        });
+      }, 5000);
+    }
 
     // Year navigator (desktop only)
     const yearNav = document.createElement('div');
@@ -703,13 +728,15 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
-    // Initial trigger
-    setTimeout(onScroll, 600);
+    // Initial trigger after GSAP animations complete
+    setTimeout(onScroll, 5200);
 
     function filterTimeline(tag) {
       document.querySelectorAll('.tl-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === tag));
       items.forEach(item => {
-        if (tag === 'all') {
+        // Era (year header) items always stay visible
+        const isEra = item.classList.contains('tl-era');
+        if (tag === 'all' || isEra) {
           item.classList.remove('filtered-out');
         } else {
           item.classList.toggle('filtered-out', !item.dataset.tags.split(',').includes(tag));
