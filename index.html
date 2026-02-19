@@ -2325,9 +2325,11 @@ addEventListener('scroll',()=>{
     const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;
     document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';
     trackScroll();
-    if(!reducedMotion){document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${t*(i+1)*.06}px)`;});}
+   if(!reducedMotion){document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${t*(i+1)*.06}px)`;});}
 },{passive:true});
-    
+
+})(); // ← THIS closes the (()=>{ at the very top of the script
+
 </script>
 <script src="phase1-features.js" defer></script>
 <script src="phase2-features.js" defer></script>
@@ -2336,13 +2338,19 @@ addEventListener('scroll',()=>{
 <script src="phase5-experimental.js" defer></script>
 <script src="phase6-intelligence.js" defer></script>
 <script>
-// Safety: ensure page is never permanently hidden due to JS errors
-window.addEventListener('error', function() {
-  document.body.style.overflow = 'auto';
-  var pre = document.getElementById('preloader');
-  if (pre) pre.style.display = 'none';
-  var app = document.getElementById('app');
-  if (app) { app.style.opacity = '1'; }
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var pre = document.getElementById('preloader');
+    var app = document.getElementById('app');
+    if (pre && pre.style.display !== 'none') {
+      pre.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      document.body.style.overflowX = 'hidden';
+    }
+    if (app && app.style.opacity === '0' || app && !app.style.opacity) {
+      app.style.opacity = '1';
+    }
+  }, 4000); // 4s safety net
 });
 </script>
 </body>
