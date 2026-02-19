@@ -922,7 +922,7 @@ function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById(
 if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     const CAIRO_LAT=30.0444,CAIRO_LNG=31.2357,RADIUS_KM=25;
     function haversineKm(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-    fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});if(data.status==='success'){const dist=haversineKm(data.lat,data.lon,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
+    fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
 }
 function initShake(){const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;let shakeStart=0,shaking=false;const hint=document.getElementById('shakeHint'),bar=document.getElementById('shakeBar'),fill=document.getElementById('shakeFill');
 function handleMotion(e){if(contactRevealed)return;const acc=e.accelerationIncludingGravity;if(!acc)return;const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z),accelNet=Math.abs(total-9.81);
