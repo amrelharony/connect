@@ -3,17 +3,17 @@
 // Drop-in: <script src="phase6-intelligence.js" defer></script>
 //
 // Features:
-//   0. Always-visible CTA buttons (LinkedIn + Calendar)
+//   0. Always-visible CTA buttons (LinkedIn + Get Mentored)
 //   1. Command Palette (Cmd+K) — fuzzy search, MRU, descriptions, Tab categories
 //   2. Trophy Case & Progress Tracker — 24 achievements, exploration tracking
-//   3. Interactive Timeline — SVG line, canvas particles, glassmorphism
+//   3. Interactive Timeline — minimal scroll-line, clean cards, filters
 //   4. Live Guestbook (emoji wall)
 //   5. Voice Navigation — 30+ routes, compound commands, confidence display
 //   6. Advanced Terminal — 35+ commands, easter eggs, neofetch
-//   7. ADPList widget removal (CSS + DOM + MutationObserver)
+//   7. ADPList widget cleanup (CSS + DOM) + direct redirect
 //   8. Trophy triggers wired into: scroll, guestbook, palette, terminal, voice
 //
-// 2,278 lines · Syntax validated · RTL/mobile/print/zen safe
+// 1,957 lines · Syntax validated · RTL/mobile/print/zen safe
 // ═══════════════════════════════════════════════════════════════
 (function PhaseSixIntelligence() {
   'use strict';
@@ -213,40 +213,25 @@ div[id*="adplist-widget"], div[class*="adplist-widget"] { display: none !importa
   padding: 10px 12px; border-radius: 10px;
   font-family: 'JetBrains Mono', monospace; font-size: 9px;
   font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-  text-decoration: none; transition: all .35s cubic-bezier(.16,1,.3,1);
-  position: relative; overflow: hidden;
+  text-decoration: none; transition: transform .25s ease, box-shadow .25s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.always-cta::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.08) 50%, transparent 60%);
-  transform: translateX(-100%); pointer-events: none;
-}
-.always-cta:hover::before { animation: shm .7s ease forwards; }
-@keyframes shm { to { transform: translateX(100%); } }
 .always-cta-linkedin {
-  background: linear-gradient(135deg, #0077b5, #005f8f);
-  color: #fff; border: 1px solid rgba(0,119,181,.3);
+  background: #0077b5; color: #fff; border: 1px solid rgba(0,119,181,.3);
 }
-.always-cta-linkedin:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,119,181,.3); color: #fff; }
-.always-cta-cal {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: var(--bg); border: 1px solid rgba(0,225,255,.2);
+.always-cta-linkedin:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,119,181,.2); color: #fff; }
+.always-cta-mentor {
+  background: rgba(0,225,255,.1); color: var(--accent);
+  border: 1px solid rgba(0,225,255,.15);
 }
-.always-cta-cal:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--glowS); color: var(--bg); }
+.always-cta-mentor:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,225,255,.1); color: var(--accent); }
 .always-cta i { font-size: 12px; }
 @media print { .always-cta-row { display: none !important; } }
 
 
 /* ═══════════════════════════════════════════
-   3. INTERACTIVE TIMELINE — ADVANCED ENGINE
+   3. INTERACTIVE TIMELINE — MINIMAL ENGINE
    ═══════════════════════════════════════════ */
-
-/* --- Canvas particle backdrop --- */
-.tl-particle-canvas {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  border-radius: 12px; opacity: .6;
-}
 
 /* --- Filter pills --- */
 .tl-filters {
@@ -256,232 +241,139 @@ div[id*="adplist-widget"], div[class*="adplist-widget"] { display: none !importa
 .tl-filter-btn {
   font-family: 'JetBrains Mono', monospace; font-size: 7px;
   letter-spacing: 1px; text-transform: uppercase;
-  padding: 4px 12px; border-radius: 100px;
-  border: 1px solid var(--border); background: var(--card); color: var(--sub);
-  cursor: pointer; transition: all .3s cubic-bezier(.16,1,.3,1);
-  -webkit-tap-highlight-color: transparent; backdrop-filter: blur(6px);
+  padding: 4px 10px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent; color: var(--sub);
+  cursor: pointer; transition: color .25s, border-color .25s, background .25s;
+  -webkit-tap-highlight-color: transparent;
 }
-.tl-filter-btn:hover { border-color: rgba(0,225,255,.25); color: var(--text); background: var(--cardH); }
+.tl-filter-btn:hover { border-color: rgba(255,255,255,.12); color: var(--text); }
 .tl-filter-btn.active {
   border-color: var(--accent); color: var(--accent);
-  background: rgba(0,225,255,.08);
-  box-shadow: 0 0 12px rgba(0,225,255,.1), inset 0 0 12px rgba(0,225,255,.03);
+  background: rgba(0,225,255,.05);
 }
 
-/* --- SVG animated line (replaces static div line) --- */
-.tl-svg-line {
-  position: absolute; left: 0; top: 0; width: 12px; height: 100%;
-  z-index: 1; pointer-events: none; overflow: visible;
+/* --- Scroll-progress line --- */
+.tl-scroll-line {
+  position: absolute; left: 5px; top: 0; width: 1.5px; height: 100%;
+  z-index: 1; pointer-events: none; overflow: hidden;
+  background: var(--border); border-radius: 1px;
 }
-.tl-svg-path-bg { fill: none; stroke: var(--border); stroke-width: 1.5; }
-.tl-svg-path-glow {
-  fill: none; stroke: url(#tlLineGrad); stroke-width: 2.5;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 4px rgba(0,225,255,.5)) drop-shadow(0 0 12px rgba(99,102,241,.2));
-  transition: stroke-dashoffset .08s linear;
+.tl-scroll-line-fill {
+  width: 100%; height: 0%; border-radius: 1px;
+  background: var(--accent); opacity: .45;
+  transition: height .08s linear;
 }
 
 /* --- Enhanced items --- */
 .tl-item.tl-enhanced {
   cursor: pointer; flex-wrap: wrap; position: relative;
-  transition: all .5s cubic-bezier(.16,1,.3,1) !important;
+  transition: opacity .4s ease, transform .4s ease !important;
 }
 
-/* Entrance: slide + blur + scale */
+/* Entrance: simple fade up */
 .tl-item.tl-hidden {
   opacity: 0 !important;
-  transform: translateX(-16px) translateY(14px) scale(.97) !important;
-  filter: blur(3px);
+  transform: translateY(10px) !important;
 }
 .tl-item.tl-visible {
-  opacity: 1 !important; transform: none !important; filter: none;
-  transition: opacity .6s cubic-bezier(.16,1,.3,1),
-              transform .6s cubic-bezier(.16,1,.3,1),
-              filter .6s cubic-bezier(.16,1,.3,1) !important;
+  opacity: 1 !important; transform: none !important;
+  transition: opacity .5s ease, transform .5s ease !important;
 }
 
 /* Filter out */
 .tl-item.filtered-out {
-  opacity: .08 !important; transform: scale(.94) translateX(8px) !important;
-  pointer-events: none; filter: grayscale(.8) blur(1px);
-  transition: all .45s cubic-bezier(.16,1,.3,1) !important;
+  opacity: .06 !important; transform: scale(.97) !important;
+  pointer-events: none;
+  transition: opacity .35s ease, transform .35s ease !important;
 }
 
-/* --- Dot: orbital ring + radar ping --- */
+/* --- Dot: clean, no orbits --- */
 .tl-item.tl-enhanced .tl-dot {
-  transition: all .45s cubic-bezier(.16,1,.3,1);
+  transition: background .3s, border-color .3s, transform .3s;
   z-index: 3;
 }
-.tl-item.tl-enhanced .tl-dot::before {
-  content: ''; position: absolute;
-  inset: -5px; border-radius: 50%;
-  border: 1px dashed transparent;
-  transition: border-color .4s;
-}
-.tl-item.tl-active .tl-dot::before {
-  border-color: rgba(0,225,255,.2);
-  animation: tlOrbit 4s linear infinite;
-}
-/* Radar ping on active */
-.tl-item.tl-active .tl-dot::after {
-  content: ''; position: absolute;
-  inset: -3px; border-radius: 50%;
-  border: 1.5px solid var(--accent);
-  animation: tlPing 2s cubic-bezier(0,.6,.5,1) infinite;
-}
-.tl-item:not(.tl-active) .tl-dot::after { display: none; }
 
-@keyframes tlOrbit { to { transform: rotate(360deg); } }
-@keyframes tlPing {
-  0% { transform: scale(1); opacity: .7; }
-  100% { transform: scale(3); opacity: 0; }
-}
-
-/* Active dot glow */
+/* Active dot — subtle scale + accent */
 .tl-item.tl-active .tl-dot {
   background: var(--accent) !important;
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 4px rgba(0,225,255,.1), 0 0 16px rgba(0,225,255,.35) !important;
-  transform: scale(1.4);
+  transform: scale(1.25);
 }
 
-/* Active item ambient glow */
+/* Active item — faint left accent */
 .tl-item.tl-active {
-  background: linear-gradient(90deg, rgba(0,225,255,.03), transparent 80%);
-  border-radius: 8px; padding: 10px 0 10px 16px !important;
+  border-radius: 6px;
+  background: rgba(0,225,255,.02);
 }
 
-/* --- Era headers: gradient text + animated bar --- */
+/* --- Era headers: clean styling --- */
 .tl-item.tl-era.tl-visible .tl-txt strong {
-  background: linear-gradient(90deg, var(--text), var(--accent));
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: tlEraShift 4s ease-in-out infinite alternate;
-}
-@keyframes tlEraShift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  color: var(--text);
 }
 .tl-item.tl-era.tl-visible::after {
   content: ''; position: absolute; bottom: -1px;
   left: 36px; right: 0; height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: .15; animation: tlBarSlide .8s ease-out forwards;
+  background: linear-gradient(90deg, rgba(255,255,255,.06), transparent);
 }
-@keyframes tlBarSlide { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); } }
 
-/* --- Year label glow on active --- */
+/* --- Year label on active --- */
 .tl-item.tl-active .tl-yr {
   color: var(--accent) !important;
-  text-shadow: 0 0 8px rgba(0,225,255,.4);
-  transition: all .3s !important;
+  transition: color .3s !important;
 }
 .tl-item:hover .tl-yr { color: var(--accent); }
 
-/* --- Expand card: glass morphism + 3D --- */
+/* --- Expand card: clean, flat --- */
 .tl-item-expand {
   max-height: 0; overflow: hidden; opacity: 0;
-  transition: max-height .55s cubic-bezier(.16,1,.3,1), opacity .4s .08s, margin .3s;
+  transition: max-height .45s ease, opacity .3s .05s, margin .25s;
   margin: 0; flex-basis: 100%; width: 100%; order: 99;
 }
-.tl-item-expand.open { max-height: 280px; opacity: 1; margin: 8px 0 0; }
+.tl-item-expand.open { max-height: 320px; opacity: 1; margin: 8px 0 0; }
 .tl-expand-content {
-  padding: 12px 14px; border-radius: 12px;
-  background: rgba(0,225,255,.02);
-  border: 1px solid rgba(0,225,255,.06);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  padding: 12px 14px; border-radius: 10px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.04);
   font-size: 10px; line-height: 1.7; color: var(--sub);
-  position: relative; overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s;
-}
-.tl-expand-content:hover {
-  transform: perspective(600px) rotateX(1deg) rotateY(-1deg) scale(1.01);
-  box-shadow: 0 8px 24px rgba(0,225,255,.06);
-}
-.tl-expand-content::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
-  opacity: .4;
-}
-.tl-expand-content::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 20% 0%, rgba(0,225,255,.04), transparent 70%);
-  pointer-events: none;
 }
 .tl-expand-content strong { color: var(--text); }
 .tl-expand-metric {
   display: inline-flex; align-items: center; gap: 3px;
   font-family: 'JetBrains Mono', monospace; font-size: 8px;
-  padding: 3px 8px; border-radius: 6px;
-  background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.12);
-  color: #22c55e; margin: 6px 4px 0 0;
-  box-shadow: 0 0 8px rgba(34,197,94,.06);
-}
-
-/* --- Year navigator (fixed sidebar) --- */
-.tl-year-nav {
-  position: fixed; right: 8px; top: 50%; transform: translateY(-50%);
-  z-index: 98; display: flex; flex-direction: column; gap: 1px;
-  opacity: 0; transition: opacity .4s; pointer-events: none;
-}
-.tl-year-nav.show { opacity: 1; pointer-events: auto; }
-.tl-year-pip {
-  font-family: 'JetBrains Mono', monospace; font-size: 7px;
-  color: var(--sub); padding: 3px 8px; border-radius: 6px;
-  text-align: right; cursor: pointer; transition: all .3s cubic-bezier(.16,1,.3,1);
-  letter-spacing: .5px; opacity: .3; position: relative;
-}
-.tl-year-pip:hover { opacity: .7; color: var(--text); }
-.tl-year-pip.active {
-  color: var(--accent); background: rgba(0,225,255,.08);
-  transform: translateX(-4px); opacity: 1;
-  box-shadow: 0 0 10px rgba(0,225,255,.08);
-}
-.tl-year-pip.active::before {
-  content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 3px; border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
+  padding: 3px 8px; border-radius: 5px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05);
+  color: var(--sub); margin: 6px 4px 0 0;
 }
 
 /* --- Progress counter (above timeline) --- */
 .tl-progress-bar {
   display: flex; align-items: center; gap: 8px;
-  margin: 0 0 10px; opacity: 0; transition: opacity .5s;
+  margin: 0 0 10px; opacity: 0; transition: opacity .4s;
 }
 .tl-progress-bar.show { opacity: 1; }
 .tl-progress-track {
-  flex: 1; height: 2px; border-radius: 1px; background: var(--border);
-  overflow: hidden; position: relative;
+  flex: 1; height: 1.5px; border-radius: 1px; background: var(--border);
+  overflow: hidden;
 }
 .tl-progress-fill {
   height: 100%; border-radius: 1px; width: 0%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-  transition: width .15s linear; position: relative;
-}
-.tl-progress-fill::after {
-  content: ''; position: absolute; right: 0; top: -2px;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  background: var(--accent); opacity: .5;
+  transition: width .12s linear;
 }
 .tl-progress-label {
   font-family: 'JetBrains Mono', monospace; font-size: 7px;
-  color: var(--accent); letter-spacing: 1px; flex-shrink: 0; min-width: 28px;
+  color: var(--sub); letter-spacing: 1px; flex-shrink: 0; min-width: 28px;
   text-align: right;
 }
 
-/* --- Zen / RTL / Mobile / Print --- */
-body.zen-mode .tl-filters, body.zen-mode .tl-year-nav,
-body.zen-mode .tl-item-expand, body.zen-mode .tl-particle-canvas,
-body.zen-mode .tl-svg-line, body.zen-mode .tl-progress-bar { display: none !important; }
-[dir="rtl"] .tl-svg-line { left: auto; right: 0; }
-[dir="rtl"] .tl-year-nav { right: auto; left: 8px; }
-[dir="rtl"] .tl-year-pip { text-align: left; }
-[dir="rtl"] .tl-year-pip.active { transform: translateX(4px); }
-@media(max-width:600px) { .tl-year-nav { display: none !important; } }
+/* --- Zen / RTL / Print --- */
+body.zen-mode .tl-filters,
+body.zen-mode .tl-item-expand, body.zen-mode .tl-scroll-line,
+body.zen-mode .tl-progress-bar { display: none !important; }
+[dir="rtl"] .tl-scroll-line { left: auto; right: 5px; }
 @media print {
-  .tl-filters, .tl-item-expand, .tl-year-nav,
-  .tl-svg-line, .tl-particle-canvas, .tl-progress-bar { display: none !important; }
+  .tl-filters, .tl-item-expand,
+  .tl-scroll-line, .tl-progress-bar { display: none !important; }
 }
 
 
@@ -629,7 +521,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { name:'Contact Info',           icon:'📧', action:()=>{ const s=document.getElementById('contactSecret'); if(s) s.classList.add('revealed'); scrollTo('.sr'); }, cat:'Section', desc:'Reveal contact details', keys:'' },
       // Links
       { name:'The Bilingual Executive',icon:'📘', action:()=>clickLink('bilingual'),  cat:'Link', desc:'The book on Amazon', keys:'' },
-      { name:'ADPList Mentoring',      icon:'🎓', action:()=>clickLink('adplist'),    cat:'Link', desc:'Book a mentoring session', keys:'' },
+      { name:'ADPList Mentoring',      icon:'🎓', action:()=>window.open('https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session','_blank'),    cat:'Link', desc:'Book a mentoring session', keys:'' },
       { name:'Fintech Bilinguals',     icon:'🤝', action:()=>clickLink('fintech-bilinguals'), cat:'Link', desc:'Community hub', keys:'' },
       { name:'LinkedIn Profile',       icon:'💼', action:()=>window.open('https://linkedin.com/in/amrmelharony','_blank'), cat:'Link', desc:'Connect on LinkedIn', keys:'' },
       { name:'Book My Calendar',       icon:'📅', action:()=>window.open('https://calendly.com/amrmelharony/30min','_blank'), cat:'Link', desc:'Schedule a 30-min call', keys:'' },
@@ -1064,9 +956,9 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
          class="always-cta always-cta-linkedin">
         <i class="fa-brands fa-linkedin"></i> LinkedIn
       </a>
-      <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener"
-         class="always-cta always-cta-cal">
-        <i class="fa-solid fa-calendar-check"></i> Book My Calendar
+      <a href="https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session" target="_blank" rel="noopener"
+         class="always-cta always-cta-mentor">
+        <i class="fa-solid fa-user-group"></i> Get Mentored
       </a>`;
 
     anchor.insertAdjacentElement(position, row);
@@ -1083,7 +975,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
 
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 3: INTERACTIVE TIMELINE — ADVANCED ENGINE
+  // FEATURE 3: INTERACTIVE TIMELINE — MINIMAL ENGINE
   // ═══════════════════════════════════════════════════
 
   function initInteractiveTimeline() {
@@ -1299,128 +1191,12 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     const staticLine = tlWrap.querySelector('.tl-line');
     if (staticLine) staticLine.style.display = 'none';
 
-    // ─── 2. SVG ANIMATED LINE ───
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svgEl = document.createElementNS(svgNS, 'svg');
-    svgEl.setAttribute('class', 'tl-svg-line');
-    svgEl.setAttribute('preserveAspectRatio', 'none');
-    // Gradient definition
-    const defs = document.createElementNS(svgNS, 'defs');
-    const grad = document.createElementNS(svgNS, 'linearGradient');
-    grad.id = 'tlLineGrad'; grad.setAttribute('x1','0'); grad.setAttribute('y1','0');
-    grad.setAttribute('x2','0'); grad.setAttribute('y2','1');
-    const stops = [
-      { offset: '0%', color: '#00e1ff' },
-      { offset: '40%', color: '#6366f1' },
-      { offset: '100%', color: '#a855f7' },
-    ];
-    stops.forEach(s => {
-      const st = document.createElementNS(svgNS, 'stop');
-      st.setAttribute('offset', s.offset);
-      st.setAttribute('stop-color', s.color);
-      grad.appendChild(st);
-    });
-    defs.appendChild(grad);
-    svgEl.appendChild(defs);
-
-    // Two paths: bg + animated glow
-    const bgPath = document.createElementNS(svgNS, 'line');
-    bgPath.setAttribute('class', 'tl-svg-path-bg');
-    bgPath.setAttribute('x1', '6'); bgPath.setAttribute('y1', '0');
-    bgPath.setAttribute('x2', '6'); bgPath.setAttribute('y2', '100%');
-    svgEl.appendChild(bgPath);
-
-    const glowPath = document.createElementNS(svgNS, 'line');
-    glowPath.setAttribute('class', 'tl-svg-path-glow');
-    glowPath.setAttribute('x1', '6'); glowPath.setAttribute('y1', '0');
-    glowPath.setAttribute('x2', '6'); glowPath.setAttribute('y2', '100%');
-    svgEl.appendChild(glowPath);
-
-    tlWrap.appendChild(svgEl);
-
-    // Size SVG to wrap height
-    function sizeSVG() {
-      const h = tlWrap.scrollHeight;
-      svgEl.setAttribute('viewBox', `0 0 12 ${h}`);
-      svgEl.style.height = h + 'px';
-      bgPath.setAttribute('y2', h);
-      glowPath.setAttribute('y2', h);
-      const pathLen = h;
-      glowPath.style.strokeDasharray = pathLen;
-      glowPath.style.strokeDashoffset = pathLen;
-      glowPath._pathLen = pathLen;
-    }
-    // Defer sizing until layout is stable
-    setTimeout(sizeSVG, 100);
-    window.addEventListener('resize', () => { setTimeout(sizeSVG, 50); });
-
-    // ─── 3. CANVAS PARTICLE BACKDROP ───
-    const canvas = document.createElement('canvas');
-    canvas.className = 'tl-particle-canvas';
-    tlWrap.insertBefore(canvas, tlWrap.firstChild);
-    const ctx = canvas.getContext('2d');
-    let cW = 0, cH = 0, particles = [], canvasActive = false;
-
-    function sizeCanvas() {
-      cW = canvas.width = tlWrap.offsetWidth;
-      cH = canvas.height = tlWrap.scrollHeight;
-    }
-
-    class TLParticle {
-      constructor() { this.reset(); }
-      reset() {
-        this.x = Math.random() * cW;
-        this.y = Math.random() * cH;
-        this.vx = (Math.random() - 0.5) * 0.15;
-        this.vy = (Math.random() - 0.5) * 0.15;
-        this.r = Math.random() * 1.2 + 0.3;
-        this.alpha = Math.random() * 0.25 + 0.05;
-        this.phase = Math.random() * Math.PI * 2;
-      }
-      update() {
-        this.phase += 0.008;
-        this.x += this.vx + Math.sin(this.phase) * 0.05;
-        this.y += this.vy + Math.cos(this.phase * 0.7) * 0.03;
-        if (this.x < -5 || this.x > cW + 5 || this.y < -5 || this.y > cH + 5) this.reset();
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,225,255,${this.alpha})`;
-        ctx.fill();
-      }
-    }
-
-    function initParticles() {
-      sizeCanvas();
-      const count = Math.min(Math.floor(cW * cH / 16000), 18);
-      particles = [];
-      for (let i = 0; i < count; i++) particles.push(new TLParticle());
-    }
-
-    let animFrame = null;
-    function animateParticles() {
-      if (!canvasActive) return;
-      ctx.clearRect(0, 0, cW, cH);
-      particles.forEach(p => { p.update(); p.draw(); });
-      // Draw connection lines
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const d = dx * dx + dy * dy;
-          if (d < 5000) {
-            ctx.strokeStyle = `rgba(0,225,255,${0.03 * (1 - d / 5000)})`;
-            ctx.lineWidth = 0.25;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-      animFrame = requestAnimationFrame(animateParticles);
-    }
+    // ─── 2. SCROLL-PROGRESS LINE (simple div) ───
+    const scrollLine = document.createElement('div');
+    scrollLine.className = 'tl-scroll-line';
+    scrollLine.innerHTML = '<div class="tl-scroll-line-fill" id="tlScrollFill"></div>';
+    tlWrap.appendChild(scrollLine);
+    const scrollFill = document.getElementById('tlScrollFill');
 
     // ─── 4. FILTER PILLS ───
     const filters = document.createElement('div');
@@ -1469,20 +1245,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       item.appendChild(expandDiv);
 
       item.addEventListener('click', (e) => {
-        if (e.target.closest('a')) return; // Don't capture link clicks
+        if (e.target.closest('a')) return;
         const isOpen = expandDiv.classList.contains('open');
         tlWrap.querySelectorAll('.tl-item-expand.open').forEach(d => d.classList.remove('open'));
-        if (!isOpen) {
-          expandDiv.classList.add('open');
-          // Haptic feedback
-          if (navigator.vibrate) navigator.vibrate(15);
-        }
+        if (!isOpen) expandDiv.classList.add('open');
       });
 
       item.classList.add('tl-enhanced');
     });
 
-    // ─── 7. ENTRANCE ANIMATION (after GSAP finishes) ───
+    // ─── 7. ENTRANCE ANIMATION ───
     if (!RM) {
       setTimeout(() => {
         const viewH = window.innerHeight;
@@ -1490,41 +1262,17 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           const r = item.getBoundingClientRect();
           if (r.top > viewH) {
             item.classList.add('tl-hidden');
-            // Stagger delay based on position within each era group
-            item.style.transitionDelay = (idx % 5) * 0.06 + 's';
+            item.style.transitionDelay = (idx % 5) * 0.05 + 's';
           } else {
             item.classList.add('tl-visible');
           }
         });
-      }, 4800);
+      }, 2000);
     }
 
-    // ─── 8. YEAR NAVIGATOR (desktop) ───
-    const yearNav = document.createElement('div');
-    yearNav.className = 'tl-year-nav'; yearNav.id = 'tlYearNav';
-    const years = [];
-    items.forEach(item => {
-      const yr = item.querySelector('.tl-yr');
-      if (yr) {
-        const y = yr.textContent.trim();
-        if (!years.includes(y)) years.push(y);
-      }
-    });
-    years.forEach(y => {
-      const pip = document.createElement('div');
-      pip.className = 'tl-year-pip'; pip.textContent = y; pip.dataset.year = y;
-      pip.addEventListener('click', () => {
-        const target = items.find(i => i.querySelector('.tl-yr')?.textContent.trim() === y);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-      yearNav.appendChild(pip);
-    });
-    document.body.appendChild(yearNav);
-
-    // ─── 9. MASTER SCROLL ENGINE ───
+    // ─── 8. MASTER SCROLL ENGINE ───
     let rafId = null;
     let lastProgress = -1;
-    let initialized = false;
 
     function onScroll() {
       if (rafId) return;
@@ -1534,44 +1282,24 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         const viewH = window.innerHeight;
         const inView = wrapRect.top < viewH && wrapRect.bottom > 0;
 
-        // Year nav visibility
-        yearNav.classList.toggle('show', inView && !isMobile);
-
         // Progress bar visibility
         progressBar.classList.toggle('show', inView);
 
-        // Canvas activation
-        if (inView && !canvasActive) {
-          canvasActive = true;
-          if (!initialized) { initParticles(); initialized = true; }
-          animateParticles();
-        } else if (!inView && canvasActive) {
-          canvasActive = false;
-          if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
-        }
-
         if (!inView) return;
 
-        // ── SVG line draw progress ──
+        // ── Scroll line fill ──
         const rawProgress = Math.max(0, Math.min(1,
           (viewH * 0.5 - wrapRect.top) / wrapRect.height
         ));
-        // Smooth ease
-        const progress = rawProgress * rawProgress * (3 - 2 * rawProgress); // smoothstep
-
-        if (glowPath._pathLen && Math.abs(progress - lastProgress) > 0.001) {
-          lastProgress = progress;
-          const offset = glowPath._pathLen * (1 - progress);
-          glowPath.style.strokeDashoffset = offset;
-
-          // Progress bar
-          const pct = Math.round(progress * 100);
+        if (Math.abs(rawProgress - lastProgress) > 0.002) {
+          lastProgress = rawProgress;
+          scrollFill.style.height = (rawProgress * 100) + '%';
+          const pct = Math.round(rawProgress * 100);
           progressFill.style.width = pct + '%';
           progressLabel.textContent = pct + '%';
         }
 
         // ── Per-item checks ──
-        let activeYear = null;
         items.forEach(item => {
           const r = item.getBoundingClientRect();
           const visible = r.top < viewH * 0.88 && r.bottom > viewH * 0.12;
@@ -1584,36 +1312,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           }
 
           // Active highlight
-          const wasActive = item.classList.contains('tl-active');
-          const isActive = centered && !item.classList.contains('filtered-out');
-          if (isActive !== wasActive) {
-            item.classList.toggle('tl-active', isActive);
-          }
-
-          // Year nav tracking
-          if (centered) {
-            const yr = item.querySelector('.tl-yr');
-            if (yr) activeYear = yr.textContent.trim();
-          }
-        });
-
-        // Update year nav pips
-        yearNav.querySelectorAll('.tl-year-pip').forEach(p => {
-          p.classList.toggle('active', p.dataset.year === activeYear);
+          item.classList.toggle('tl-active', centered && !item.classList.contains('filtered-out'));
         });
       });
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => {
-      if (initialized) { sizeCanvas(); sizeSVG(); }
-      onScroll();
-    }, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    setTimeout(onScroll, 2500);
 
-    // Initial trigger after GSAP completes
-    setTimeout(() => { sizeSVG(); onScroll(); }, 5000);
-
-    // ─── 10. FILTER SYSTEM ───
+    // ─── 9. FILTER SYSTEM ───
     function filterTimeline(tag) {
       document.querySelectorAll('.tl-filter-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.filter === tag)
@@ -1631,7 +1339,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       setTimeout(onScroll, 100);
     }
 
-    // ─── 11. TERMINAL INTEGRATION ───
+    // ─── 10. TERMINAL INTEGRATION ───
     if (window.TermCmds) {
       window.TermCmds.timeline = (args) => {
         const tag = (args || '').trim().toLowerCase();
@@ -1792,7 +1500,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { match:/timeline|journey|experience|career|history/i, action:()=>{scrollTo('.tl-wrap');return'🚀 Scrolling to Timeline';} },
       { match:/contact|email|phone|reach\s*out|connect/i,    action:()=>{const s=document.getElementById('contactSecret');if(s)s.classList.add('revealed');scrollTo('.sr');if(typeof checkTrophy==='function')checkTrophy('explorer_contact');return'📧 Revealing Contact Info';} },
       { match:/book|bilingual\s*exec|author|amazon/i,        action:()=>{clickLink('bilingual');return'📘 Opening Book Link';} },
-      { match:/mentor|adplist|coaching|session/i,             action:()=>{clickLink('adplist');return'🎓 Opening ADPList';} },
+      { match:/mentor|adplist|coaching|session/i,             action:()=>{window.open('https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session','_blank');return'🎓 Opening ADPList';} },
       { match:/conference|speak|talks|panel|keynote/i,        action:()=>{scrollTo('.conf-strip');return'🎤 Scrolling to Conferences';} },
       { match:/article|linkedin.*post|blog|writing/i,         action:()=>{scrollTo('#linkedinFeed');return'📝 Scrolling to Articles';} },
       { match:/impact|numbers|metrics|data\s*point/i,         action:()=>{scrollTo('.imp');return'📊 Scrolling to Impact Numbers';} },
@@ -1923,53 +1631,24 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   // REMOVE ADPLIST INLINE WIDGET
   // ═══════════════════════════════════════════════════
   function removeADPListWidget() {
-    // Remove any ADPList embedded widget from the page
+    // Defensive cleanup: remove any ADPList embedded widget remnants
     const selectors = [
-      '[data-adplist-widget]',
-      '.adplist-widget',
-      'iframe[src*="adplist"]',
-      '.adp-widget-container',
-      'div[id*="adplist-widget"]',
-      'div[class*="adplist-widget"]',
-      'script[src*="adplist"]',
-      '.adplist-embed',
-      '[data-widget="adplist"]',
+      '[data-adplist-widget]', '.adplist-widget', 'iframe[src*="adplist"]',
+      '.adp-widget-container', 'div[id*="adplist-widget"]', 'div[class*="adplist-widget"]',
+      'script[src*="adplist"]', '.adplist-embed', '[data-widget="adplist"]',
     ];
-    selectors.forEach(sel => {
-      document.querySelectorAll(sel).forEach(el => el.remove());
-    });
+    selectors.forEach(sel => document.querySelectorAll(sel).forEach(el => el.remove()));
 
     // Remove duplicate Digital Twin status bar
     const twinEl = document.getElementById('twinStatus') || document.querySelector('.twin-status');
     if (twinEl) twinEl.remove();
 
-    // Also look for inline scripts that load ADPList widget
+    // Remove inline scripts that load ADPList widget
     document.querySelectorAll('script').forEach(script => {
       if (script.textContent && script.textContent.includes('adplist') && script.textContent.includes('widget')) {
         script.remove();
       }
     });
-
-    // MutationObserver to catch late-loaded widgets
-    const obs = new MutationObserver(mutations => {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node.nodeType !== 1) continue;
-          const el = node;
-          if (
-            (el.tagName === 'IFRAME' && el.src && el.src.includes('adplist')) ||
-            (el.className && typeof el.className === 'string' && (el.className.includes('adplist') || el.className.includes('twin-status'))) ||
-            (el.id && (el.id.includes('adplist-widget') || el.id === 'twinStatus')) ||
-            el.hasAttribute('data-adplist-widget')
-          ) {
-            el.remove();
-          }
-        }
-      }
-    });
-    obs.observe(document.body, { childList: true, subtree: true });
-    // Auto-disconnect after 30s to save resources
-    setTimeout(() => obs.disconnect(), 30000);
   }
 
 
@@ -2016,7 +1695,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   <span class="term-white">linkedin</span>          Open LinkedIn profile
   <span class="term-white">calendar</span>          Book a meeting
   <span class="term-white">book</span>              Open The Bilingual Executive
-  <span class="term-white">mentor</span>            Open ADPList mentoring
+  <span class="term-white">mentor</span>            Book a mentoring session
   <span class="term-white">community</span>         Open Fintech Bilinguals
 
 <span class="term-cyan">System:</span>
@@ -2083,7 +1762,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     T.linkedin = () => { window.open('https://linkedin.com/in/amrmelharony', '_blank'); return '<span class="term-green">💼 Opening LinkedIn profile...</span>'; };
     T.calendar = () => { window.open('https://calendly.com/amrmelharony/30min', '_blank'); return '<span class="term-green">📅 Opening calendar booking...</span>'; };
     T.book = () => { const lk = document.querySelector('a.lk[href*="bilingual"]'); if (lk) lk.click(); return '<span class="term-green">📘 Opening The Bilingual Executive...</span>'; };
-    T.mentor = () => { const lk = document.querySelector('a.lk[href*="adplist"]'); if (lk) lk.click(); return '<span class="term-green">🎓 Opening ADPList mentoring...</span>'; };
+    T.mentor = () => { window.open('https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session', '_blank'); return '<span class="term-green">🎓 Opening ADPList mentoring...</span>'; };
     T.community = () => { const lk = document.querySelector('a.lk[href*="fintech-bilinguals"]'); if (lk) lk.click(); return '<span class="term-green">🤝 Opening Fintech Bilinguals...</span>'; };
 
     // ── System / Info ──────────────────────────────
