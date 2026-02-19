@@ -13,7 +13,7 @@
 //   7. ADPList widget removal (CSS + DOM + MutationObserver)
 //   8. Trophy triggers wired into: scroll, guestbook, palette, terminal, voice
 //
-// 2,047 lines · Syntax validated · RTL/mobile/print/zen safe
+// 2,278 lines · Syntax validated · RTL/mobile/print/zen safe
 // ═══════════════════════════════════════════════════════════════
 (function PhaseSixIntelligence() {
   'use strict';
@@ -139,22 +139,23 @@
   color: #4a5568; flex-shrink: 0; letter-spacing: .5px;
 }
 
-/* Trophy Toast Notification */
+/* Trophy Toast — subtle notification */
 .trophy-toast {
-  position: fixed; bottom: 30px; right: 20px; z-index: 99999;
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 18px; border-radius: 12px;
-  background: rgba(13,20,32,.95); border: 1px solid rgba(251,191,36,.3);
-  box-shadow: 0 10px 40px rgba(0,0,0,.5), 0 0 20px rgba(251,191,36,.1);
-  backdrop-filter: blur(12px);
-  transform: translateX(120%); opacity: 0;
-  transition: transform .5s cubic-bezier(.16,1,.3,1), opacity .3s;
-  font-size: 11px; color: #e2e8f0;
+  position: fixed; bottom: 20px; right: 16px; z-index: 99999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 8px;
+  background: rgba(13,20,32,.88); border: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+  backdrop-filter: blur(8px);
+  transform: translateY(12px); opacity: 0;
+  transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .25s;
+  font-size: 10px; color: #8b949e;
+  pointer-events: none;
 }
-.trophy-toast.show { transform: translateX(0); opacity: 1; }
-.trophy-toast-icon { font-size: 24px; }
-.trophy-toast strong { color: #fbbf24; display: block; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; }
-.trophy-toast span { color: #8b949e; font-size: 10px; }
+.trophy-toast.show { transform: translateY(0); opacity: 1; }
+.trophy-toast-icon { font-size: 16px; }
+.trophy-toast strong { color: #e2e8f0; display: block; font-size: 9px; letter-spacing: .3px; font-weight: 500; }
+.trophy-toast span { color: #6b7280; font-size: 9px; }
 
 /* Trophy Grid in Admin Panel */
 .trophy-item {
@@ -174,11 +175,31 @@
   padding: 2px 5px; border-radius: 4px;
   background: rgba(34,197,94,.1); color: #22c55e; flex-shrink: 0;
 }
-@media(max-width:600px) { .trophy-toast { bottom: 12px; right: 12px; left: 12px; } }
+@media(max-width:600px) { .trophy-toast { bottom: 10px; right: 10px; left: auto; max-width: 200px; } }
+
+/* Timeline expand card enhancements */
+.tl-expand-date {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  color: #4a5568; margin-left: 6px; letter-spacing: .3px;
+}
+.tl-expand-content p {
+  margin: 6px 0; font-size: 10px; line-height: 1.55; color: #8b949e;
+}
+.tl-expand-chips {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+}
+.tl-expand-skills {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  color: #3a4a5c; margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,.03);
+}
 
 /* Hide ADPList inline widget */
 [data-adplist-widget], .adplist-widget, iframe[src*="adplist"], .adp-widget-container,
 div[id*="adplist-widget"], div[class*="adplist-widget"] { display: none !important; }
+
+/* Hide duplicate status bar (Digital Twin from phase5) */
+.twin-status, #twinStatus { display: none !important; }
 
 
 /* ═══════════════════════════════════════════
@@ -881,13 +902,15 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   function showTrophyToast(id) {
     const trophy = TROPHIES.find(t => t.id === id);
     if (!trophy) return;
+    // Only show toast for non-exploration trophies (exploration is too frequent/noisy)
+    const silentTrophies = ['explorer_timeline','explorer_certs','explorer_testimonials','explorer_conferences','explorer_articles','explorer_impact'];
+    if (silentTrophies.includes(id)) return;
     const toast = document.createElement('div');
     toast.className = 'trophy-toast';
-    toast.innerHTML = `<span class="trophy-toast-icon">${trophy.icon}</span><div><strong>Trophy Unlocked!</strong><br><span>${trophy.name}</span></div>`;
+    toast.innerHTML = `<span class="trophy-toast-icon">${trophy.icon}</span><div><strong>${trophy.name}</strong><br><span>${trophy.desc}</span></div>`;
     document.body.appendChild(toast);
-    if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
     setTimeout(() => toast.classList.add('show'), 50);
-    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2500);
   }
 
   function initAdminDashboard() {
@@ -1073,12 +1096,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
 
     // ─── TAG CLASSIFICATION ───
     const TAGS = {
-      banking:  ['bank','banque','misr','operations','financial','treasury','officer'],
-      agile:    ['scrum','agile','kanban','safe','sprint','delivery','pmp','lead','hybrid'],
-      data:     ['data','analytics','cdmp','warehouse','pipeline','governance','mesh','analyst'],
-      speaking: ['speak','conference','seamless','devopsdays','keynote','panel','summit','techne','forum'],
-      learning: ['cert','degree','doctorate','dba','learn','study','university','award','earned','mba'],
-      author:   ['book','bilingual','executive','author','publish','write','community','founded','launched'],
+      banking:  ['bank','banque','misr','operations','financial','treasury','officer','credit','sme','business banking','corporate','lending'],
+      agile:    ['scrum','agile','kanban','safe','sprint','delivery','pmp','lead','hybrid','standup','retrospective','backlog'],
+      data:     ['data','analytics','cdmp','warehouse','pipeline','governance','mesh','analyst','bi','dashboard','report','datacamp'],
+      speaking: ['speak','conference','seamless','devopsdays','keynote','panel','summit','techne','forum','moderator','career summit','techup'],
+      learning: ['cert','degree','doctorate','dba','learn','study','university','award','earned','mba','frankfurt','helwan','bachelor','best learner','toastmasters'],
+      author:   ['book','bilingual','executive','author','publish','write','community','founded','launched','fintech bilinguals'],
+      mentor:   ['mentor','adplist','coaching','mentee','session','guidance','1000 min'],
+      military: ['armed forces','military','army','officer','security','defense','technology officer'],
+      fintech:  ['fintech','efa','egyptian fintech','startup','consultant','pro bono','association','ecosystem'],
+      intern:   ['intern','nissan','central bank','exchange','mcdr','clearing','reinsurance','jazira'],
     };
 
     items.forEach(item => {
@@ -1091,14 +1118,181 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       item.dataset.tags = tags.join(',');
     });
 
-    // ─── EXPANDABLE DETAILS ───
+    // ─── ROLE-SPECIFIC DETAILS (matched by keywords in timeline items) ───
+    const ROLE_MAP = [
+      {
+        match: ['scrum master', '2025', 'scrum/kanban', 'flow metrics'],
+        html: `<strong>Scrum Master — Banque Misr</strong> <span class="tl-expand-date">May 2025 – Present</span>
+          <p>Championed a hybrid Scrum/Kanban framework for the data analytics team, using flow metrics to identify and eliminate systemic bottlenecks and improve delivery predictability.</p>
+          <p>Serves as the key leadership bridge between technical data teams and business stakeholders, translating strategic goals into actionable work.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">⚡ Hybrid Scrum/Kanban</span><span class="tl-expand-metric">📈 Flow Metrics</span><span class="tl-expand-metric">🎯 PMP® + PSM II + ICP-ATF</span></div>
+          <div class="tl-expand-skills">Agile Methodologies · Servant Leadership · Flow Metrics & Predictability</div>`
+      },
+      {
+        match: ['corporate banking data analyst', 'data analyst', 'bi report', 'dashboard'],
+        html: `<strong>Corporate Banking Data Analyst — Banque Misr</strong> <span class="tl-expand-date">Jun 2021 – May 2025 · 4 yrs</span>
+          <p>Strategic pivot from project management into a hands-on data role to master the bank's core data assets — bridging the gap between project goals and data realities.</p>
+          <p>Designed and delivered critical BI reports and dashboards for senior leadership, directly influencing corporate banking strategy. Skills validated by DataCamp Professional certification.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">📊 BI Dashboards</span><span class="tl-expand-metric">🏦 Corporate Banking Strategy</span><span class="tl-expand-metric">💾 DataCamp Certified</span></div>
+          <div class="tl-expand-skills">Stakeholder Management · Business Intelligence (BI)</div>`
+      },
+      {
+        match: ['project management professional', 'pmp', 'cross-functional', 'scope, schedule'],
+        html: `<strong>Project Management Professional — Banque Misr</strong> <span class="tl-expand-date">Feb 2020 – Jun 2021 · 1 yr 5 mos</span>
+          <p>Applied a disciplined, PMP®-certified approach to lead end-to-end delivery of complex, cross-functional banking projects — rigorously managing scope, schedule, and budget in a regulated enterprise environment.</p>
+          <p>Identified data integrity as the primary success factor for key initiatives — the critical insight that motivated specialization in data analytics.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🎯 PMP® Certified</span><span class="tl-expand-metric">🏗️ Cross-Functional Delivery</span><span class="tl-expand-metric">🔍 Data Integrity Focus</span></div>
+          <div class="tl-expand-skills">Risk Management · Scope Management · Regulated Environment</div>`
+      },
+      {
+        match: ['sme', 'credit analyst', 'lending', 'portfolio risk'],
+        html: `<strong>SMEs Credit Analyst — Banque Misr</strong> <span class="tl-expand-date">Nov 2017 – Feb 2020 · 2 yrs 4 mos</span>
+          <p>Assessed financial health of corporate clients, managed portfolio risk, and made informed lending recommendations. This role was foundational for developing deep commercial acumen.</p>
+          <p>Understanding core business drivers of clients became vital context for later work in technology delivery.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">💰 Credit Risk Analysis</span><span class="tl-expand-metric">📑 Financial Statements</span><span class="tl-expand-metric">🤝 Client Portfolio</span></div>
+          <div class="tl-expand-skills">Credit Risk Analysis · Financial Statement Analysis · Commercial Acumen</div>`
+      },
+      {
+        match: ['business banking officer', 'financial advisor', 'small business'],
+        html: `<strong>Business Banking Officer — Banque Misr</strong> <span class="tl-expand-date">Nov 2016 – Nov 2017 · 1 yr 1 mo</span>
+          <p>Served as a trusted financial advisor and Accredited Small Business Consultant for a diverse portfolio of business clients, helping them achieve commercial goals.</p>
+          <p>This client-facing role was foundational for developing deep customer empathy — an invaluable understanding of user needs that drives modern FinTech product development.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">👤 Client Advisory</span><span class="tl-expand-metric">🏢 SME Portfolio</span><span class="tl-expand-metric">💡 Customer Empathy</span></div>
+          <div class="tl-expand-skills">Relationship Management · Commercial Acumen · Client Needs Analysis</div>`
+      },
+      {
+        match: ['armed forces', 'military', 'technology officer', 'digital security'],
+        html: `<strong>Technology Officer | IT & Digital Security — Egyptian Armed Forces</strong> <span class="tl-expand-date">Jan 2015 – Mar 2016 · 1 yr 3 mos</span>
+          <p>Commanded IT and digital security operations for a mission-critical unit, ensuring 100% uptime and integrity of vital systems in a high-stakes, zero-failure environment.</p>
+          <p>Developed foundational expertise in IT infrastructure, network security, and disciplined operational management — a security-first mindset that now informs building resilient financial technology.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🛡️ 100% Uptime</span><span class="tl-expand-metric">🔐 Digital Security</span><span class="tl-expand-metric">⭐ Leadership Commendation</span></div>
+          <div class="tl-expand-skills">Cybersecurity · Leadership Under Pressure · IT Infrastructure</div>`
+      },
+      {
+        match: ['intern', 'nissan', 'central bank', 'exchange', 'mcdr', 'clearing'],
+        html: `<strong>Finance & Banking Internships</strong> <span class="tl-expand-date">Jul 2011 – Jul 2014 · 3 yrs</span>
+          <p>Built a robust and diverse foundation through competitive internships at Egypt's leading institutions — hands-on exposure to corporate finance, capital markets, and regulatory supervision.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🏭 Nissan Motor Corp</span><span class="tl-expand-metric">🏛️ Central Bank of Egypt</span><span class="tl-expand-metric">📈 Egyptian Exchange</span><span class="tl-expand-metric">🔄 MCDR</span></div>
+          <div class="tl-expand-skills">Corporate Finance · Capital Markets · Investment Analysis</div>`
+      },
+      {
+        match: ['adplist', 'mentor', '1000 min', 'top 50'],
+        html: `<strong>Leadership & Technology Mentor — ADPList</strong> <span class="tl-expand-date">Oct 2023 – Present · 2 yrs+</span>
+          <p>Globally recognized as a Top 50 Mentor in Project Management on the ADPList platform. Dedicated 1,000+ minutes to coaching rising professionals in FinTech, data, and digital transformation.</p>
+          <p>Empowers mentees to navigate complex career pivots, develop strategic skills, and accelerate into leadership roles.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🏅 Top 50 PM Mentor</span><span class="tl-expand-metric">⏱️ 1,000+ Minutes</span><span class="tl-expand-metric">🌍 Global Remote</span></div>`
+      },
+      {
+        match: ['fintech bilinguals', 'founder', 'community'],
+        html: `<strong>Founder — Fintech Bilinguals</strong> <span class="tl-expand-date">Feb 2026 – Present</span>
+          <p>Founded a community bridging the gap between Arabic-speaking finance professionals and global fintech knowledge — making cutting-edge concepts accessible across language barriers.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🤝 Community Builder</span><span class="tl-expand-metric">🌐 Bilingual</span></div>`
+      },
+      {
+        match: ['egyptian fintech association', 'efa', 'pro bono', 'management consultant'],
+        html: `<strong>FinTech Management Consultant (Pro Bono) — EFA</strong> <span class="tl-expand-date">Oct 2019 – Present · 6 yrs+</span>
+          <p>Strategic advisor to Egyptian FinTech startups — providing pro bono consulting on go-to-market strategy, business model validation, and regulatory compliance.</p>
+          <p>Facilitates industry roundtables and contributes to the national FinTech ecosystem, bridging startups, incumbents, and investors.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🚀 Startup Advisory</span><span class="tl-expand-metric">🏛️ Ecosystem Building</span><span class="tl-expand-metric">💼 6+ Years Pro Bono</span></div>`
+      },
+      {
+        match: ['doctorate', 'dba', 'digital transformation', 'e-hrm'],
+        html: `<strong>DBA — Digital Transformation · Helwan University</strong> <span class="tl-expand-date">Completed Dec 2023</span>
+          <p>Doctoral research on banking innovation, FinTech, and AI-driven transformation. Thesis: "The Relationship Between E-HRM Systems and Employee Satisfaction in Banking."</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🎓 Doctorate</span><span class="tl-expand-metric">🤖 AI & Banking</span><span class="tl-expand-metric">📖 Published Research</span></div>`
+      },
+      {
+        match: ['mba', 'entrepreneurship', 'startup strategy'],
+        html: `<strong>MBA — Entrepreneurship · Helwan University</strong> <span class="tl-expand-date">Completed May 2019</span>
+          <p>Specialized in startup strategy, product development, and digital finance. Developed a comprehensive business model for FinTech startup growth in the MENA region.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">📈 Startup Strategy</span><span class="tl-expand-metric">💡 Product Dev</span><span class="tl-expand-metric">🌍 MENA Focus</span></div>`
+      },
+      {
+        match: ['bachelor', 'ba,', 'international economics'],
+        html: `<strong>BA — International Economics · Helwan University</strong> <span class="tl-expand-date">Completed May 2014</span>
+          <p>Strong analytical foundation in global finance, macroeconomics, and international trade — essential context for a career at the intersection of banking and technology.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🌐 Global Finance</span><span class="tl-expand-metric">📊 Economics</span></div>`
+      },
+      {
+        match: ['frankfurt', 'digital finance', 'executive program'],
+        html: `<strong>Certified Expert in Digital Finance — Frankfurt School</strong> <span class="tl-expand-date">Aug 2019</span>
+          <p>Rigorous executive program at one of Europe's top business schools. Deep expertise in AI-driven finance, platform economics, and digital banking strategy.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🇩🇪 Frankfurt School</span><span class="tl-expand-metric">🤖 AI Finance</span><span class="tl-expand-metric">🏦 Digital Banking</span></div>`
+      },
+      {
+        match: ['best learner', 'continuous professional', 'growth mindset'],
+        html: `<strong>Best Learner Award — Banque Misr</strong> <span class="tl-expand-date">Dec 2023</span>
+          <p>Recognized by bank leadership for outstanding commitment to continuous professional development and proactively acquiring high-value skills in digital transformation and agile methodologies.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🏆 Bank Recognition</span><span class="tl-expand-metric">📚 Growth Mindset</span></div>`
+      },
+      {
+        match: ['seamless', 'north africa', 'keynote interview'],
+        html: `<strong>Panel Moderator — Seamless North Africa</strong> <span class="tl-expand-date">Sep 2024</span>
+          <p>Moderated 4 panels + 1 keynote interview at the region's premier FinTech conference. Led discussions on digital banking, open innovation, and APIs with leaders from N26, Deutsche Bank, BNP Paribas, Mashreq, and Citi Bank.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🎤 4 Panels + Keynote</span><span class="tl-expand-metric">🏦 Global Bank Leaders</span><span class="tl-expand-metric">🌍 MENA Premier</span></div>`
+      },
+      {
+        match: ['devopsdays', 'ai & devops', 'ai-driven automation'],
+        html: `<strong>Speaker — DevOpsDays Cairo 2025</strong> <span class="tl-expand-date">Sep 2025</span>
+          <p>"AI & DevOps — Powering the Next Wave of Egyptian Fintech": exploring how AI-driven automation and DevOps practices are shaping the future of financial technology in Egypt.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🤖 AI + DevOps</span><span class="tl-expand-metric">🇪🇬 Egyptian FinTech</span></div>`
+      },
+      {
+        match: ['africa fintech forum', '$100 billion', 'digital payments'],
+        html: `<strong>Panel Moderator — Africa FinTech Forum</strong> <span class="tl-expand-date">Jul 2025</span>
+          <p>Moderated a powerhouse panel mapping the road to Egypt's $100 billion digital payments industry. Guided conversation on instant payments and AI-driven security with Banque Misr's Chief Consumer Banking Officer and the CEO of Sahl.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">💰 $100B Payments</span><span class="tl-expand-metric">🤖 AI Security</span><span class="tl-expand-metric">🇪🇬 Egypt Vision</span></div>`
+      },
+      {
+        match: ['techne summit', 'virtual cards', 'swipe smarter'],
+        html: `<strong>Panel Moderator — Techne Summit Alexandria</strong> <span class="tl-expand-date">Oct 2025</span>
+          <p>"Swipe Smarter: Why Virtual Cards Are the Future of Business Payments" — led discussion on how virtual cards redefine business spending, security, and payments with Money Fellows and Paysky leaders.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">💳 Virtual Cards</span><span class="tl-expand-metric">🔒 Payment Security</span></div>`
+      },
+      {
+        match: ['banking & fintech summit', 'traditional vs. digital', 'future of banking'],
+        html: `<strong>Panel Moderator — Banking & Fintech Summit</strong> <span class="tl-expand-date">Oct 2025</span>
+          <p>"Future of Banking in Egypt: Traditional vs. Digital" — moderated alongside leaders from KFH Bank, EFG Holding, and Emirates NBD.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🏦 Banking Future</span><span class="tl-expand-metric">📱 Digital vs Traditional</span></div>`
+      },
+      {
+        match: ['career summit', 'career 180', 'banking economy'],
+        html: `<strong>Panel Moderator — Egypt Career Summit</strong> <span class="tl-expand-date">May 2025</span>
+          <p>"Beyond Transactions: Banking's Role in Shaping the Future Economy" — shared stage with COO of Emirates NBD and Chief Dealer of QNB Egypt.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🌍 Future Economy</span><span class="tl-expand-metric">👥 Next-Gen Leaders</span></div>`
+      },
+      {
+        match: ['techup women', 'data over intuition', 'never go with your gut'],
+        html: `<strong>Expert Mentor — TechUp Women Summit</strong> <span class="tl-expand-date">Oct 2024</span>
+          <p>"Data Over Intuition: Never Go With Your Gut" — deep dive into data-driven decision-making for career growth and leadership effectiveness. Selected as expert mentor for aspiring technology leaders.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">👩‍💻 Women in Tech</span><span class="tl-expand-metric">📊 Data-Driven</span></div>`
+      },
+      {
+        match: ['toastmasters', 'public speaking', 'maadi'],
+        html: `<strong>Leadership & Public Speaking — Maadi Toastmasters</strong>
+          <p>Actively honed public speaking, impromptu communication, and leadership skills within the Toastmasters International framework. Instrumental for developing stage presence for professional speaking engagements.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">🎤 Stage Presence</span><span class="tl-expand-metric">💬 Impromptu</span></div>`
+      },
+      {
+        match: ['bilingual executive', 'book', 'launched', 'published', 'amazon'],
+        html: `<strong>The Bilingual Executive — Published Author</strong>
+          <p>Published "The Bilingual Executive," a practical guide bridging Arabic-speaking professionals with global business and technology leadership concepts.</p>
+          <div class="tl-expand-chips"><span class="tl-expand-metric">📘 Published Book</span><span class="tl-expand-metric">🌐 Bilingual Bridge</span><span class="tl-expand-metric">📦 Amazon</span></div>`
+      },
+    ];
+
+    // Fallback by tag category (used when no role-specific match found)
     const DETAILS = {
-      banking:  '<strong>Banking Operations & Finance</strong> — Front-office ops, transaction processing, compliance workflows. Foundation for data flows in financial institutions. <span class="tl-expand-metric">🏦 12+ years experience</span>',
-      agile:    '<strong>Agile Delivery Leadership</strong> — Scrum/Kanban facilitation, sprint planning, retrospectives, stakeholder alignment. <span class="tl-expand-metric">⚡ Hybrid framework</span><span class="tl-expand-metric">📈 Team velocity +40%</span>',
-      data:     '<strong>Data & Analytics</strong> — Data pipelines, governance, analytics platforms, cross-domain products. <span class="tl-expand-metric">📊 Data-driven decisions</span><span class="tl-expand-metric">💾 CDMP certified</span>',
-      speaking: '<strong>Industry Engagement</strong> — Keynotes and panels at 9+ conferences across MENA, sharing insights on agile, fintech, and digital transformation. <span class="tl-expand-metric">🎤 9+ panel stages</span>',
-      learning: '<strong>Continuous Learning</strong> — 20+ certifications, doctorate research, Banque Misr Best Learner Award. <span class="tl-expand-metric">🏆 Best Learner Award</span><span class="tl-expand-metric">🎓 DBA completed</span>',
-      author:   '<strong>Thought Leadership</strong> — Published "The Bilingual Executive", founded Fintech Bilinguals, 2,300+ mentoring minutes on ADPList. <span class="tl-expand-metric">📚 Book launch</span><span class="tl-expand-metric">🤝 Community founder</span>',
+      banking:  '<strong>Banking Career</strong> — 9+ years at Banque Misr spanning business banking, credit analysis, project management, data analytics, and agile delivery. <span class="tl-expand-metric">🏦 Banque Misr</span>',
+      agile:    '<strong>Agile Delivery</strong> — Hybrid Scrum/Kanban framework, flow metrics, delivery predictability. Certified PMP®, PSM II, PSPO II, PMI-ACP, ICP-ATF. <span class="tl-expand-metric">⚡ 6+ Agile Certs</span>',
+      data:     '<strong>Data & Analytics</strong> — BI dashboards, data governance, analytics platforms. DataCamp certified, CDMP qualified. <span class="tl-expand-metric">📊 BI Leadership</span>',
+      speaking: '<strong>Conference Speaker</strong> — 10+ stages including Seamless North Africa (4 panels), DevOpsDays Cairo, Africa FinTech Forum, Techne Summit, TechUp Women. <span class="tl-expand-metric">🎤 10+ Stages</span>',
+      learning: '<strong>Continuous Learning</strong> — DBA, MBA, BA from Helwan University. Frankfurt School Digital Finance. 20+ certifications. Best Learner Award. <span class="tl-expand-metric">🏆 Best Learner</span>',
+      author:   '<strong>Thought Leadership</strong> — Published "The Bilingual Executive", founded Fintech Bilinguals community, 1,000+ mentoring minutes on ADPList. <span class="tl-expand-metric">📚 Author</span>',
+      mentor:   '<strong>Mentorship</strong> — Top 50 ADPList Mentor in Project Management. 1,000+ minutes coaching FinTech, data, and digital transformation professionals. <span class="tl-expand-metric">🏅 Top 50</span>',
+      military: '<strong>Military Service</strong> — Technology Officer at Egyptian Armed Forces. 100% uptime for mission-critical systems. Leadership commendation. <span class="tl-expand-metric">🛡️ 100% Uptime</span>',
+      fintech:  '<strong>FinTech Ecosystem</strong> — 6+ years pro bono consulting for Egyptian FinTech Association. Startup advisory, ecosystem development. <span class="tl-expand-metric">🚀 6+ Years</span>',
+      intern:   '<strong>Foundation Years</strong> — Internships at Nissan, Central Bank of Egypt, Egyptian Exchange, MCDR. Corporate finance, capital markets, regulatory exposure. <span class="tl-expand-metric">🏛️ 4 Institutions</span>',
     };
 
     // ─── 1. HIDE EXISTING STATIC LINE ───
@@ -1199,7 +1393,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
 
     function initParticles() {
       sizeCanvas();
-      const count = Math.min(Math.floor(cW * cH / 8000), 40);
+      const count = Math.min(Math.floor(cW * cH / 16000), 18);
       particles = [];
       for (let i = 0; i < count; i++) particles.push(new TLParticle());
     }
@@ -1217,7 +1411,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           const d = dx * dx + dy * dy;
           if (d < 5000) {
             ctx.strokeStyle = `rgba(0,225,255,${0.03 * (1 - d / 5000)})`;
-            ctx.lineWidth = 0.4;
+            ctx.lineWidth = 0.25;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -1231,7 +1425,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     // ─── 4. FILTER PILLS ───
     const filters = document.createElement('div');
     filters.className = 'tl-filters'; filters.id = 'tlFilters';
-    const filterIcons = { all: '✦', banking: '🏦', agile: '⚡', data: '📊', speaking: '🎤', learning: '🎓', author: '📚' };
+    const filterIcons = { all: '✦', banking: '🏦', agile: '⚡', data: '📊', speaking: '🎤', learning: '🎓', author: '📚', mentor: '🎓', military: '🛡️', fintech: '🚀', intern: '🏛️' };
     ['all', ...Object.keys(TAGS)].forEach(tag => {
       const btn = document.createElement('button');
       btn.className = 'tl-filter-btn' + (tag === 'all' ? ' active' : '');
@@ -1256,7 +1450,18 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     items.forEach((item, idx) => {
       const tags = item.dataset.tags.split(',');
       const primaryTag = tags[0];
-      const detail = DETAILS[primaryTag] || DETAILS.banking;
+      const itemText = item.textContent.toLowerCase();
+
+      // Try role-specific match first
+      let detail = null;
+      for (const role of ROLE_MAP) {
+        if (role.match.some(kw => itemText.includes(kw.toLowerCase()))) {
+          detail = role.html;
+          break;
+        }
+      }
+      // Fallback to tag-based detail
+      if (!detail) detail = DETAILS[primaryTag] || DETAILS.banking;
 
       const expandDiv = document.createElement('div');
       expandDiv.className = 'tl-item-expand';
@@ -1727,15 +1932,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       'div[id*="adplist-widget"]',
       'div[class*="adplist-widget"]',
       'script[src*="adplist"]',
-      // Look for widget containers near the "Get Mentored" area
       '.adplist-embed',
       '[data-widget="adplist"]',
     ];
     selectors.forEach(sel => {
-      document.querySelectorAll(sel).forEach(el => {
-        el.remove();
-      });
+      document.querySelectorAll(sel).forEach(el => el.remove());
     });
+
+    // Remove duplicate Digital Twin status bar
+    const twinEl = document.getElementById('twinStatus') || document.querySelector('.twin-status');
+    if (twinEl) twinEl.remove();
 
     // Also look for inline scripts that load ADPList widget
     document.querySelectorAll('script').forEach(script => {
@@ -1752,8 +1958,8 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           const el = node;
           if (
             (el.tagName === 'IFRAME' && el.src && el.src.includes('adplist')) ||
-            (el.className && typeof el.className === 'string' && el.className.includes('adplist')) ||
-            (el.id && el.id.includes('adplist-widget')) ||
+            (el.className && typeof el.className === 'string' && (el.className.includes('adplist') || el.className.includes('twin-status'))) ||
+            (el.id && (el.id.includes('adplist-widget') || el.id === 'twinStatus')) ||
             el.hasAttribute('data-adplist-widget')
           ) {
             el.remove();
@@ -1883,23 +2089,44 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     // ── System / Info ──────────────────────────────
     T.whoami = () => {
       return `<span class="term-cyan">═══ Amr El Harony ═══</span>
-<span class="term-white">Delivery Lead & Scrum Master</span> @ Banque Misr — Data & Analytics Division
-<span class="term-gray">12+ years banking & fintech · Doctorate in Digital Transformation</span>
-<span class="term-gray">20+ certifications (PMP, SAFe 6, PSM II, PSPO II, PMI-ACP, CDMP)</span>
-<span class="term-gray">Author of "The Bilingual Executive" · Top ADPList Mentor</span>
-<span class="term-gray">Speaker at Seamless North Africa, DevOpsDays Cairo</span>
-<span class="term-gray">Founder of Fintech Bilinguals community</span>`;
+<span class="term-white">Scrum Master</span> @ Banque Misr — Data & Analytics Division (9+ yrs at BM)
+<span class="term-gray">Career path: Business Banking → Credit Analysis → PMP → Data Analytics → Scrum Master</span>
+<span class="term-gray">DBA in Digital Transformation · MBA in Entrepreneurship · BA in International Economics</span>
+<span class="term-gray">Certified Expert in Digital Finance (Frankfurt School)</span>
+<span class="term-gray">20+ certifications: PMP®, SAFe 6, PSM II, PSPO II, PMI-ACP, ICP-ATF, PSK, CDMP</span>
+<span class="term-gray">Author of "The Bilingual Executive" · Founder of Fintech Bilinguals</span>
+<span class="term-gray">Top 50 ADPList Mentor (PM) · 1,000+ mentoring minutes</span>
+<span class="term-gray">10+ conference stages: Seamless NA, DevOpsDays, Africa FinTech Forum, Techne Summit</span>
+<span class="term-gray">6+ years pro bono FinTech consulting (Egyptian FinTech Association)</span>
+<span class="term-gray">Technology Officer veteran (Egyptian Armed Forces · IT & Digital Security)</span>`;
     };
 
     T.resume = () => {
-      return `<span class="term-cyan">═══ Quick Resume ═══</span>
-<span class="term-white">Current:</span>  Delivery Lead & Scrum Master — Banque Misr (Data & Analytics)
-<span class="term-white">Education:</span> DBA Digital Transformation · MBA · BSc
-<span class="term-white">Certs:</span>    PMP · SAFe 6 · PSM II · PSPO II · PMI-ACP · CDMP · 14+ more
-<span class="term-white">Book:</span>     The Bilingual Executive (Amazon, 2024)
-<span class="term-white">Speaking:</span> Seamless North Africa · DevOpsDays Cairo · 5+ more
-<span class="term-white">Mentoring:</span> 2,400+ minutes on ADPList · Top Mentor
-<span class="term-white">Community:</span> Fintech Bilinguals founder`;
+      return `<span class="term-cyan">═══ Career Timeline ═══</span>
+<span class="term-white">2025–Now:</span>  Scrum Master — Banque Misr (Data & Analytics) · Hybrid Scrum/Kanban
+<span class="term-white">2021–2025:</span> Corporate Banking Data Analyst — BI dashboards, DataCamp certified
+<span class="term-white">2020–2021:</span> Project Management Professional — PMP®, cross-functional delivery
+<span class="term-white">2017–2020:</span> SMEs Credit Analyst — Portfolio risk, lending, financial analysis
+<span class="term-white">2016–2017:</span> Business Banking Officer — Client advisory, SME consulting
+<span class="term-white">2015–2016:</span> Technology Officer — Egyptian Armed Forces (IT & Digital Security)
+<span class="term-white">2011–2014:</span> Finance Internships — Nissan, Central Bank, Exchange, MCDR
+
+<span class="term-cyan">═══ Education ═══</span>
+<span class="term-white">2023:</span> DBA Digital Transformation — Helwan University
+<span class="term-white">2019:</span> Certified Expert in Digital Finance — Frankfurt School
+<span class="term-white">2019:</span> MBA Entrepreneurship — Helwan University
+<span class="term-white">2014:</span> BA International Economics — Helwan University
+
+<span class="term-cyan">═══ Speaking (10+ stages) ═══</span>
+<span class="term-white">2025:</span> Banking & FinTech Summit · Techne Summit · DevOpsDays Cairo
+<span class="term-white">2025:</span> Africa FinTech Forum · Egypt Career Summit
+<span class="term-white">2024:</span> Seamless North Africa (4 panels + keynote) · TechUp Women
+
+<span class="term-cyan">═══ Other Roles ═══</span>
+<span class="term-white">2026–Now:</span>  Founder — Fintech Bilinguals community
+<span class="term-white">2023–Now:</span>  Top 50 ADPList Mentor (1,000+ minutes)
+<span class="term-white">2019–Now:</span>  FinTech Consultant (Pro Bono) — Egyptian FinTech Association
+<span class="term-white">Author:</span>    "The Bilingual Executive" (Published)`;
     };
 
     T.stack = () => {
