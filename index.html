@@ -2321,29 +2321,12 @@ if(D&&!reducedMotion){
 
 // ═══ SCROLL & PARALLAX ═══
 
-// 1. Cache the elements outside the listener for better performance
-const meshDivs = document.querySelectorAll('.mesh div');
-const scrollBar = document.getElementById('sbar');
-
-addEventListener('scroll', () => {
-    const t = scrollY;
-    const h = document.documentElement.scrollHeight - innerHeight;
-    
-    // 2. Update scrollbar width
-    if (scrollBar) {
-        scrollBar.style.width = (h > 0 ? (t / h) * 100 : 0) + '%';
-    }
-    
-    // 3. Trigger your custom tracking function
-    if (typeof trackScroll === 'function') trackScroll();
-    
-    // 4. Parallax effect using cached nodes
-    if (!reducedMotion) {
-        meshDivs.forEach((b, i) => {
-            b.style.transform = `translateY(${t * (i + 1) * .06}px)`;
-        });
-    }
-}, { passive: true });
+addEventListener('scroll',()=>{
+    const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+    document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';
+    trackScroll();
+    if(!reducedMotion){document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${t*(i+1)*.06}px)`;});}
+},{passive:true});
     
 </script>
 <script src="phase1-features.js" defer></script>
