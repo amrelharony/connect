@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
     <meta name="twitter:description" content="Bridging banking and technology to deliver measurable digital transformation across MENA.">
     <meta name="twitter:image" content="https://amrelharony.com/profile.jpg">
-    <type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Amr Elharony","url":"https://amrelharony.com","image":"https://amrelharony.com/profile.jpg","jobTitle":"Scrum Master","worksFor":{"@type":"Organization","name":"Banque Misr"},"description":"Delivery Lead, Mentor, FinTech Author & Speaker bridging banking and technology across MENA.","alumniOf":[{"@type":"CollegeOrUniversity","name":"Helwan University Cairo"},{"@type":"CollegeOrUniversity","name":"Frankfurt School of Finance & Management"}],"knowsAbout":["FinTech","Agile","Scrum","Digital Transformation","Data Analytics","Banking"],"sameAs":["https://www.linkedin.com/in/amrmelharony","https://t.me/Amrmelharony","https://adplist.org/mentors/amr-elharony"]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Amr Elharony","url":"https://amrelharony.com","image":"https://amrelharony.com/profile.jpg","jobTitle":"Scrum Master","worksFor":{"@type":"Organization","name":"Banque Misr"},"description":"Delivery Lead, Mentor, FinTech Author & Speaker bridging banking and technology across MENA.","alumniOf":[{"@type":"CollegeOrUniversity","name":"Helwan University Cairo"},{"@type":"CollegeOrUniversity","name":"Frankfurt School of Finance & Management"}],"knowsAbout":["FinTech","Agile","Scrum","Digital Transformation","Data Analytics","Banking"],"sameAs":["https://www.linkedin.com/in/amrmelharony","https://t.me/Amrmelharony","https://adplist.org/mentors/amr-elharony"]}</script>
     <script>window.va=window.va||function(){(window.va.q=window.va.q||[]).push(arguments);};</script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2335,5 +2335,15 @@ addEventListener('scroll',()=>{
 <script src="phase4-ai-3d.js" defer></script>
 <script src="phase5-experimental.js" defer></script>
 <script src="phase6-intelligence.js" defer></script>
+<script>
+// Safety: ensure page is never permanently hidden due to JS errors
+window.addEventListener('error', function() {
+  document.body.style.overflow = 'auto';
+  var pre = document.getElementById('preloader');
+  if (pre) pre.style.display = 'none';
+  var app = document.getElementById('app');
+  if (app) { app.style.opacity = '1'; }
+});
+</script>
 </body>
 </html>
