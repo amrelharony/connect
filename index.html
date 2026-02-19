@@ -536,9 +536,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <div class="rv" style="display:flex;justify-content:center;">
         <div class="st"><span class="sd" id="sdot" style="background:#22c55e;" aria-hidden="true"></span><span id="stxt">LOCATING...</span></div>
     </div>
-    <div id="greetBar" style="display:none;text-align:center;margin-top:4px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);opacity:.7;" id="greetTxt"></span>
-    </div>
     <div class="pf rv" id="pfw" role="button" tabindex="0" aria-label="Flip to show QR code" onclick="toggleFlip()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFlip();}">
         <svg viewBox="0 0 136 136" aria-hidden="true"><circle cx="68" cy="68" r="66" stroke="var(--accent)" opacity=".3"/><circle cx="68" cy="68" r="66" stroke="var(--accent2)" opacity=".2" stroke-dasharray="4 10" style="animation-direction:reverse;animation-duration:18s"/></svg>
         <div class="pfi"><div class="fc"><div class="fi" id="fc">
@@ -702,10 +699,6 @@ const isRepeatVisit=!!localStorage.getItem('visited');localStorage.setItem('visi
 const isMobile=window.matchMedia('(pointer:coarse)').matches;
 const params=new URLSearchParams(location.search);
 
-// ═══ SMART GREETING (referrer detection) ═══
-const refMap={linkedin:'WELCOME FROM LINKEDIN',calendly:'EXCITED FOR OUR CALL',seamless:'GREAT SEEING YOU AT SEAMLESS',devopsdays:'HELLO FROM DEVOPSDAYS',techne:'WELCOME FROM TECHNE SUMMIT',afff:'HELLO FROM AFRICA FINTECH FORUM',career180:'WELCOME FROM CAREER SUMMIT',adplist:'WELCOME, FELLOW MENTOR'};
-const refKey=params.get('ref');
-let customGreeting=refKey&&refMap[refKey.toLowerCase()]?refMap[refKey.toLowerCase()]:null;
 
 // ═══ SOCIAL PROOF TICKER ═══
 const quotes=[
@@ -812,11 +805,6 @@ function updStatus(){
     dot.style.background=col;
     if(reducedMotion){txt.textContent=msg;return;}
     txt.textContent='';let i=0;(function t(){if(i<msg.length){txt.textContent+=msg[i];i++;setTimeout(t,35);}})();
-    if(customGreeting){
-        const bar=document.getElementById('greetBar');
-        const gt=document.getElementById('greetTxt');
-        if(bar&&gt){bar.style.display='block';gt.textContent=customGreeting;}
-    }
 }
 
 // ═══ EGYPT HOLIDAYS (via Nager.Date free API) ═══
