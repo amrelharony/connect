@@ -8,7 +8,7 @@
     <meta name="author" content="Amr Elharony">
     <link rel="canonical" href="https://amrelharony.com">
     <meta property="og:type" content="profile"><meta property="og:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
-    <meta property="og:description" content="Bridging banking and technology to deliver measurable digital transformation. Author of The Bilingual Executive. 1,000+ mentoring minutes on ADPList.">
+    <meta property="og:description" content="Bridging banking and technology to deliver measurable digital transformation. Author of The Bilingual Executive. 2,300+ mentoring minutes on ADPList.">
     <meta property="og:url" content="https://amrelharony.com"><meta property="og:image" content="https://amrelharony.com/profile.jpg">
     <meta property="og:site_name" content="Amr Elharony"><meta property="profile:first_name" content="Amr"><meta property="profile:last_name" content="Elharony">
     <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
@@ -590,7 +590,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <div style="display:flex;flex-direction:column;gap:12px;">
         <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">My Book</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
         <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="fb.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-users fbi" style="color:var(--accent2);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Fintech Bilinguals</div><div class="lsu">Join the Community</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
-        <a href="https://adplist.org/mentors/amr-elharony" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="smiley.jpg" style="border-radius:8px;" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-graduation-cap fbi" style="color:var(--accent3);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Get Mentored</div><div class="lsu">Free 1:1 Agile Coaching</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
+        <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><i class="fa-solid fa-calendar-check fbi" style="display:block;color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Book My Calendar</div><div class="lsu">Free 30-Min Strategy Call</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
     </div>
 
     <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
@@ -738,7 +738,7 @@ function initP(){pts=[];for(let i=0;i<PC;i++)pts.push(new Pt());}
 function drawP(){cx.clearRect(0,0,W,H);const{r,g,b}=pC;for(let i=0;i<pts.length;i++){const a=pts[i];a.update();a.draw();for(let j=i+1;j<pts.length;j++){const bb=pts[j],dx=a.x-bb.x,dy=a.y-bb.y,dd=dx*dx+dy*dy;if(dd<CD*CD){const al=(1-Math.sqrt(dd)/CD)*.12;cx.beginPath();cx.strokeStyle=`rgba(${r},${g},${b},${al})`;cx.lineWidth=.5;cx.moveTo(a.x,a.y);cx.lineTo(bb.x,bb.y);cx.stroke();}}}requestAnimationFrame(drawP);}
 function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;if(!pts.length)initP();}
 addEventListener('resize',rsz);rsz();
-if(reducedMotion){}else if('requestIdleCallback' in window){requestIdleCallback(()=>{initP();drawP();});}else{setTimeout(()=>{initP();drawP();},100);}
+if(reducedMotion){/* skip particles */}else if('requestIdleCallback' in window){requestIdleCallback(()=>{initP();drawP();});}else{setTimeout(()=>{initP();drawP();},100);}
 addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
 addEventListener('touchmove',e=>{if(e.touches[0]){mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;}},{passive:true});
 addEventListener('touchend',()=>{mouse.x=-9999;mouse.y=-9999;});
@@ -897,7 +897,7 @@ function launch(){
     pre.style.clipPath='inset(0 0 0% 0)';gsap.to(pre,{clipPath:'inset(0 0 100% 0)',duration:.9,delay:.3,ease:'power4.inOut',onComplete:()=>{pre.style.display='none';document.body.style.overflow='auto';document.body.style.overflowX='hidden';}});
     gsap.to(app,{opacity:1,duration:.5,delay:.6});setTimeout(updStatus,800);
     document.querySelectorAll('.rv').forEach((el,i)=>{gsap.to(el,{opacity:1,y:0,duration:.9,delay:.8+i*.08,ease:'power3.out',onComplete:()=>done(el)});});
-    setTimeout(()=>new Scr(document.getElementById('hname')).run(isArabic?'عمرو الحاروني':'Amr Elharony'),1400);
+    setTimeout(()=>new Scr(document.getElementById('hname')).run('Amr Elharony'),1400);
     document.querySelectorAll('.rt').forEach((t,i)=>{gsap.from(t,{scale:.7,opacity:0,y:10,duration:.5,delay:1.1+i*.1,ease:'back.out(2)',onComplete:()=>{gsap.set(t,{clearProps:'all'});t.style.opacity='1';}});});
     document.querySelectorAll('.lk').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,y:50,scale:.92,rotateX:10,filter:'blur(6px)'},{opacity:1,y:0,scale:1,rotateX:0,filter:'blur(0px)',duration:.8,delay:1.4+i*.12,ease:'power3.out',onComplete:()=>done(c)});});
     document.querySelectorAll('.nl').forEach((c,i)=>{gsap.fromTo(c,{opacity:0,x:-20},{opacity:1,x:0,duration:.6,delay:2+i*.1,ease:'power2.out',onComplete:()=>done(c)});});
@@ -922,7 +922,7 @@ function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById(
 if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     const CAIRO_LAT=30.0444,CAIRO_LNG=31.2357,RADIUS_KM=25;
     function haversineKm(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-    fetch('https://ip-api.com/json/?fields=lat,lon,city,status',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.status==='success'){const dist=haversineKm(data.lat,data.lon,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
+    fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});if(data.status==='success'){const dist=haversineKm(data.lat,data.lon,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
 }
 function initShake(){const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;let shakeStart=0,shaking=false;const hint=document.getElementById('shakeHint'),bar=document.getElementById('shakeBar'),fill=document.getElementById('shakeFill');
 function handleMotion(e){if(contactRevealed)return;const acc=e.accelerationIncludingGravity;if(!acc)return;const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z),accelNet=Math.abs(total-9.81);
@@ -943,10 +943,6 @@ function showEgg(){const el=document.getElementById('easterEgg');el.classList.ad
 window.closeEgg=function(){document.getElementById('easterEgg').classList.remove('show');};
 // Escape handled by unified handler below
 
-// ═══ ARABIC/ENGLISH TOGGLE ═══
-let isArabic=false;
-// Language toggle removed — stub for compatibility
-const _langEl=document.createElement('button');_langEl.id='langBtn';_langEl.style.display='none';document.body.appendChild(_langEl);
 
 // ═══ VISITOR COUNTER ═══
 (function(){
@@ -956,25 +952,6 @@ const _langEl=document.createElement('button');_langEl.id='langBtn';_langEl.styl
     const base=4200+Math.floor(count*1.3);
     localStorage.setItem('vc',count.toString());
     document.getElementById('visitorCount').textContent=`Visitor #${base.toLocaleString()}`;
-})();
-
-// ═══ DYNAMIC WEATHER BACKGROUND ═══
-(function(){
-    fetch('https://wttr.in/Cairo?format=%C&m',{headers:{'Accept':'text/plain'}})
-        .then(r=>r.text()).then(w=>{
-            w=w.trim().toLowerCase();
-            const mesh=document.querySelectorAll('.mesh div');
-            if(w.includes('sun')||w.includes('clear')){
-                mesh[0].style.background='#ff9500';mesh[1].style.background='#ff6b00';mesh[2].style.background='#ffcc00';
-            }else if(w.includes('rain')||w.includes('drizzle')){
-                mesh[0].style.background='#0077ff';mesh[1].style.background='#004499';mesh[2].style.background='#66aaff';
-            }else if(w.includes('cloud')||w.includes('overcast')){
-                mesh[0].style.background='#8899aa';mesh[1].style.background='#667788';mesh[2].style.background='#99aabb';
-            }
-            // night override
-            const cairoH=parseInt(new Date().toLocaleString("en-US",{timeZone:"Africa/Cairo",hour:"numeric",hour12:false}));
-            if(cairoH>=20||cairoH<5){mesh[0].style.background='#1a0a3e';mesh[1].style.background='#4a1a8a';mesh[2].style.background='#0a0a2e';}
-        }).catch(()=>{});
 })();
 
     
@@ -1296,8 +1273,8 @@ function showSmartCta(type){
     const cta=document.getElementById('smartCta'),link=document.getElementById('smartCtaLink'),title=document.getElementById('smartCtaTitle'),sub=document.getElementById('smartCtaSub'),icon=document.getElementById('smartCtaIcon');
     if(type==='high'){
         link.href='https://calendly.com/amrmelharony/30min';
-        title.textContent="You seem interested — let's chat";
-        sub.textContent='Book a free 30-minute call';
+        title.textContent="You seem interested — let's connect";
+        sub.textContent='Book a free 30-min strategy call';
         icon.innerHTML='<i class="fa-solid fa-calendar-check"></i>';
     } else {
         link.href='https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168';
@@ -1334,15 +1311,15 @@ function showRecommendation(){
     if(!container)return;
     const clicked=p.clickedLinks.join(' ').toLowerCase();
     let rec=null;
-    if(clicked.includes('adplist')||clicked.includes('mentor')){
-        rec={icon:'fa-book',label:'Since you like mentoring...',title:'Read The Bilingual Executive',href:'https://bilingualexecutive.amrelharony.com/'};
-    } else if(clicked.includes('bilingual')||clicked.includes('book')){
-        rec={icon:'fa-users',label:'Loved the book?',title:'Join Fintech Bilinguals Community',href:'https://www.linkedin.com/company/fintech-bilinguals'};
-    } else if(clicked.includes('fintech')){
-        rec={icon:'fa-graduation-cap',label:'Want to go deeper?',title:'Get Free 1:1 Agile Coaching',href:'https://adplist.org/mentors/amr-elharony'};
-    } else if(p.visits>1){
-        rec={icon:'fa-calendar-check',label:'Ready to connect?',title:'Book a 30-Min Call with Amr',href:'https://calendly.com/amrmelharony/30min'};
-    }
+    if(clicked.includes('calendly')||clicked.includes('calendar')){
+    rec={icon:'fa-book',label:'While you wait for our call...',title:'Read The Bilingual Executive',href:'https://bilingualexecutive.amrelharony.com/'};
+} else if(clicked.includes('bilingual')||clicked.includes('book')){
+    rec={icon:'fa-users',label:'Loved the book?',title:'Join Fintech Bilinguals Community',href:'https://www.linkedin.com/company/fintech-bilinguals'};
+} else if(clicked.includes('fintech')){
+    rec={icon:'fa-calendar-check',label:'Want to go deeper?',title:'Book a Free Strategy Call',href:'https://calendly.com/amrmelharony/30min'};
+} else if(p.visits>1){
+    rec={icon:'fa-calendar-check',label:'Ready to connect?',title:'Book a 30-Min Call with Amr',href:'https://calendly.com/amrmelharony/30min'};
+}
     if(rec){
         container.innerHTML=`<a href="${rec.href}" target="_blank" rel="noopener" class="rec-card"><div class="rec-icon"><i class="fa-solid ${rec.icon}"></i></div><div class="rec-meta"><div class="rec-label">${rec.label}</div><div class="rec-title">${rec.title}</div></div><div style="color:var(--sub);opacity:.4"><i class="fa-solid fa-arrow-right"></i></div></a>`;
     }
@@ -1355,7 +1332,7 @@ const consoleMessages=[
     ()=>`${VDna.get().visits===1?'Welcome, new visitor':'Welcome back'} · Visit #${VDna.get().visits}`,
     ()=>'2,300+ mentoring minutes and counting...',    ()=>`Engagement score: ${getEngagementScore()}/100`,
     ()=>`Your device: ${VDna.get().device} · ${VDna.get().os} · ${VDna.get().browser}`,
-    ()=>`${VDna.get().achievements.length}/${15} achievements unlocked`,
+    ()=>`${VDna.get().achievements.length}/${14} achievements unlocked`,
     ()=>`Running on ${navigator.hardwareConcurrency||'?'} cores · ${VDna.get().screen}`,
     ()=>'System status: all modules operational ✓',
 ];
@@ -1388,7 +1365,6 @@ const BADGES=[
     {id:'social',emoji:'🔗',name:'Networker',desc:'Clicked 5+ different links',rarity:'rare',xp:40},
     {id:'collector',emoji:'🏆',name:'Collector',desc:'Unlocked 8 badges',rarity:'legendary',xp:100},
     {id:'certified',emoji:'📜',name:'Cert Inspector',desc:'Visited 3+ certifications',rarity:'rare',xp:35},
-    {id:'bilingual',emoji:'🌐',name:'Bilingual',desc:'Switched to Arabic mode',rarity:'common',xp:20},
 ];
 
 const LEVEL_NAMES=['Visitor','Curious','Explorer','Engaged','Fan','Superfan','Legend'];
@@ -1590,8 +1566,7 @@ showEgg=function(){origShowEgg();Achieve.check('secret');};
 // Hook shake contact achievement
 const origReveal=revealContact;
 revealContact=function(){origReveal();Achieve.check('shaker');};
-// Hook language toggle for bilingual badge
-document.getElementById('langBtn').addEventListener('click',()=>{Achieve.check('bilingual');});
+
 // Track social networker on clicks
 document.addEventListener('click',e=>{
     const p=VDna.get();
@@ -1651,8 +1626,8 @@ const TermCmds={
     skills:()=>'<span class="term-accent">Core Skills:</span>\n  Agile/Scrum · Kanban · SAFe · Data Analytics\n  Digital Transformation · Stakeholder Management\n  FinTech · Project Management · Mentoring\n  Python · SQL · Jira · Confluence',
     contact:()=>'<span class="term-accent">Contact Amr:</span>\n  📧 a.elharony@gmail.com\n  🔗 linkedin.com/in/amrmelharony\n  📅 calendly.com/amrmelharony/30min\n  🌐 amrelharony.com',
     book:()=>'<span class="term-accent">📚 The Bilingual Executive</span>\nLeadership Communication for a Bilingual World\n\nAvailable in: Print · eBook · AI Audiobook\n→ bilingualexecutive.amrelharony.com',
-    stats:()=>{const p=VDna.get();return `<span class="term-accent">Your Session Stats:</span>\n  Visits: ${p.visits} · Scroll: ${p.scrollMax}%\n  Badges: ${p.achievements.length}/15 · XP: ${p.xp}\n  Device: ${p.device} · ${p.browser}`;},
-    badges:()=>{const p=VDna.get();return '<span class="term-accent">Badges ('+p.achievements.length+'/15):</span>\n'+BADGES.map(b=>'  '+(p.achievements.includes(b.id)?b.emoji:' 🔒')+' '+b.name+' — '+b.desc).join('\n');},
+    stats:()=>{const p=VDna.get();return `<span class="term-accent">Your Session Stats:</span>\n  Visits: ${p.visits} · Scroll: ${p.scrollMax}%\n  Badges: ${p.achievements.length}/14 · XP: ${p.xp}\n  Device: ${p.device} · ${p.browser}`;},
+    badges:()=>{const p=VDna.get();return '<span class="term-accent">Badges ('+p.achievements.length+'/14):</span>\n'+BADGES.map(b=>'  '+(p.achievements.includes(b.id)?b.emoji:' 🔒')+' '+b.name+' — '+b.desc).join('\n');},
     snake:()=>{closeTerm();setTimeout(openGame,400);return '<span class="term-green">Launching Snake...</span>';},
     clear:()=>'__CLEAR__',
     exit:()=>{closeTerm();return '';}
@@ -2343,22 +2318,33 @@ if(D&&!reducedMotion){
     document.addEventListener('keydown',unifiedKeys);
 })();
 
-// ═════════════════════════════════════════════════
-// FEATURE: SERVICE WORKER (Offline Mode)
-// ═════════════════════════════════════════════════
-if('serviceWorker' in navigator){
-    // Register inline service worker via blob
-    const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('amr-v1').then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok){const clone=res.clone();caches.open('amr-v1').then(c=>c.put(e.request,clone));}return res;}).catch(()=>caches.match('/'))));});`;
-    try{
-        const blob=new Blob([swCode],{type:'application/javascript'});
-        navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'/'}).catch(()=>{});
-    }catch(e){}
-}
 
 // ═══ SCROLL & PARALLAX ═══
-addEventListener('scroll',()=>{const t=scrollY,h=document.documentElement.scrollHeight-innerHeight;document.getElementById('sbar').style.width=(h>0?t/h*100:0)+'%';trackScroll();},{passive:true});
-if(!reducedMotion){addEventListener('scroll',()=>{const y=scrollY;document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${y*(i+1)*.06}px)`;});},{passive:true});}
-})();
+
+// 1. Cache the elements outside the listener for better performance
+const meshDivs = document.querySelectorAll('.mesh div');
+const scrollBar = document.getElementById('sbar');
+
+addEventListener('scroll', () => {
+    const t = scrollY;
+    const h = document.documentElement.scrollHeight - innerHeight;
+    
+    // 2. Update scrollbar width
+    if (scrollBar) {
+        scrollBar.style.width = (h > 0 ? (t / h) * 100 : 0) + '%';
+    }
+    
+    // 3. Trigger your custom tracking function
+    if (typeof trackScroll === 'function') trackScroll();
+    
+    // 4. Parallax effect using cached nodes
+    if (!reducedMotion) {
+        meshDivs.forEach((b, i) => {
+            b.style.transform = `translateY(${t * (i + 1) * .06}px)`;
+        });
+    }
+}, { passive: true });
+    
 </script>
 <script src="phase1-features.js" defer></script>
 <script src="phase2-features.js" defer></script>
