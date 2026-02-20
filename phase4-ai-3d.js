@@ -662,172 +662,139 @@ body.zen-mode .hover-preview { display: none !important; }
     scene.fog = new THREE.FogExp2(0x060910, 0.15);
 
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 0, 3.8);
+    camera.position.set(0, 0.3, 3.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
+    // Book group
     const book = new THREE.Group();
 
-    // 1. Load Textures
-    const textureLoader = new THREE.TextureLoader();
-    
-    const frontTex = textureLoader.load('be.png'); 
-    frontTex.colorSpace = THREE.SRGBColorSpace;
-    
-    const backTex = textureLoader.load('back.png'); 
-    backTex.colorSpace = THREE.SRGBColorSpace;
-    backTex.wrapS = THREE.RepeatWrapping;
-    backTex.repeat.x = -1; // Fix mirrored text on back
-    
-    const spineTex = textureLoader.load('spine.png');
-    spineTex.colorSpace = THREE.SRGBColorSpace;
+    // Cover (front)
+    const coverGeo = new THREE.BoxGeometry(1.4, 2, 0.05);
+    const coverMat = new THREE.MeshPhongMaterial({
+      color: 0x1a3a5c,
+      emissive: 0x0a1a2c,
+      specular: 0x00e1ff,
+      shininess: 30
+    });
+    const front = new THREE.Mesh(coverGeo, coverMat);
+    front.position.z = 0.15;
+    book.add(front);
 
-    // 2. Procedurally generate "Pages" texture
-    const pagesCanvas = document.createElement('canvas');
-    pagesCanvas.width = 64; pagesCanvas.height = 512;
-    const pcx = pagesCanvas.getContext('2d');
-    pcx.fillStyle = '#f5f0e8'; 
-    pcx.fillRect(0, 0, 64, 512);
-    pcx.fillStyle = '#e3dac9'; 
-    for(let i = 0; i < 512; i += 4) { pcx.fillRect(0, i, 64, 1 + Math.random() * 1.5); }
-    const pagesTexture = new THREE.CanvasTexture(pagesCanvas);
-    pagesTexture.wrapS = THREE.RepeatWrapping;
-    pagesTexture.wrapT = THREE.RepeatWrapping;
+    // Title text on front (using plane with emissive)
+    const titleGeo = new THREE.PlaneGeometry(1.1, 0.3);
+    const titleMat = new THREE.MeshBasicMaterial({ color: 0x00e1ff, transparent: true, opacity: 0.8 });
+    const titleMesh = new THREE.Mesh(titleGeo, titleMat);
+    titleMesh.position.set(0, 0.4, 0.177);
+    book.add(titleMesh);
 
-    // Dimensions
-    const bookW = 1.4;
-    const bookH = 2.0;
-    const bookD = 0.25; 
-    const coverThickness = 0.03; 
+    // Subtitle line
+    const subGeo = new THREE.PlaneGeometry(0.8, 0.04);
+    const subMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.5 });
+    const subMesh = new THREE.Mesh(subGeo, subMat);
+    subMesh.position.set(0, 0.15, 0.177);
+    book.add(subMesh);
 
-    // 3. Define the Materials
-    const frontMat = new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
-    const backMat = new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
-    const spineMat = new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
-    
-    const edgeMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.5 }); 
-    const insideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }); 
+    // Author name line
+    const authGeo = new THREE.PlaneGeometry(0.6, 0.03);
+    const authMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.5 });
+    const authMesh = new THREE.Mesh(authGeo, authMat);
+    authMesh.position.set(0, -0.6, 0.177);
+    book.add(authMesh);
 
-    // THE REAL FIX: Proper Arrays
-    const frontMaterials =;
-    const backMaterials  =;
-    const spineMaterials =;
-
-    // 4. Create Front Cover
-    const coverGeo = new THREE.BoxGeometry(bookW, bookH, coverThickness);
-    const frontCover = new THREE.Mesh(coverGeo, frontMaterials);
-    frontCover.position.set(0, 0, bookD/2 + coverThickness/2);
-    book.add(frontCover);
-
-    // 5. Create Back Cover
-    const backCover = new THREE.Mesh(coverGeo, backMaterials);
-    backCover.position.set(0, 0, -(bookD/2 + coverThickness/2));
-    book.add(backCover);
-
-    // 6. Create Spine
-    const spineGeo = new THREE.BoxGeometry(coverThickness, bookH, bookD + coverThickness*2);
-    const spine = new THREE.Mesh(spineGeo, spineMaterials);
-    spine.position.set(-(bookW/2 + coverThickness/2), 0, 0);
-    book.add(spine);
-
-    // 7. Create Pages Block
-    const pagesGeo = new THREE.BoxGeometry(bookW - 0.06, bookH - 0.08, bookD);
-    const pageEdgeMat = new THREE.MeshStandardMaterial({ map: pagesTexture, roughness: 0.9, color: 0xffffff });
-    const blankMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8 });
-    
-    // Pages Array: Only the visible edges get the paper texture
-    const pageMaterials  =;
-    
-    const pages = new THREE.Mesh(pagesGeo, pageMaterials);
-    pages.position.set(0.03, 0, 0); 
+    // Pages (spine)
+    const pagesGeo = new THREE.BoxGeometry(1.35, 1.95, 0.25);
+    const pagesMat = new THREE.MeshLambertMaterial({ color: 0xf5f0e8 });
+    const pages = new THREE.Mesh(pagesGeo, pagesMat);
     book.add(pages);
 
-    book.position.x = 0.3; 
+    // Back cover
+    const back = new THREE.Mesh(coverGeo, coverMat.clone());
+    back.position.z = -0.15;
+    book.add(back);
+
+    // Spine edge accent
+    const spineGeo = new THREE.BoxGeometry(0.05, 2, 0.3);
+    const spineMat = new THREE.MeshPhongMaterial({ color: 0x00e1ff, emissive: 0x003344, shininess: 60 });
+    const spine = new THREE.Mesh(spineGeo, spineMat);
+    spine.position.x = -0.7;
+    book.add(spine);
+
     scene.add(book);
 
-    // 8. Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x334466, 0.5);
     scene.add(ambient);
 
-    const key = new THREE.DirectionalLight(0xffffff, 0.8);
+    const key = new THREE.DirectionalLight(0x00e1ff, 0.6);
     key.position.set(2, 3, 4);
     scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0xe0eaff, 0.4);
+    const fill = new THREE.DirectionalLight(0x6366f1, 0.3);
     fill.position.set(-3, 1, -2);
     scene.add(fill);
 
-    const rim = new THREE.PointLight(0xa855f7, 0.6, 10);
+    const rim = new THREE.PointLight(0xa855f7, 0.4, 10);
     rim.position.set(0, -2, 3);
     scene.add(rim);
 
-    // 9. Ground plane particles
+    // Ground plane particles
     const particleCount = 60;
     const pGeo = new THREE.BufferGeometry();
     const pPositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      pPositions = (Math.random() - 0.5) * 8;
-      pPositions = (Math.random() - 0.5) * 5;
-      pPositions = (Math.random() - 0.5) * 8;
+      pPositions[i * 3] = (Math.random() - 0.5) * 8;
+      pPositions[i * 3 + 1] = (Math.random() - 0.5) * 5;
+      pPositions[i * 3 + 2] = (Math.random() - 0.5) * 8;
     }
     pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
     const pMat = new THREE.PointsMaterial({ color: 0x00e1ff, size: 0.02, transparent: true, opacity: 0.3 });
     scene.add(new THREE.Points(pGeo, pMat));
 
-    // 10. Controls & Interaction
+    // Mouse / touch rotation
     let isDragging = false, prevX = 0, prevY = 0;
-    let rotVelX = 0.003, rotVelY = 0.01;
-
-    book.rotation.y = -0.3;
-    book.rotation.x = 0.1;
+    let rotVelX = 0.003, rotVelY = 0;
 
     renderer.domElement.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
     renderer.domElement.addEventListener('mousemove', e => {
       if (!isDragging) return;
-      rotVelY = (e.clientX - prevX) * 0.006;
-      rotVelX = (e.clientY - prevY) * 0.004;
+      rotVelY = (e.clientX - prevX) * 0.005;
+      rotVelX = (e.clientY - prevY) * 0.003;
       prevX = e.clientX; prevY = e.clientY;
     });
     renderer.domElement.addEventListener('mouseup', () => isDragging = false);
     renderer.domElement.addEventListener('mouseleave', () => isDragging = false);
 
-    renderer.domElement.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches.clientX; prevY = e.touches.clientY; }, { passive: true });
+    renderer.domElement.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; }, { passive: true });
     renderer.domElement.addEventListener('touchmove', e => {
       if (!isDragging) return;
-      rotVelY = (e.touches.clientX - prevX) * 0.006;
-      rotVelX = (e.touches.clientY - prevY) * 0.004;
-      prevX = e.touches.clientX; prevY = e.touches.clientY;
+      rotVelY = (e.touches[0].clientX - prevX) * 0.005;
+      rotVelX = (e.touches[0].clientY - prevY) * 0.003;
+      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
     }, { passive: true });
     renderer.domElement.addEventListener('touchend', () => isDragging = false, { passive: true });
 
+    // Scroll zoom
     renderer.domElement.addEventListener('wheel', e => {
       camera.position.z = Math.max(2, Math.min(6, camera.position.z + e.deltaY * 0.005));
       e.preventDefault();
     }, { passive: false });
 
-    // 11. Animation Loop
+    // Animate
     let animId;
-    const clock = new THREE.Clock();
-
     function animate() {
       animId = requestAnimationFrame(animate);
-      const time = clock.getElapsedTime();
-
       if (!isDragging) {
-        rotVelY *= 0.96; 
-        rotVelX *= 0.96;
-        rotVelY += 0.0006; 
+        rotVelY *= 0.97; // friction
+        rotVelX *= 0.97;
+        rotVelY += 0.0008; // idle spin
       }
-      
       book.rotation.y += rotVelY;
       book.rotation.x += rotVelX;
       book.rotation.x = Math.max(-0.5, Math.min(0.5, book.rotation.x));
-
-      book.position.y = Math.sin(time * 2) * 0.08;
-
       renderer.render(scene, camera);
     }
     animate();
@@ -838,7 +805,6 @@ body.zen-mode .hover-preview { display: none !important; }
     };
   }
 
-  
 
   // ═══════════════════════════════════════════════════
   // FEATURE 4: 3D DATA MESH VISUALIZER
