@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-// PHASE 4: AI, INTERACTIVE 3D & AR — amrelharony.com
+// PHASE 4: AI, INTERACTIVE 3D — amrelharony.com
 // Drop-in: <script src="phase4-ai-3d.js" defer></script>
 //
 // Features:
 //   1. "Ask Amr" Terminal Chatbot
-//   2. 3D & AR Book Viewer (<model-viewer> with .glb/.usdz)
+//   2. 3D Book Viewer (<model-viewer>) - NO AR
 //   3. 3D Data Mesh Visualizer (Three.js)
 // ═══════════════════════════════════════════════════════════════
-(function PhaseFourAI3DAR() {
+(function PhaseFourAI3D() {
   'use strict';
 
   const RM = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -68,7 +68,7 @@
 .term-chat-topic:hover { background: rgba(0,225,255,.08); border-color: #00e1ff; }
 
 /* ═══════════════════════════════════════════
-   2. 3D VIEWER OVERLAY & AR STYLES
+   2. 3D VIEWER OVERLAY STYLES
    ═══════════════════════════════════════════ */
 #viewer3dOverlay {
   position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.96);
@@ -114,19 +114,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 }
 .viewer3d-loading-spinner { font-size: 28px; animation: v3dSpin 2s ease-in-out infinite; }
 @keyframes v3dSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }
-
-/* AR Button Styling */
-#ar-button {
-  background-image: url(https://cdn.glitch.global/a92517b6-34df-4658-9b32-0469cb28037f/ar_icon_white.png?v=1660934672966);
-  background-repeat: no-repeat; background-size: 20px 20px; background-position: 12px 50%;
-  background-color: rgba(0, 225, 255, 0.9); position: absolute; left: 50%; transform: translateX(-50%);
-  white-space: nowrap; bottom: 40px; padding: 0px 16px 0px 40px;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #060910;
-  height: 36px; line-height: 36px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 4px 12px rgba(0,225,255,0.3); cursor: pointer; transition: all 0.2s; z-index: 15;
-}
-#ar-button:hover { background-color: #fff; color: #00e1ff; box-shadow: 0 4px 16px rgba(0,225,255,0.5); }
-#ar-button:active { transform: translateX(-50%) scale(0.95); }
 
 /* Node labels in data mesh */
 .mesh-label {
@@ -220,7 +207,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     const titleEl = document.getElementById('v3dTitle');
     const container = document.getElementById('v3dContainer');
 
-    // Clean container but keep loader/hud
     Array.from(container.children).forEach(child => {
         if (!['v3dLoading', 'v3dHud'].includes(child.id)) child.remove();
     });
@@ -248,7 +234,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         if (container.querySelector('canvas')) container.querySelector('canvas').remove();
         if (container.querySelector('model-viewer')) container.querySelector('model-viewer').remove();
     }
-    // Cleanup Three.js
     if (window._v3dCleanup) { window._v3dCleanup(); window._v3dCleanup = null; }
   }
   window._close3D = close3D;
@@ -281,20 +266,19 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   }
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 3: BOOK VIEWER (AR/3D)
+  // FEATURE 3: BOOK VIEWER (3D Only - No AR)
   // ═══════════════════════════════════════════════════
   function launchBookViewer() {
-    open3D('📘 The Bilingual Executive — 3D & AR', buildBookARScene, 'model-viewer');
+    // Title updated to remove "AR"
+    open3D('📘 The Bilingual Executive — 3D Viewer', buildBookScene, 'model-viewer');
   }
 
-  function buildBookARScene(container) {
+  function buildBookScene(container) {
+    // REMOVED: ar, ar-modes, ios-src, and the slot="ar-button" button
     const mvHTML = `
       <model-viewer
         src="book.glb"
-        ios-src="book.usdz"
         alt="A 3D model of The Bilingual Executive book"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
         camera-controls
         auto-rotate
         shadow-intensity="1"
@@ -302,7 +286,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         exposure="1"
         loading="eager"
       >
-        <button slot="ar-button" id="ar-button">View in your space</button>
       </model-viewer>
       <div class="viewer3d-hint" id="v3dHint">
         ${isMobile ? 'Pinch to zoom · Drag to rotate' : 'Scroll to zoom · Drag to rotate · Click to open site'}
@@ -315,7 +298,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     const mv = container.querySelector('model-viewer');
 
     // ─────────────────────────────────────────────
-    // DRAG vs CLICK vs AR-BUTTON LOGIC
+    // DRAG VS CLICK DETECTION LOGIC
     // ─────────────────────────────────────────────
     let startX = 0, startY = 0;
 
@@ -328,22 +311,14 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     mv.addEventListener('touchstart', (e) => onDown(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
     mv.addEventListener('click', (e) => {
-      // 1. FIX: Check if the AR button was clicked.
-      // If the target (or any parent) is the AR button, DO NOTHING.
-      // Allow the default behavior (AR launch) to happen.
-      if (e.target.closest('#ar-button')) {
-        return; 
-      }
-
-      // 2. Drag calculation
       const diffX = Math.abs(e.clientX - startX);
       const diffY = Math.abs(e.clientY - startY);
 
-      // 3. Only open the site if it was a quick, non-moving click
+      // Only open if movement is minimal (a genuine click, not a rotate drag)
       if (diffX < 5 && diffY < 5) {
         window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
       } else {
-        // Prevent random behavior on drag
+        // Prevent default behavior if it was a drag
         e.preventDefault();
         e.stopPropagation();
       }
@@ -416,7 +391,8 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
         position:relative;z-index:10;
       `;
-      badge.innerHTML = '📦 3D + AR PREVIEW';
+      // UPDATED LABEL: Removed "AR"
+      badge.innerHTML = '📦 3D PREVIEW';
       badge.addEventListener('mouseenter', () => { badge.style.background = 'rgba(99,102,241,.2)'; badge.style.color = '#fff'; });
       badge.addEventListener('mouseleave', () => { badge.style.background = 'rgba(99,102,241,.1)'; badge.style.color = '#6366f1'; });
       badge.addEventListener('click', e => {
