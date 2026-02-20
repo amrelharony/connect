@@ -1689,14 +1689,17 @@ const TermCmds = {
     // Helper: Get Current Directory
     getDir: function() {
         let d = this.fs['~'];
-        for (let i = 1; i < this.path.length; i++) d = d[this.path[i]];
+        for (let i = 1; i < this.path.length; i++) {
+            if (d[this.path[i]]) d = d[this.path[i]];
+            else return null;
+        }
         return d;
     },
 
     // 2. Commands
     ls: function() {
         const dir = this.getDir();
-        if (!dir) return '<span style="color:#ef4444">Error reading dir</span>';
+        if (!dir || typeof dir !== 'object') return '<span style="color:#ef4444">Error reading dir</span>';
         return Object.keys(dir).map(k => {
             const isDir = typeof dir[k] === 'object';
             const icon = isDir ? '📁' : '📄';
@@ -1711,7 +1714,7 @@ const TermCmds = {
         else if (t === '..') { if (this.path.length > 1) this.path.pop(); }
         else {
             const dir = this.getDir();
-            if (dir[t] && typeof dir[t] === 'object') this.path.push(t);
+            if (dir && dir[t] && typeof dir[t] === 'object') this.path.push(t);
             else return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
         }
         this.updatePrompt();
@@ -1721,8 +1724,12 @@ const TermCmds = {
     cat: function(args) {
         const t = (args || '').trim();
         const dir = this.getDir();
-        if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
+        if (dir && dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
         return `<span style="color:#ef4444">cat: ${t}: No such file</span>`;
+    },
+
+    pwd: function() {
+        return `<span style="color:#8b949e">${this.path.join('/')}</span>`;
     },
 
     help: () => `
@@ -1731,7 +1738,7 @@ const TermCmds = {
 <span style="color:#00e1ff">APPS</span>     <span style="color:#fff">arcade</span> games · <span style="color:#fff">wall</span> guestbook · <span style="color:#fff">search</span> cmd+k
 <span style="color:#00e1ff">MODULES</span>  <span style="color:#fff">theme</span> switch · <span style="color:#fff">weather</span> cairo · <span style="color:#fff">skills</span> graph`,
 
-    // Integrations
+    // Integrations (safe checks)
     arcade: () => { if(window._openArcade) window._openArcade(); return '🕹️ Opening Arcade...'; },
     wall: () => { if(window.openGuestbook) window.openGuestbook(); return '🌍 Opening Guestbook...'; },
     search: () => { if(window._openPalette) window._openPalette(); return '⌨️ Opening Palette...'; },
@@ -1745,6 +1752,11 @@ const TermCmds = {
         } catch(e) { return 'Weather data offline.'; }
     },
     
+    skills: () => {
+        const skills = [{n:'Agile',v:95},{n:'Data',v:90},{n:'FinTech',v:85}];
+        return skills.map(s => `<span style="color:#00e1ff">${s.n.padEnd(8)}</span> <span style="color:#22c55e">${'█'.repeat(s.v/10)} ${s.v}%</span>`).join('\n');
+    },
+
     clear: () => '__CLEAR__',
     exit: () => { window.closeTerm(); return ''; },
 
@@ -1762,15 +1774,25 @@ const TermCmds = {
 window.openTerm = function() {
     document.getElementById('termOverlay').classList.add('show');
     const b = document.getElementById('termBody');
-    // Set initial v3 welcome message if empty
-    if(b.innerHTML.trim().length < 100) { 
-        b.innerHTML = '<div class="term-line"><span style="color:#22c55e">Welcome to AmrOS v3.0</span></div><div class="term-line"><span style="color:#8b949e">Type <span style="color:#00e1ff">help</span> to start.</span></div>';
+    // Ensure we start fresh or keep history
+    if(b.innerHTML.trim().length < 100 || b.innerHTML.includes('v2.0')) { 
+        b.innerHTML = `
+            <div class="term-line"><span style="color:#22c55e">Welcome to AmrOS v3.0</span></div>
+            <div class="term-line"><span style="color:#8b949e">Type <span style="color:#00e1ff">help</span> to start.</span></div>
+        `;
     }
+    TermCmds.updatePrompt(); // Set correct prompt immediately
     setTimeout(() => document.getElementById('termInput').focus(), 300);
 };
 window.closeTerm = function() { document.getElementById('termOverlay').classList.remove('show'); };
 
-document.getElementById('termInput').addEventListener('keydown', e => {
+// Input Handler
+const termInput = document.getElementById('termInput');
+// Remove old listeners to prevent duplicates (using a clone trick)
+const newTermInput = termInput.cloneNode(true);
+termInput.parentNode.replaceChild(newTermInput, termInput);
+
+newTermInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         const input = e.target;
         const raw = input.value.trim();
@@ -1780,7 +1802,7 @@ document.getElementById('termInput').addEventListener('keydown', e => {
         input.value = '';
 
         const body = document.getElementById('termBody');
-        body.innerHTML += `<div class="term-line"><span class="term-prompt">❯</span> <span class="term-cmd">${raw}</span></div>`;
+        body.innerHTML += `<div class="term-line"><span class="term-prompt">amr@v3:${TermCmds.path.length>1?'~/'+TermCmds.path.slice(1).join('/'):'~'}❯</span> <span class="term-cmd">${raw}</span></div>`;
 
         if (TermCmds[cmd]) {
             const out = TermCmds[cmd](args);
@@ -1793,7 +1815,6 @@ document.getElementById('termInput').addEventListener('keydown', e => {
         body.scrollTop = body.scrollHeight;
     }
 });
-
 // ═════════════════════════════════════════════════
 // FEATURE: TESTIMONIAL CAROUSEL (80+ recommendations)
 // ═════════════════════════════════════════════════
