@@ -652,7 +652,7 @@ body.zen-mode .hover-preview { display: none !important; }
     open3D('📘 The Bilingual Executive — 3D Preview', buildBookScene);
   }
 
-function buildBookScene() {
+  function buildBookScene() {
     const container = document.getElementById('v3dContainer');
     const W = container.clientWidth;
     const H = container.clientHeight;
@@ -672,7 +672,7 @@ function buildBookScene() {
     // Book group
     const book = new THREE.Group();
 
-    // 1. Load Textures (make sure be.png, back.png, and spine.png are in your folder)
+    // 1. Load Textures (make sure be.png, back.png, and spine.png exist!)
     const textureLoader = new THREE.TextureLoader();
     
     const frontTex = textureLoader.load('be.png'); 
@@ -680,9 +680,8 @@ function buildBookScene() {
     
     const backTex = textureLoader.load('back.png'); 
     backTex.colorSpace = THREE.SRGBColorSpace;
-    // Fix mirrored text on the back cover
     backTex.wrapS = THREE.RepeatWrapping;
-    backTex.repeat.x = -1;
+    backTex.repeat.x = -1; // Fix mirrored text on back
     
     const spineTex = textureLoader.load('spine.png');
     spineTex.colorSpace = THREE.SRGBColorSpace;
@@ -691,9 +690,9 @@ function buildBookScene() {
     const pagesCanvas = document.createElement('canvas');
     pagesCanvas.width = 64; pagesCanvas.height = 512;
     const pcx = pagesCanvas.getContext('2d');
-    pcx.fillStyle = '#f5f0e8'; // Base paper color
+    pcx.fillStyle = '#f5f0e8'; 
     pcx.fillRect(0, 0, 64, 512);
-    pcx.fillStyle = '#e3dac9'; // Shadow lines
+    pcx.fillStyle = '#e3dac9'; 
     for(let i = 0; i < 512; i += 4) { pcx.fillRect(0, i, 64, 1 + Math.random() * 1.5); }
     const pagesTexture = new THREE.CanvasTexture(pagesCanvas);
     pagesTexture.wrapS = THREE.RepeatWrapping;
@@ -706,16 +705,14 @@ function buildBookScene() {
     const coverThickness = 0.03; 
 
     // 3. Define the Materials
-    // Glossy image materials for the outside covers
     const frontMat = new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
     const backMat = new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
     const spineMat = new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.2, metalness: 0.15, color: 0xffffff });
     
-    // Solid materials for edges and insides
-    const edgeMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.5 }); // Dark blue hardcover edge
-    const insideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }); // Inside paper color
+    const edgeMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.5 }); 
+    const insideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }); 
 
-    // Three.js Box Face Order: 0:Right, 1:Left, 2:Top, 3:Bottom, 4:Front, 5:Back
+    // THE FIX: Correctly mapped arrays for the 6 faces of each box
     const frontMaterials =;
     const backMaterials =;
     const spineMaterials =;
@@ -742,18 +739,18 @@ function buildBookScene() {
     const pageEdgeMat = new THREE.MeshStandardMaterial({ map: pagesTexture, roughness: 0.9, color: 0xffffff });
     const blankMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8 });
     
-    // Edges get the paper texture, hidden front/back get blank color
+    // THE FIX: Pages materials
     const pageMaterials =;
     
     const pages = new THREE.Mesh(pagesGeo, pageMaterials);
-    pages.position.set(0.03, 0, 0); // Shift slightly right to sit flush inside the spine
+    pages.position.set(0.03, 0, 0); 
     book.add(pages);
 
-    // Shift book slightly so it spins perfectly on its visual center of gravity
+    // Shift book slightly to center its spin axis
     book.position.x = 0.3; 
     scene.add(book);
 
-    // 8. Lighting (Upgraded to make StandardMaterials look great)
+    // 8. Lighting
     const ambient = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambient);
 
@@ -786,7 +783,6 @@ function buildBookScene() {
     let isDragging = false, prevX = 0, prevY = 0;
     let rotVelX = 0.003, rotVelY = 0.01;
 
-    // Start with the book slightly angled so the spine is visible
     book.rotation.y = -0.3;
     book.rotation.x = 0.1;
 
@@ -823,17 +819,15 @@ function buildBookScene() {
       const time = clock.getElapsedTime();
 
       if (!isDragging) {
-        rotVelY *= 0.96; // friction
+        rotVelY *= 0.96; 
         rotVelX *= 0.96;
-        rotVelY += 0.0006; // continuous idle spin
+        rotVelY += 0.0006; 
       }
       
       book.rotation.y += rotVelY;
       book.rotation.x += rotVelX;
-      // Clamp vertical rotation so you don't accidentally flip the book upside down
       book.rotation.x = Math.max(-0.5, Math.min(0.5, book.rotation.x));
 
-      // Added: Smooth floating/bobbing effect
       book.position.y = Math.sin(time * 2) * 0.08;
 
       renderer.render(scene, camera);
@@ -845,6 +839,7 @@ function buildBookScene() {
       renderer.dispose();
     };
   }
+  
 
   // ═══════════════════════════════════════════════════
   // FEATURE 4: 3D DATA MESH VISUALIZER
