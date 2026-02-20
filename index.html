@@ -2599,7 +2599,41 @@ addEventListener('scroll',()=>{
 })();
 </script>
 
-    
+<script>
+// Advanced: Update Sticky Bar icons AND add Calendar button
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        // 1. Fix the Mentor Icon
+        var mentorBtn = document.querySelector('.always-cta-mentor');
+        if (mentorBtn) {
+            var icon = mentorBtn.querySelector('i');
+            if (icon) icon.style.display = 'none';
+            
+            var img = document.createElement('img');
+            img.src = 'Adplist.png';
+            img.style.width = '14px'; img.style.height = '14px'; img.style.objectFit = 'contain'; img.style.marginRight = '6px';
+            mentorBtn.insertBefore(img, mentorBtn.firstChild);
+        }
+
+        // 2. Add Calendar Button (Optional)
+        var bar = document.querySelector('.always-cta-row');
+        if (bar && !document.querySelector('.always-cta-cal')) {
+            var calBtn = document.createElement('a');
+            calBtn.href = 'https://calendly.com/amrmelharony/30min';
+            calBtn.target = '_blank';
+            calBtn.className = 'always-cta always-cta-cal';
+            calBtn.style.background = 'rgba(0,100,255,0.1)';
+            calBtn.style.color = '#00e1ff';
+            calBtn.style.border = '1px solid rgba(0,100,255,0.2)';
+            
+            calBtn.innerHTML = '<img src="calendly.webp" style="width:14px;height:14px;object-fit:contain;margin-right:6px"> Book';
+            
+            // Insert in middle
+            bar.insertBefore(calBtn, mentorBtn);
+        }
+    }, 2500); 
+});
+</script>
     
 </body>
 </html>
