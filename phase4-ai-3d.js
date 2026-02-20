@@ -1005,27 +1005,123 @@ function buildBookARScene(container) {
   }
 
 
-  // ═══════════════════════════════════════════════════
-  // WIRE UP: TERMINAL COMMANDS + TRIGGERS
-  // [THIS SECTION REMAINS UNCHANGED - SNIPPED FOR BREVITY]
+// ═══════════════════════════════════════════════════
+  // WIRE UP: TERMINAL COMMANDS + TRIGGERS (FIXED)
   // ═══════════════════════════════════════════════════
 
   function wireUp() {
-    // Terminal commands
+    // 1. Terminal commands
     if (window.TermCmds) {
       window.TermCmds.book3d = () => {
         setTimeout(launchBookViewer, 300);
         return '<span class="term-green">📘 Launching 3D & AR book viewer...</span>';
       };
-      window.TermCmds.book = window.TermCmds.book3d;<br>
+      window.TermCmds.book = window.TermCmds.book3d;
+
       window.TermCmds.datamesh = () => {
         setTimeout(launchDataMesh, 300);
         return '<span class="term-green">🔀 Launching data mesh visualizer...</span>';
       };
       window.TermCmds.mesh = window.TermCmds.datamesh;
 
-      // Update help to include Phase 4 commands
+      // Update help
       const origHelp = window.TermCmds.help;
       window.TermCmds.help = function() {
         let base = typeof origHelp === 'function' ? origHelp() : '';
-        // Only add if not already present (Phase 4
+        if (!base.includes('book3d')) {
+          base += `<br><span class="term-cmd">ask &lt;question&gt;</span> — Ask Amr anything`;
+          base += `<br><span class="term-cmd">book3d</span> — 3D & AR book viewer`;
+          base += `<br><span class="term-cmd">datamesh</span> — Interactive data mesh visualizer`;
+        }
+        return base;
+      };
+    }
+
+    // 2. ROBUST BOOK CARD FINDER
+    // We try multiple selectors to find your book link
+    const selectors = [
+      'a.lk[href*="bilingual"]', // Priority 1: Specific class + link
+      'a[href*="bilingual"]',    // Priority 2: Any link with "bilingual"
+      'a[href*="book"]'          // Priority 3: Any link with "book"
+    ];
+
+    let bookCard = null;
+    for (const sel of selectors) {
+      bookCard = document.querySelector(sel);
+      if (bookCard) break; // Found it!
+    }
+
+    if (bookCard) {
+      console.log('✅ Phase 4: Found Book Card:', bookCard);
+
+      // Create the Badge
+      const badge = document.createElement('span');
+      badge.style.cssText = `
+        font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;
+        text-transform:uppercase;padding:4px 8px;border-radius:100px;
+        background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);
+        color:#6366f1;margin-top:8px;cursor:pointer;transition:all .2s;
+        display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+        position: relative; z-index: 10;
+      `;
+      badge.innerHTML = '📦 3D + AR PREVIEW';
+      
+      // Hover effects
+      badge.addEventListener('mouseenter', () => {
+        badge.style.background = 'rgba(99,102,241,.2)';
+        badge.style.borderColor = '#6366f1';
+        badge.style.color = '#fff';
+      });
+      badge.addEventListener('mouseleave', () => {
+        badge.style.background = 'rgba(99,102,241,.1)';
+        badge.style.borderColor = 'rgba(99,102,241,.3)';
+        badge.style.color = '#6366f1';
+      });
+
+      // Click event
+      badge.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation(); // Stop the link from opening the URL
+        launchBookViewer();
+        if (window.VDna) window.VDna.addXp(5);
+      });
+
+      // Attach logic: Try subtitle first, otherwise append to card
+      const subtitle = bookCard.querySelector('.lsu');
+      if (subtitle) {
+        // Add a line break if needed
+        subtitle.style.display = 'flex';
+        subtitle.style.flexDirection = 'column';
+        subtitle.style.alignItems = 'flex-start';
+        subtitle.appendChild(badge);
+      } else {
+        // Fallback: Just put it at the end of the card
+        bookCard.style.display = 'flex';
+        bookCard.style.flexDirection = 'column';
+        bookCard.appendChild(badge);
+      }
+      
+    } else {
+      console.warn('⚠️ Phase 4: Could not find any link containing "bilingual" or "book". 3D Badge not added.');
+    }
+
+    // 3. Keyboard Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('viewer3dOverlay')?.classList.contains('show')) {
+        close3D();
+      }
+    });
+
+    // 4. Panel Shortcut
+    const panel = document.querySelector('.shortcut-panel');
+    if (panel) {
+      const closeDiv = panel.querySelector('.sc-close');
+      if (closeDiv && !panel.querySelector('[data-p4-key]')) {
+        const row = document.createElement('div');
+        row.className = 'sc-row';
+        row.dataset.p4Key = '1';
+        row.innerHTML = '<span class="sc-key">Terminal</span><span class="sc-desc">> ask / > book3d / > datamesh</span>';
+        panel.insertBefore(row, closeDiv);
+      }
+    }
+  }
