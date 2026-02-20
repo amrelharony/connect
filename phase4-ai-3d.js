@@ -662,17 +662,16 @@ body.zen-mode .hover-preview { display: none !important; }
     scene.fog = new THREE.FogExp2(0x060910, 0.15);
 
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 0, 3.8); // Pull camera slightly back
+    camera.position.set(0, 0, 3.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // Book group
     const book = new THREE.Group();
 
-    // 1. Load Textures (make sure be.png, back.png, and spine.png exist!)
+    // 1. Load Textures
     const textureLoader = new THREE.TextureLoader();
     
     const frontTex = textureLoader.load('be.png'); 
@@ -686,7 +685,7 @@ body.zen-mode .hover-preview { display: none !important; }
     const spineTex = textureLoader.load('spine.png');
     spineTex.colorSpace = THREE.SRGBColorSpace;
 
-    // 2. Procedurally generate "Pages" edge texture
+    // 2. Procedurally generate "Pages" texture
     const pagesCanvas = document.createElement('canvas');
     pagesCanvas.width = 64; pagesCanvas.height = 512;
     const pcx = pagesCanvas.getContext('2d');
@@ -712,9 +711,9 @@ body.zen-mode .hover-preview { display: none !important; }
     const edgeMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.5 }); 
     const insideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }); 
 
-    // THE FIX: Correctly mapped arrays for the 6 faces of each box
+    // THE REAL FIX: Proper Arrays
     const frontMaterials =;
-    const backMaterials =;
+    const backMaterials  =;
     const spineMaterials =;
 
     // 4. Create Front Cover
@@ -739,14 +738,13 @@ body.zen-mode .hover-preview { display: none !important; }
     const pageEdgeMat = new THREE.MeshStandardMaterial({ map: pagesTexture, roughness: 0.9, color: 0xffffff });
     const blankMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8 });
     
-    // THE FIX: Pages materials
-    const pageMaterials =;
+    // Pages Array: Only the visible edges get the paper texture
+    const pageMaterials  =;
     
     const pages = new THREE.Mesh(pagesGeo, pageMaterials);
     pages.position.set(0.03, 0, 0); 
     book.add(pages);
 
-    // Shift book slightly to center its spin axis
     book.position.x = 0.3; 
     scene.add(book);
 
@@ -839,6 +837,7 @@ body.zen-mode .hover-preview { display: none !important; }
       renderer.dispose();
     };
   }
+
   
 
   // ═══════════════════════════════════════════════════
