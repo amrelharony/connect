@@ -4,9 +4,8 @@
 //
 // Features:
 //   1. "Ask Amr" Terminal Chatbot
-//   2. Context-Aware Hover Previews
-//   3. 3D & AR Book Viewer (<model-viewer> with .glb/.usdz)
-//   4. 3D Data Mesh Visualizer (Three.js)
+//   2. 3D & AR Book Viewer (<model-viewer> with .glb/.usdz)
+//   3. 3D Data Mesh Visualizer (Three.js)
 // ═══════════════════════════════════════════════════════════════
 (function PhaseFourAI3DAR() {
   'use strict';
@@ -69,31 +68,7 @@
 .term-chat-topic:hover { background: rgba(0,225,255,.08); border-color: #00e1ff; }
 
 /* ═══════════════════════════════════════════
-   2. HOVER PREVIEWS
-   ═══════════════════════════════════════════ */
-.hover-preview {
-  position: fixed; z-index: 9998; max-width: 280px; padding: 10px 14px;
-  border-radius: 12px; background: rgba(13,20,32,.97); border: 1px solid #1a2332;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0,0,0,.4); pointer-events: none; opacity: 0;
-  transform: translateY(6px); transition: opacity .2s, transform .2s;
-  font-size: 11px; line-height: 1.5; color: #8b949e;
-}
-.hover-preview.show { opacity: 1; transform: translateY(0); }
-.hover-preview-title {
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 1.5px;
-  text-transform: uppercase; margin-bottom: 4px;
-}
-.hover-preview-title.tech { color: #00e1ff; }
-.hover-preview-title.biz { color: #22c55e; }
-.hover-preview-body { color: #c9d1d9; }
-.hover-preview-body strong { color: #e2e8f0; }
-body.zen-mode .hover-preview { display: none !important; }
-@media(max-width:768px) { .hover-preview { display: none !important; } }
-@media print { .hover-preview { display: none !important; } }
-
-/* ═══════════════════════════════════════════
-   3 & 4. 3D VIEWER OVERLAY & AR STYLES
+   2. 3D VIEWER OVERLAY & AR STYLES
    ═══════════════════════════════════════════ */
 #viewer3dOverlay {
   position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.96);
@@ -152,9 +127,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 }
 #ar-button:hover { background-color: #fff; color: #00e1ff; box-shadow: 0 4px 16px rgba(0,225,255,0.5); }
 #ar-button:active { transform: translateX(-50%) scale(0.95); }
-
-/* REMOVED: model-viewer:not([ar-status="chosen"]) #ar-button { display: none; } 
-   This removal allows the button to try and display even if AR status isnt 'chosen' yet */
 
 /* Node labels in data mesh */
 .mesh-label {
@@ -217,38 +189,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
       return html;
     };
     window.TermCmds.amr = (args) => window.TermCmds.ask(args || 'who are you');
-  }
-
-  // ═══════════════════════════════════════════════════
-  // FEATURE 2: HOVER PREVIEWS
-  // ═══════════════════════════════════════════════════
-  function initHoverPreviews() {
-    if (isMobile) return;
-    const tooltip = document.createElement('div');
-    tooltip.className = 'hover-preview';
-    tooltip.id = 'hoverPreview';
-    document.body.appendChild(tooltip);
-    let showTimeout = null, hideTimeout = null;
-
-    function showPreview(el, text) {
-      tooltip.innerHTML = `<div class="hover-preview-body">${text}</div>`;
-      const rect = el.getBoundingClientRect();
-      let left = rect.left + rect.width / 2 - 140;
-      let top = rect.bottom + 8;
-      if (left < 10) left = 10;
-      if (left + 280 > window.innerWidth) left = window.innerWidth - 290;
-      if (top + 100 > window.innerHeight) top = rect.top - 80;
-      tooltip.style.left = left + 'px';
-      tooltip.style.top = top + 'px';
-      tooltip.classList.add('show');
-    }
-
-    document.querySelectorAll('a.lk').forEach(lk => {
-      if(lk.href.includes('bilingual')) {
-        lk.addEventListener('mouseenter', () => { showTimeout = setTimeout(() => showPreview(lk, "<strong>THE BOOK</strong><br>A guide to bridging the gap between business and technology."), 400); });
-        lk.addEventListener('mouseleave', () => { clearTimeout(showTimeout); tooltip.classList.remove('show'); });
-      }
-    });
   }
 
   // ═══════════════════════════════════════════════════
@@ -499,7 +439,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   function init() {
     create3DOverlay();
     initAskAmr();
-    initHoverPreviews();
+    // initHoverPreviews(); // <-- REMOVED
     wireUp();
     console.log('%c🤖 Phase 4 Loaded', 'background:#6366f1;color:#fff;padding:2px 5px;border-radius:3px;');
   }
