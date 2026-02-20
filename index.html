@@ -2700,237 +2700,138 @@ addEventListener('scroll',()=>{
 
 <script>
 window.addEventListener('load', function() {
-    // Wait a moment for the Phase 6 script to create the buttons
-    setTimeout(function() {
-        var mentorBtn = document.querySelector('.always-cta-mentor');
-        
-        if (mentorBtn) {
-            // 1. Hide the default FontAwesome icon
-            var defaultIcon = mentorBtn.querySelector('i');
-            if (defaultIcon) defaultIcon.style.display = 'none';
+    // Safety delay: Wait 1.5s to ensure Phase 6 is completely done
+    setTimeout(initTerminalV3, 1500);
 
-            // 2. Prevent adding the image twice
-            if (!mentorBtn.querySelector('img')) {
-                var img = document.createElement('img');
-                
-                // Ensure this filename matches exactly (case-sensitive)
-                img.src = 'Adplist.png'; 
-                
-                // Styling to match the new Advanced Design
-                img.style.width = '16px';
-                img.style.height = '16px';
-                img.style.objectFit = 'contain';
-                img.style.marginRight = '8px';
-                img.style.display = 'inline-block';
-                img.style.verticalAlign = 'middle';
-                
-                // Insert the image at the start of the button
-                mentorBtn.insertBefore(img, mentorBtn.firstChild);
-            }
+    function initTerminalV3() {
+        if (!window.TermCmds) {
+            console.warn('Terminal core not found. Retrying...');
+            setTimeout(initTerminalV3, 1000);
+            return;
         }
-    }, 2500); // 2.5s delay to ensure button exists
-});
-</script>
 
-<script>
-(function() {
-    'use strict';
-
-    // Wait for Phase 6 to define the base object
-    const checkInterval = setInterval(() => {
-        if (window.TermCmds) {
-            clearInterval(checkInterval);
-            upgradeTerminalV3();
-        }
-    }, 100);
-
-    function upgradeTerminalV3() {
         const T = window.TermCmds;
         
-        // 1. VIRTUAL FILE SYSTEM
-        // -----------------------
-        const fileSystem = {
+        // 1. FILE SYSTEM DATA
+        const FS = {
             '~': {
                 'projects': {
-                    'bilingual_executive.txt': 'The Bilingual Executive: Bridging the gap between business and technology leadership. Published 2026.',
-                    'fintech_bilinguals.txt': 'A community for Arabic-speaking fintech professionals to master global concepts.',
-                    'data_mesh_impl.log': 'Successfully implemented Data Mesh architecture at Banque Misr. Status: Operational.',
+                    'book.txt': 'The Bilingual Executive: Bridging business & tech. Published 2026.',
+                    'community.txt': 'Fintech Bilinguals: 500+ members bridging the gap.',
+                    'data_mesh.log': 'Architecture impl at Banque Misr: SUCCESS.'
                 },
                 'certs': {
-                    'pmp.crt': 'Project Management Professional (PMP)® - PMI',
-                    'safe_agilist.crt': 'Certified SAFe® 6 Agilist',
-                    'cdmp.crt': 'Certified Data Management Professional - DAMA',
-                    'psm_ii.crt': 'Professional Scrum Master II - Scrum.org',
+                    'pmp.crt': 'PMP® Certified (Project Management Professional)',
+                    'cdmp.crt': 'DAMA Certified Data Management Professional',
+                    'safe.crt': 'SAFe® 6 Agilist'
                 },
-                'skills': {
-                    'agile.md': '# Agile & Scrum\nExpertise in SAFe, Kanban, and Scrum frameworks. Focused on delivery predictability.',
-                    'data.md': '# Data Analytics\nBI Dashboards, Data Governance, ETL Pipelines, and Data Mesh architecture.',
-                    'leadership.md': '# Leadership\nMentoring, Team Building, Stakeholder Management, and Conflict Resolution.',
-                },
-                'contact.json': '{\n  "email": "a.elharony@gmail.com",\n  "linkedin": "/in/amrmelharony",\n  "location": "Cairo, Egypt"\n}'
+                'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
+                'contact.json': '{\n  "email": "a.elharony@gmail.com",\n  "linkedin": "/in/amrmelharony"\n}'
             }
         };
+        let path = ['~'];
 
-        let currentPath = ['~'];
-
-        function getDir(path) {
-            let dir = fileSystem['~'];
-            for (let i = 1; i < path.length; i++) {
-                if (dir[path[i]]) dir = dir[path[i]];
-                else return null;
-            }
-            return dir;
+        // Helper to get current directory object
+        function getDir() {
+            let d = FS['~'];
+            for (let i = 1; i < path.length; i++) d = d[path[i]];
+            return d;
         }
 
-        // 2. NEW COMMANDS
-        // ----------------
-
-        // File System: ls
+        // 2. NEW LOGIC OVERRIDES
+        
+        // ls: List files with icons and colors
         T.ls = () => {
-            const dir = getDir(currentPath);
-            if (!dir || typeof dir !== 'object') return '<span class="term-red">Error: Not a directory</span>';
-            
-            const items = Object.keys(dir).map(key => {
-                const isDir = typeof dir[key] === 'object';
-                const color = isDir ? 'term-blue' : 'term-white';
+            const dir = getDir();
+            const items = Object.keys(dir).map(k => {
+                const isDir = typeof dir[k] === 'object';
+                const col = isDir ? 'color:#00e1ff;font-weight:bold' : 'color:#e2e8f0';
                 const icon = isDir ? '📁' : '📄';
-                return `<span class="${color}">${icon} ${key}</span>`;
+                return `<span style="${col}">${icon} ${k}</span>`;
             });
-            return items.join('  ');
+            return items.join('&nbsp;&nbsp;&nbsp;');
         };
 
-        // File System: cd
+        // cd: Change directory
         T.cd = (args) => {
-            const target = (args || '').trim();
-            if (!target || target === '~') {
-                currentPath = ['~'];
-                return '';
+            const t = (args || '').trim();
+            if (!t || t === '~') { path = ['~']; return ''; }
+            if (t === '..') { if (path.length > 1) path.pop(); return ''; }
+            const dir = getDir();
+            if (dir[t] && typeof dir[t] === 'object') {
+                path.push(t);
+                return ''; 
             }
-            if (target === '..') {
-                if (currentPath.length > 1) currentPath.pop();
-                return '';
-            }
-            const dir = getDir(currentPath);
-            if (dir && dir[target] && typeof dir[target] === 'object') {
-                currentPath.push(target);
-                return '';
-            }
-            return `<span class="term-red">cd: ${target}: No such directory</span>`;
+            return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
         };
 
-        // File System: cat
+        // cat: Read file
         T.cat = (args) => {
-            const target = (args || '').trim();
-            const dir = getDir(currentPath);
-            if (dir && dir[target] && typeof dir[target] === 'string') {
-                return `<span class="term-white">${dir[target]}</span>`;
-            }
-            return `<span class="term-red">cat: ${target}: No such file</span>`;
+            const t = (args || '').trim();
+            const dir = getDir();
+            if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
+            return `<span style="color:#ef4444">cat: ${t}: No such file</span>`;
         };
 
-        // File System: pwd
-        T.pwd = () => `<span class="term-gray">${currentPath.join('/')}</span>`;
+        // pwd: Print path
+        T.pwd = () => `<span style="color:#8b949e">${path.join('/')}</span>`;
 
-        // Utils: Weather (uses Phase 1 cached data)
+        // weather: Live Cairo Data
         T.weather = () => {
             try {
                 const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
-                if (w && w.data) {
-                    const temp = Math.round(w.data.temp);
-                    return `<span class="term-cyan">📍 Cairo, Egypt</span>
-<span class="term-white">Temperature:</span> ${temp}°C
-<span class="term-white">Status:</span> Operational`;
+                const t = w.data ? Math.round(w.data.temp) : '--';
+                return `<span style="color:#00e1ff">📍 Cairo, Egypt</span>\nTemp: ${t}°C · Status: Online`;
+            } catch(e) { return 'Weather unavailable.'; }
+        };
+
+        // 3. UPDATED HELP MENU
+        T.help = () => `
+<span style="color:#22c55e;font-weight:bold">═══ AmrOS v3.0 (Advanced) ═══</span>
+
+<span style="color:#00e1ff">SYSTEM</span>
+  <span style="color:#fff">ls</span>       List directory
+  <span style="color:#fff">cd</span>       Change dir (try: cd projects)
+  <span style="color:#fff">cat</span>      Read file (try: cat about.md)
+  <span style="color:#fff">clear</span>    Clear screen
+
+<span style="color:#00e1ff">APPS</span>
+  <span style="color:#fff">arcade</span>   Open Game Hub
+  <span style="color:#fff">wall</span>     Open Guestbook
+  <span style="color:#fff">search</span>   Command Palette (⌘K)
+
+<span style="color:#00e1ff">MODULES</span>
+  <span style="color:#fff">theme</span>    Switch theme (cyberpunk/zen)
+  <span style="color:#fff">weather</span>  Live Cairo report
+  <span style="color:#fff">skills</span>   View skill graph`;
+
+        // 4. UI UPDATES
+        
+        // Update the prompt dynamically to match path (e.g. amr@v3:~/projects❯)
+        setInterval(() => {
+            const p = document.querySelector('.term-prompt');
+            if (p) {
+                const pathStr = path.length === 1 ? '~' : '~/' + path.slice(1).join('/');
+                // Only update if text content differs to prevent selection flicker
+                if (!p.innerHTML.includes(pathStr)) {
+                    p.innerHTML = `amr@v3:<span style="color:#00e1ff">${pathStr}</span>❯`;
                 }
-            } catch(e) {}
-            return '<span class="term-gray">Weather data unavailable. Look outside! ☀️</span>';
-        };
-
-        // Utils: Skills Graph
-        T.skills = () => {
-            const skills = [
-                {n: 'Agile/Scrum', v: 95},
-                {n: 'Data Analytics', v: 90},
-                {n: 'FinTech', v: 85},
-                {n: 'Leadership', v: 92},
-                {n: 'Digital Trans.', v: 88}
-            ];
-            return skills.map(s => {
-                const bar = '█'.repeat(Math.floor(s.v/5)) + '░'.repeat(20 - Math.floor(s.v/5));
-                return `<span class="term-cyan">${s.n.padEnd(14)}</span> <span class="term-green">[${bar}] ${s.v}%</span>`;
-            }).join('\n');
-        };
-
-        // Utils: Theme Switcher
-        T.theme = (args) => {
-            const mode = (args || '').trim().toLowerCase();
-            if (mode === 'cyberpunk') return T.cyberpunk();
-            if (mode === 'zen') return T.zen();
-            if (mode === 'light' || mode === 'dark') {
-                const btn = document.getElementById('tbtn');
-                if (btn) btn.click(); // Toggle logic is complex, simple click is safest
-                return `<span class="term-green">Theme toggled.</span>`;
             }
-            return `<span class="term-gray">Usage: theme [cyberpunk|zen|light|dark]</span>`;
-        };
+        }, 500);
 
-        // Utils: History
-        // (Note: terminal UI needs to support history array for Up arrow, 
-        // this command just shows previous commands in the session)
-        T.history = () => {
-            return `<span class="term-gray">Session History:</span>\n` + 
-                   (window._termHistory || []).map((c, i) => `${i+1}  ${c}`).join('\n');
-        };
-
-        // 3. UPDATED HELP (The "Man Page")
-        // --------------------------------
-        T.help = () => {
-            return `<span class="term-green">═══ AmrOS v3.0 Terminal ═══</span>
-
-<span class="term-cyan">File System:</span>
-  <span class="term-white">ls</span>              List directory contents
-  <span class="term-white">cd &lt;dir&gt;</span>        Change directory
-  <span class="term-white">cat &lt;file&gt;</span>      Read file content
-  <span class="term-white">pwd</span>             Print working directory
-
-<span class="term-cyan">Intelligence:</span>
-  <span class="term-white">ask &lt;query&gt;</span>     Ask AI Assistant (e.g., "ask about book")
-  <span class="term-white">search</span>          Open Command Palette (⌘K)
-  <span class="term-white">skills</span>          View skill proficiency graph
-  <span class="term-white">weather</span>         Live Cairo weather report
-
-<span class="term-cyan">Navigation:</span>
-  <span class="term-white">goto &lt;loc&gt;</span>      Jump to (timeline, certs, contact, impact)
-  <span class="term-white">links</span>           Show all social links (linkedin, calendar)
-
-<span class="term-cyan">Fun & Arcade:</span>
-  <span class="term-white">play &lt;game&gt;</span>     (stacker, router, trader, snake)
-  <span class="term-white">arcade</span>          Open Arcade Hub
-  <span class="term-white">trophies</span>        View your achievements
-  <span class="term-white">theme &lt;name&gt;</span>    Switch (cyberpunk, zen, light)
-
-<span class="term-cyan">System:</span>
-  <span class="term-white">whoami</span>          About Amr
-  <span class="term-white">clear</span>           Clear screen
-  <span class="term-white">exit</span>            Close terminal`;
-        };
-
-        // 4. Update Prompt Logic
-        // We need to hook into the prompt updater to show the current directory
-        // Since we can't easily replace the event listener, we update the prompt span dynamically
-        const promptEl = document.querySelector('.term-prompt');
-        if (promptEl) {
-            setInterval(() => {
-                const pathStr = currentPath.length === 1 ? '~' : '~/' + currentPath.slice(1).join('/');
-                // Only update if changed to avoid flicker
-                if (promptEl.textContent !== `amr@portfolio:${pathStr}❯`) {
-                    promptEl.innerHTML = `amr@portfolio:<span class="term-blue">${pathStr}</span>❯`;
-                }
-            }, 500);
+        // Inject "System Update" message into the terminal body if it exists
+        const termBody = document.getElementById('termBody');
+        if (termBody) {
+            const line = document.createElement('div');
+            line.className = 'term-line';
+            line.innerHTML = `<span style="color:#22c55e">✔ System updated to AmrOS v3.0 kernel.</span>`;
+            termBody.appendChild(line);
+            termBody.scrollTop = termBody.scrollHeight; // Auto-scroll to bottom
         }
 
-        console.log('%c🚀 Terminal Upgraded to v3 (FileSystem + Advanced Logic)', 'background:#00e1ff;color:#000;padding:4px;');
+        console.log('🚀 Terminal v3 Logic Injected Successfully');
     }
-})();
+});
 </script>
     
     
