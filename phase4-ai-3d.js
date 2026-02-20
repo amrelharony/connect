@@ -643,167 +643,186 @@ body.zen-mode .hover-preview { display: none !important; }
     return threeLoadPromise;
   }
 
+// ═══════════════════════════════════════════════════
+// FEATURE 3: 3D BOOK VIEWER (UPGRADED)
+// ═══════════════════════════════════════════════════
 
-  // ═══════════════════════════════════════════════════
-  // FEATURE 3: 3D BOOK VIEWER
-  // ═══════════════════════════════════════════════════
+function launchBookViewer() {
+  open3D('📘 The Bilingual Executive — 3D Preview', buildBookScene);
+}
 
-  function launchBookViewer() {
-    open3D('📘 The Bilingual Executive — 3D Preview', buildBookScene);
-  }
+function buildBookScene() {
+  const container = document.getElementById('v3dContainer');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
 
-  function buildBookScene() {
-    const container = document.getElementById('v3dContainer');
-    const W = container.clientWidth;
-    const H = container.clientHeight;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x060910);
+  scene.fog = new THREE.FogExp2(0x060910, 0.15);
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060910);
-    scene.fog = new THREE.FogExp2(0x060910, 0.15);
+  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+  camera.position.set(0, 0.3, 4.5); // Optimal viewing distance
 
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 0.3, 3.5);
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
+  // --- TEXTURE LOADING ---
+  const texLoader = new THREE.TextureLoader();
+  
+  const frontTex = texLoader.load('be.png');
+  const backTex  = texLoader.load('back.png');
+  const spineTex = texLoader.load('spine.png');
 
-    // Book group
-    const book = new THREE.Group();
+  // Correct color space for vivid textures
+  [frontTex, backTex, spineTex].forEach(t => {
+    t.colorSpace = THREE.SRGBColorSpace; 
+  });
 
-    // Cover (front)
-    const coverGeo = new THREE.BoxGeometry(1.4, 2, 0.05);
-    const coverMat = new THREE.MeshPhongMaterial({
-      color: 0x1a3a5c,
-      emissive: 0x0a1a2c,
-      specular: 0x00e1ff,
-      shininess: 30
-    });
-    const front = new THREE.Mesh(coverGeo, coverMat);
-    front.position.z = 0.15;
-    book.add(front);
+  // --- BOOK MATERIALS ---
+  // Order: Right, Left, Top, Bottom, Front, Back
+  const materials = [
+    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Right (Pages)
+    new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.2 }),   // Left (Spine)
+    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Top (Pages)
+    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Bottom (Pages)
+    new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.2, metalness: 0.1 }), // Front
+    new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.2, metalness: 0.1 })   // Back
+  ];
 
-    // Title text on front (using plane with emissive)
-    const titleGeo = new THREE.PlaneGeometry(1.1, 0.3);
-    const titleMat = new THREE.MeshBasicMaterial({ color: 0x00e1ff, transparent: true, opacity: 0.8 });
-    const titleMesh = new THREE.Mesh(titleGeo, titleMat);
-    titleMesh.position.set(0, 0.4, 0.177);
-    book.add(titleMesh);
+  // --- BOOK GEOMETRY (CALCULATED FROM YOUR IMAGE DIMENSIONS) ---
+  // 1400px width / 2000px height = 1.4
+  // 310px spine / 2000px height = 0.31
+  const bookGeo = new THREE.BoxGeometry(1.4, 2, 0.31);
+  
+  const book = new THREE.Mesh(bookGeo, materials);
+  book.castShadow = true;
+  book.receiveShadow = true;
+  scene.add(book);
 
-    // Subtitle line
-    const subGeo = new THREE.PlaneGeometry(0.8, 0.04);
-    const subMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.5 });
-    const subMesh = new THREE.Mesh(subGeo, subMat);
-    subMesh.position.set(0, 0.15, 0.177);
-    book.add(subMesh);
+  // --- LIGHTING ---
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambient);
 
-    // Author name line
-    const authGeo = new THREE.PlaneGeometry(0.6, 0.03);
-    const authMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.5 });
-    const authMesh = new THREE.Mesh(authGeo, authMat);
-    authMesh.position.set(0, -0.6, 0.177);
-    book.add(authMesh);
+  const spotLight = new THREE.SpotLight(0xffffff, 10);
+  spotLight.position.set(2, 5, 5);
+  spotLight.angle = Math.PI / 6;
+  spotLight.penumbra = 0.5;
+  spotLight.castShadow = true;
+  scene.add(spotLight);
 
-    // Pages (spine)
-    const pagesGeo = new THREE.BoxGeometry(1.35, 1.95, 0.25);
-    const pagesMat = new THREE.MeshLambertMaterial({ color: 0xf5f0e8 });
-    const pages = new THREE.Mesh(pagesGeo, pagesMat);
-    book.add(pages);
+  const fillLight = new THREE.PointLight(0x6366f1, 2);
+  fillLight.position.set(-3, 1, 2);
+  scene.add(fillLight);
 
-    // Back cover
-    const back = new THREE.Mesh(coverGeo, coverMat.clone());
-    back.position.z = -0.15;
-    book.add(back);
+  const rimLight = new THREE.PointLight(0xa855f7, 2);
+  rimLight.position.set(0, -2, -3);
+  scene.add(rimLight);
 
-    // Spine edge accent
-    const spineGeo = new THREE.BoxGeometry(0.05, 2, 0.3);
-    const spineMat = new THREE.MeshPhongMaterial({ color: 0x00e1ff, emissive: 0x003344, shininess: 60 });
-    const spine = new THREE.Mesh(spineGeo, spineMat);
-    spine.position.x = -0.7;
-    book.add(spine);
+  // --- INTERACTIVITY ---
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2(-99, -99);
+  let isDragging = false, prevX = 0, prevY = 0;
+  let rotVelX = 0.003, rotVelY = 0.05;
 
-    scene.add(book);
+  function onMouseMove(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x334466, 0.5);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(0x00e1ff, 0.6);
-    key.position.set(2, 3, 4);
-    scene.add(key);
-
-    const fill = new THREE.DirectionalLight(0x6366f1, 0.3);
-    fill.position.set(-3, 1, -2);
-    scene.add(fill);
-
-    const rim = new THREE.PointLight(0xa855f7, 0.4, 10);
-    rim.position.set(0, -2, 3);
-    scene.add(rim);
-
-    // Ground plane particles
-    const particleCount = 60;
-    const pGeo = new THREE.BufferGeometry();
-    const pPositions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      pPositions[i * 3] = (Math.random() - 0.5) * 8;
-      pPositions[i * 3 + 1] = (Math.random() - 0.5) * 5;
-      pPositions[i * 3 + 2] = (Math.random() - 0.5) * 8;
-    }
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    const pMat = new THREE.PointsMaterial({ color: 0x00e1ff, size: 0.02, transparent: true, opacity: 0.3 });
-    scene.add(new THREE.Points(pGeo, pMat));
-
-    // Mouse / touch rotation
-    let isDragging = false, prevX = 0, prevY = 0;
-    let rotVelX = 0.003, rotVelY = 0;
-
-    renderer.domElement.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
-    renderer.domElement.addEventListener('mousemove', e => {
-      if (!isDragging) return;
+    if (isDragging) {
       rotVelY = (e.clientX - prevX) * 0.005;
       rotVelX = (e.clientY - prevY) * 0.003;
-      prevX = e.clientX; prevY = e.clientY;
-    });
-    renderer.domElement.addEventListener('mouseup', () => isDragging = false);
-    renderer.domElement.addEventListener('mouseleave', () => isDragging = false);
-
-    renderer.domElement.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; }, { passive: true });
-    renderer.domElement.addEventListener('touchmove', e => {
-      if (!isDragging) return;
-      rotVelY = (e.touches[0].clientX - prevX) * 0.005;
-      rotVelX = (e.touches[0].clientY - prevY) * 0.003;
-      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
-    }, { passive: true });
-    renderer.domElement.addEventListener('touchend', () => isDragging = false, { passive: true });
-
-    // Scroll zoom
-    renderer.domElement.addEventListener('wheel', e => {
-      camera.position.z = Math.max(2, Math.min(6, camera.position.z + e.deltaY * 0.005));
-      e.preventDefault();
-    }, { passive: false });
-
-    // Animate
-    let animId;
-    function animate() {
-      animId = requestAnimationFrame(animate);
-      if (!isDragging) {
-        rotVelY *= 0.97; // friction
-        rotVelX *= 0.97;
-        rotVelY += 0.0008; // idle spin
-      }
-      book.rotation.y += rotVelY;
-      book.rotation.x += rotVelX;
-      book.rotation.x = Math.max(-0.5, Math.min(0.5, book.rotation.x));
-      renderer.render(scene, camera);
+      prevX = e.clientX; 
+      prevY = e.clientY;
     }
-    animate();
-
-    window._v3dCleanup = () => {
-      if (animId) cancelAnimationFrame(animId);
-      renderer.dispose();
-    };
   }
+
+  function onMouseDown(e) { isDragging = true; prevX = e.clientX; prevY = e.clientY; }
+  function onMouseUp() { isDragging = false; }
+  
+  function onClick() {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects([book]);
+    if (intersects.length > 0) {
+      const flash = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 2.1, 0.35),
+        new THREE.MeshBasicMaterial({ color: 0x00e1ff, transparent: true, opacity: 0.5 })
+      );
+      book.add(flash);
+      setTimeout(() => {
+        window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
+        book.remove(flash);
+      }, 100);
+    }
+  }
+
+  renderer.domElement.addEventListener('mousemove', onMouseMove);
+  renderer.domElement.addEventListener('mousedown', onMouseDown);
+  renderer.domElement.addEventListener('mouseup', onMouseUp);
+  renderer.domElement.addEventListener('mouseleave', onMouseUp);
+  renderer.domElement.addEventListener('click', onClick);
+  
+  renderer.domElement.addEventListener('touchstart', e => { 
+    isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.touches[0].clientY - rect.top) / rect.height) * 2 + 1;
+  }, { passive: true });
+  
+  renderer.domElement.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    rotVelY = (e.touches[0].clientX - prevX) * 0.005;
+    rotVelX = (e.touches[0].clientY - prevY) * 0.003;
+    prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  renderer.domElement.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
+
+  renderer.domElement.addEventListener('wheel', e => {
+    camera.position.z = Math.max(3, Math.min(8, camera.position.z + e.deltaY * 0.005));
+    e.preventDefault();
+  }, { passive: false });
+
+  let animId;
+  function animate() {
+    animId = requestAnimationFrame(animate);
+
+    if (!isDragging) {
+      rotVelY *= 0.96;
+      rotVelX *= 0.96;
+      if (Math.abs(rotVelY) < 0.001) rotVelY += 0.0002;
+    }
+
+    book.rotation.y += rotVelY;
+    book.rotation.x += rotVelX;
+    book.rotation.x = Math.max(-0.5, Math.min(0.5, book.rotation.x));
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects([book]);
+    container.style.cursor = intersects.length > 0 ? 'pointer' : (isDragging ? 'grabbing' : 'grab');
+
+    if (intersects.length > 0) {
+        book.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.1);
+    } else {
+        book.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window._v3dCleanup = () => {
+    if (animId) cancelAnimationFrame(animId);
+    renderer.dispose();
+    bookGeo.dispose();
+    materials.forEach(m => m.dispose());
+  };
+}
+  
 
 
   // ═══════════════════════════════════════════════════
