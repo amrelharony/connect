@@ -195,7 +195,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         </div>
         <div class="viewer3d-hud" id="v3dHud">
           <span class="viewer3d-title" id="v3dTitle">3D Viewer</span>
-          <span class="viewer3d-close" onclick="window._close3D()">✕ Close · ESC</span>
+          <span class="viewer3d-close" onclick="window._close3D()">✕ · ESC</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);
