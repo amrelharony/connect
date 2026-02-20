@@ -2697,6 +2697,41 @@ addEventListener('scroll',()=>{
         transform: scale(1.1) rotate(-5deg);
     }
 </style>
+
+<script>
+window.addEventListener('load', function() {
+    // Wait a moment for the Phase 6 script to create the buttons
+    setTimeout(function() {
+        var mentorBtn = document.querySelector('.always-cta-mentor');
+        
+        if (mentorBtn) {
+            // 1. Hide the default FontAwesome icon
+            var defaultIcon = mentorBtn.querySelector('i');
+            if (defaultIcon) defaultIcon.style.display = 'none';
+
+            // 2. Prevent adding the image twice
+            if (!mentorBtn.querySelector('img')) {
+                var img = document.createElement('img');
+                
+                // Ensure this filename matches exactly (case-sensitive)
+                img.src = 'Adplist.png'; 
+                
+                // Styling to match the new Advanced Design
+                img.style.width = '16px';
+                img.style.height = '16px';
+                img.style.objectFit = 'contain';
+                img.style.marginRight = '8px';
+                img.style.display = 'inline-block';
+                img.style.verticalAlign = 'middle';
+                
+                // Insert the image at the start of the button
+                mentorBtn.insertBefore(img, mentorBtn.firstChild);
+            }
+        }
+    }, 2500); // 2.5s delay to ensure button exists
+});
+</script>
+    
     
 </body>
 </html>
