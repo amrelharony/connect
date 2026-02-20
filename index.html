@@ -669,13 +669,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
         <p style="font-size:11px;color:#888;">Cairo, Egypt · a.elharony@gmail.com · amrelharony.com · linkedin.com/in/amrmelharony</p>
     </div>
 
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">LATEST ARTICLES</div><div class="ndl"></div></div>
-    <div id="linkedinFeed" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-        <div class="nl rv" style="opacity:.3;pointer-events:none;">
-            <div class="ni"><i class="fa-solid fa-spinner fa-spin" style="color:var(--accent);"></i></div>
-            <span class="nlb">Loading latest posts...</span>
-        </div>
-    </div>
+   <div class="nd rv"><div class="ndl"></div><div class="ndt">LINKEDIN NEWSLETTERS</div><div class="ndl"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+    <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni"><i class="fa-solid fa-user-tie" style="color:var(--accent);"></i></div>
+        <span class="nlb">LevelUp Your Leadership</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+    <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni"><i class="fa-solid fa-laptop-code" style="color:var(--accent2);"></i></div>
+        <span class="nlb">LevelUp Your Tech</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+    <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni"><i class="fa-solid fa-briefcase" style="color:var(--accent3);"></i></div>
+        <span class="nlb">LevelUp Your Business</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+</div>
 
     <!-- Personalized Recommendation -->
     <div id="recContainer" style="margin-bottom:16px;"></div>
@@ -1145,37 +1156,6 @@ window.copyShareImage=function(){
 // ═══ STREAK ═══
 (function(){const today=new Date().toDateString(),last=localStorage.getItem('lastVisit');let streak=parseInt(localStorage.getItem('streak')||'0');if(last!==today){const yd=new Date();yd.setDate(yd.getDate()-1);streak=(last===yd.toDateString())?streak+1:1;}localStorage.setItem('streak',streak.toString());localStorage.setItem('lastVisit',today);if(streak>1)document.getElementById('streakCount').textContent=`🔥 ${streak}-day visit streak`;})();
 
-// ═══ LIVE LINKEDIN FEED ═══
-(async function(){
-    const container = document.getElementById('linkedinFeed');
-    
-    // 1. Go to rss.app, create a feed for your LinkedIn profile URL.
-    // 2. Paste the generated RSS link below:
-    const myRssUrl = 'https://rss.app/feeds/9LkeDk2rdq1NPifG.xml'; 
-    
-    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(myRssUrl)}`;
-
-    try {
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        
-        if (data.status === 'ok' && data.items.length > 0) {
-            container.innerHTML = data.items.slice(0, 5).map(post => `
-                <a href="${post.link}" target="_blank" rel="noopener" class="nl rv" style="opacity:1; transform:none;">
-                    <div class="ni"><i class="fa-brands fa-linkedin" style="color:#0077b5;" aria-hidden="true"></i></div>
-                    <span class="nlb" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
-                        ${post.title || 'View my latest post on LinkedIn'}
-                    </span>
-                    <i class="fa-solid fa-external-link-alt ne" aria-hidden="true"></i>
-                </a>
-            `).join('');
-        } else {
-            container.innerHTML = `<span class="nlb" style="font-size:12px; opacity:0.5;">No recent posts found.</span>`;
-        }
-    } catch (err) {
-        container.innerHTML = `<span class="nlb" style="font-size:12px; color:var(--accent3);">Feed temporarily unavailable.</span>`;
-    }
-})();
 
 // ═════════════════════════════════════════════════
 // SYSTEM 1: VISITOR INTELLIGENCE ENGINE
