@@ -912,10 +912,70 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     function haversineKm(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
     fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
 }
-function initShake(){const SHAKE_THRESHOLD=15,SHAKE_DURATION=2000;let shakeStart=0,shaking=false;const hint=document.getElementById('shakeHint'),bar=document.getElementById('shakeBar'),fill=document.getElementById('shakeFill');
-function handleMotion(e){if(contactRevealed)return;const acc=e.accelerationIncludingGravity;if(!acc)return;const total=Math.sqrt(acc.x*acc.x+acc.y*acc.y+acc.z*acc.z),accelNet=Math.abs(total-9.81);
-if(accelNet>SHAKE_THRESHOLD){if(!shaking){shaking=true;shakeStart=Date.now();hint.classList.add('shaking');bar.classList.add('active');}const elapsed=Date.now()-shakeStart,progress=Math.min(elapsed/SHAKE_DURATION*100,100);fill.style.width=progress+'%';if(elapsed>=SHAKE_DURATION){window.removeEventListener('devicemotion',handleMotion);fill.style.width='100%';revealContact();}}else{if(shaking){shaking=false;shakeStart=0;hint.classList.remove('shaking');bar.classList.remove('active');fill.style.width='0%';}}}
-if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){document.body.addEventListener('touchstart',function rp(){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')window.addEventListener('devicemotion',handleMotion);}).catch(()=>{});document.body.removeEventListener('touchstart',rp);},{once:true});}else if(typeof DeviceMotionEvent!=='undefined'){window.addEventListener('devicemotion',handleMotion);}}
+function initShake() {
+    let shakeScore = 0;
+    const hint = document.getElementById('shakeHint');
+    const bar = document.getElementById('shakeBar');
+    const fill = document.getElementById('shakeFill');
+    let lastTime = Date.now();
+
+    function handleMotion(e) {
+        if (contactRevealed) return;
+        
+        // Rate limit to prevent battery drain and jitter
+        const now = Date.now();
+        if (now - lastTime < 50) return; 
+        lastTime = now;
+
+        const acc = e.accelerationIncludingGravity;
+        if (!acc) return;
+
+        // Calculate force ignoring gravity
+        const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+        const accelNet = Math.abs(total - 9.81);
+        const SHAKE_THRESHOLD = 15;
+
+        // "Energy Bar" Logic
+        if (accelNet > SHAKE_THRESHOLD) {
+            // Shaking adds energy
+            shakeScore += 5;
+            if (!bar.classList.contains('active')) {
+                hint.classList.add('shaking');
+                bar.classList.add('active');
+            }
+        } else {
+            // Not shaking reduces energy slowly (doesn't reset instantly)
+            shakeScore -= 2;
+        }
+
+        // Keep score between 0 and 100
+        shakeScore = Math.max(0, Math.min(shakeScore, 100));
+
+        // Update UI
+        fill.style.width = shakeScore + '%';
+
+        // Success
+        if (shakeScore >= 100) {
+            window.removeEventListener('devicemotion', handleMotion);
+            revealContact();
+        } else if (shakeScore === 0) {
+            hint.classList.remove('shaking');
+            bar.classList.remove('active');
+        }
+    }
+
+    // Permission handling for iOS 13+
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        document.body.addEventListener('touchstart', function rp() {
+            DeviceMotionEvent.requestPermission().then(r => {
+                if (r === 'granted') window.addEventListener('devicemotion', handleMotion);
+            }).catch(() => {});
+            document.body.removeEventListener('touchstart', rp);
+        }, { once: true });
+    } else if (typeof DeviceMotionEvent !== 'undefined') {
+        window.addEventListener('devicemotion', handleMotion);
+    }
+}
 document.addEventListener('keydown',e=>{if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
 
 // ═══ VCARD ═══
