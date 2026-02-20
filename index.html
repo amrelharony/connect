@@ -2381,5 +2381,270 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 4000); // 4s safety net
 });
 </script>
+
+<style>
+    /* 1. Reset & Container Position */
+    #toastContainer {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2147483647; /* Max Z-Index */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+        width: auto;
+        min-width: 300px;
+    }
+
+    /* 2. The Unified Minimal Toast Card */
+    .uni-toast {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px 10px 12px;
+        background: rgba(10, 10, 12, 0.85); /* Deep dark background */
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 99px; /* Pill shape */
+        box-shadow: 
+            0 4px 20px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(0, 0, 0, 0.2);
+        color: #f0f2f5;
+        font-family: 'Inter', sans-serif; /* Clean sans-serif over monospace */
+        font-size: 13px;
+        letter-spacing: -0.01em;
+        pointer-events: auto;
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform, opacity;
+        max-width: 90vw;
+    }
+
+    /* 3. States */
+    .uni-toast.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .uni-toast.hiding {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    /* 4. Content Styling */
+    .uni-toast-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .uni-toast-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .uni-toast-title {
+        font-weight: 500;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .uni-toast-meta {
+        font-size: 11px;
+        color: #8b949e;
+        line-height: 1.2;
+        font-family: 'JetBrains Mono', monospace; /* Monospace only for meta/XP */
+    }
+
+    /* 5. Type Accents (Minimal dots instead of borders) */
+    .uni-toast::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #4a5568; /* Default */
+    }
+
+    .uni-toast[data-type="success"]::before { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+    .uni-toast[data-type="accent"]::before  { background: #00e1ff; box-shadow: 0 0 8px rgba(0,225,255,0.4); }
+    .uni-toast[data-type="rare"]::before    { background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.4); }
+    .uni-toast[data-type="legendary"]::before { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+
+    /* Hide Old Elements */
+    .toast-container .toast, 
+    .trophy-toast, 
+    .surprise-toast, 
+    .share-copied {
+        display: none !important;
+    }
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+    // 1. The Manager
+    const UnifiedToaster = {
+        container: document.getElementById('toastContainer') || createContainer(),
+        queue: [],
+        isShowing: false,
+
+        // Core Trigger
+        show(title, meta = '', icon = '✨', type = 'default') {
+            // Prevent duplicates in queue
+            if (this.queue.some(t => t.title === title)) return;
+            
+            this.queue.push({ title, meta, icon, type });
+            this.processQueue();
+        },
+
+        processQueue() {
+            if (this.isShowing || this.queue.length === 0) return;
+            
+            const data = this.queue.shift();
+            this.render(data);
+        },
+
+        render({ title, meta, icon, type }) {
+            this.isShowing = true;
+
+            const el = document.createElement('div');
+            el.className = 'uni-toast';
+            el.dataset.type = type;
+            el.innerHTML = `
+                <div class="uni-toast-icon">${icon}</div>
+                <div class="uni-toast-content">
+                    <div class="uni-toast-title">${title}</div>
+                    ${meta ? `<div class="uni-toast-meta">${meta}</div>` : ''}
+                </div>
+            `;
+
+            this.container.appendChild(el);
+
+            // Animate In
+            requestAnimationFrame(() => el.classList.add('show'));
+
+            // Haptic Feedback
+            if (navigator.vibrate) navigator.vibrate(20);
+
+            // Cleanup & Next
+            setTimeout(() => {
+                el.classList.remove('show');
+                el.classList.add('hiding');
+                
+                el.addEventListener('transitionend', () => {
+                    el.remove();
+                    this.isShowing = false;
+                    // Small delay between toasts so they don't overlap too fast
+                    setTimeout(() => this.processQueue(), 150);
+                });
+            }, 3500); // 3.5s duration
+        }
+    };
+
+    function createContainer() {
+        const div = document.createElement('div');
+        div.id = 'toastContainer';
+        document.body.appendChild(div);
+        return div;
+    }
+
+    // 2. Intercept Existing Functions
+    // We override the global functions used by Phase 1-6 scripts.
+
+    // Intercept Arcade/Achievement Toasts
+    window.showToast = function(badge) {
+        // Map rarity to minimal colors
+        const typeMap = { common: 'default', rare: 'accent', epic: 'rare', legendary: 'legendary' };
+        
+        let meta = badge.desc || 'Achievement Unlocked';
+        if (badge._earnedXp) meta += ` · +${badge._earnedXp} XP`;
+        
+        UnifiedToaster.show(
+            badge.name || 'Achievement',
+            meta,
+            badge.emoji || '🏆',
+            typeMap[badge.rarity] || 'default'
+        );
+    };
+
+    window.showLevelUpToast = function(item) {
+        UnifiedToaster.show(
+            'Level Up!',
+            `You reached Level ${item.level}`,
+            '🎉',
+            'legendary'
+        );
+    };
+
+    // Intercept Phase 6 Trophy Toasts (the small bottom-right ones)
+    // We redefine checkTrophy logging to use our system if it shows UI
+    const originalShowTrophyToast = window.showTrophyToast; 
+    window.showTrophyToast = function(id) {
+        // Find badge data from global TROPHIES if available, or basic fallback
+        // Since we can't easily access the internal TROPHIES array of Phase 6, 
+        // we assume the logic calling this passes ID. 
+        // *However*, strict mode might block us reading the array. 
+        // Strategy: Provide a generic fallback that looks good.
+        UnifiedToaster.show('Achievement Unlocked', 'Check your Trophy Case', '🏆', 'accent');
+    };
+
+    // Intercept "Surprise Me" (Phase 1)
+    // The original logic updated a specific DOM element text. 
+    // We will override the function that shows the visual.
+    const originalSurprise = document.querySelector('.surprise-btn');
+    if(originalSurprise) {
+        // We can't easily hook the internal function, but we can hook the toast display logic
+        // by observing the DOM or redefining the visual function if exposed.
+        // Phase 1 exposed `showSurpriseToast` implicitly via scope. 
+        // Since it's scoped, we create a visual MutationObserver to catch the old toast 
+        // and replace it with ours.
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('show')) {
+                    // Steal text and hide old
+                    const text = mutation.target.textContent;
+                    mutation.target.classList.remove('show'); 
+                    UnifiedToaster.show(text, 'Navigated to section', '🚀', 'accent');
+                }
+            });
+        });
+        const oldToast = document.getElementById('surpriseToast');
+        if(oldToast) observer.observe(oldToast, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Intercept "Copied" alerts
+    window.showCopied = function() {
+        UnifiedToaster.show('Copied to clipboard', '', '✓', 'success');
+    };
+
+    // Intercept Phase 6 Command Palette selection feedback
+    // (Existing code calls checkTrophy, which eventually calls showTrophyToast, handled above)
+
+    // 3. Cleanup Old Elements on Load
+    // Ensure duplicate/unused DOM elements don't clutter the screen
+    window.addEventListener('DOMContentLoaded', () => {
+        const ids = ['shareCopied', 'surpriseToast', 'comboIndicator']; // Keep combo, it's game specific
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.display = 'none';
+        });
+    });
+
+    console.log('%c✨ Unified Toast System Active', 'background:#22c55e;color:#000;padding:4px;border-radius:4px;');
+
+})();
+</script>
+    
 </body>
 </html>
