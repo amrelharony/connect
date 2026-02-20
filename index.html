@@ -1664,35 +1664,135 @@ setInterval(checkSmartCta,5000);
 })();
 
 // ═════════════════════════════════════════════════
-// FEATURE: TYPING TERMINAL
+// FEATURE: TYPING TERMINAL v3.0 (Advanced AmrOS)
 // ═════════════════════════════════════════════════
-const TermCmds={
-    help:()=>'<span class="term-accent">Available commands:</span>\n  <span class="term-green">about</span>     — Who is Amr?\n  <span class="term-green">certs</span>     — List certifications\n  <span class="term-green">skills</span>    — Core skills\n  <span class="term-green">contact</span>   — Get in touch\n  <span class="term-green">book</span>      — About The Bilingual Executive\n  <span class="term-green">stats</span>     — Fun stats\n  <span class="term-green">badges</span>    — Achievement progress\n  <span class="term-green">snake</span>     — Play Snake 🐍\n  <span class="term-green">clear</span>     — Clear terminal\n  <span class="term-green">exit</span>      — Close terminal',
-    about:()=>'<span class="term-accent">Amr Elharony</span>\nDelivery Lead · Mentor · Fintech Author & Speaker\nScrum Master at Banque Misr | DBA in Digital Transformation\n\nI help banks and FinTech teams ship digital products faster\nthrough agile delivery and data-driven decisions.',
-    certs:()=>'<span class="term-accent">Certifications (12):</span>\n  🎯 PMP · 📋 PSM II · 📦 PSPO II · 📊 PMI-ACP\n  🔄 SAFe® 6 SM · 🧠 PSK I · 🏗️ ICAgile ATF\n  💾 CDMP · 📈 Datacamp Pro · ⚙️ Jira Cloud\n  🏦 CEDF · 🎓 DBA Digital Transformation',
-    skills:()=>'<span class="term-accent">Core Skills:</span>\n  Agile/Scrum · Kanban · SAFe · Data Analytics\n  Digital Transformation · Stakeholder Management\n  FinTech · Project Management · Mentoring\n  Python · SQL · Jira · Confluence',
-    contact:()=>'<span class="term-accent">Contact Amr:</span>\n  📧 a.elharony@gmail.com\n  🔗 linkedin.com/in/amrmelharony\n  📅 calendly.com/amrmelharony/30min\n  🌐 amrelharony.com',
-    book:()=>'<span class="term-accent">📚 The Bilingual Executive</span>\nLeadership Communication for a Bilingual World\n\nAvailable in: Print · eBook · AI Audiobook\n→ bilingualexecutive.amrelharony.com',
-    stats:()=>{const p=VDna.get();return `<span class="term-accent">Your Session Stats:</span>\n  Visits: ${p.visits} · Scroll: ${p.scrollMax}%\n  Badges: ${p.achievements.length}/14 · XP: ${p.xp}\n  Device: ${p.device} · ${p.browser}`;},
-    badges:()=>{const p=VDna.get();return '<span class="term-accent">Badges ('+p.achievements.length+'/14):</span>\n'+BADGES.map(b=>'  '+(p.achievements.includes(b.id)?b.emoji:' 🔒')+' '+b.name+' — '+b.desc).join('\n');},
-    snake:()=>{closeTerm();setTimeout(openGame,400);return '<span class="term-green">Launching Snake...</span>';},
-    clear:()=>'__CLEAR__',
-    exit:()=>{closeTerm();return '';}
+const TermCmds = {
+    // 1. File System Data
+    fs: {
+        '~': {
+            'projects': {
+                'book.txt': 'The Bilingual Executive: Bridging business & tech. Published 2026.',
+                'community.txt': 'Fintech Bilinguals: 500+ members bridging the gap.',
+                'data_mesh.log': 'Architecture impl at Banque Misr: SUCCESS.'
+            },
+            'certs': {
+                'pmp.crt': 'PMP® Certified (Project Management Professional)',
+                'cdmp.crt': 'DAMA Certified Data Management Professional',
+                'safe.crt': 'SAFe® 6 Agilist'
+            },
+            'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
+            'contact.json': '{\n  "email": "a.elharony@gmail.com",\n  "linkedin": "/in/amrmelharony"\n}'
+        }
+    },
+    path: ['~'],
+
+    // Helper: Get Current Directory
+    getDir: function() {
+        let d = this.fs['~'];
+        for (let i = 1; i < this.path.length; i++) d = d[this.path[i]];
+        return d;
+    },
+
+    // 2. Commands
+    ls: function() {
+        const dir = this.getDir();
+        if (!dir) return '<span style="color:#ef4444">Error reading dir</span>';
+        return Object.keys(dir).map(k => {
+            const isDir = typeof dir[k] === 'object';
+            const icon = isDir ? '📁' : '📄';
+            const col = isDir ? 'color:#00e1ff;font-weight:bold' : 'color:#e2e8f0';
+            return `<span style="${col}">${icon} ${k}</span>`;
+        }).join('&nbsp;&nbsp;&nbsp;');
+    },
+
+    cd: function(args) {
+        const t = (args || '').trim();
+        if (!t || t === '~') { this.path = ['~']; }
+        else if (t === '..') { if (this.path.length > 1) this.path.pop(); }
+        else {
+            const dir = this.getDir();
+            if (dir[t] && typeof dir[t] === 'object') this.path.push(t);
+            else return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
+        }
+        this.updatePrompt();
+        return '';
+    },
+
+    cat: function(args) {
+        const t = (args || '').trim();
+        const dir = this.getDir();
+        if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
+        return `<span style="color:#ef4444">cat: ${t}: No such file</span>`;
+    },
+
+    help: () => `
+<span style="color:#22c55e;font-weight:bold">═══ AmrOS v3.0 (Advanced) ═══</span>
+<span style="color:#00e1ff">SYSTEM</span>   <span style="color:#fff">ls</span> list · <span style="color:#fff">cd</span> change dir · <span style="color:#fff">cat</span> read · <span style="color:#fff">clear</span>
+<span style="color:#00e1ff">APPS</span>     <span style="color:#fff">arcade</span> games · <span style="color:#fff">wall</span> guestbook · <span style="color:#fff">search</span> cmd+k
+<span style="color:#00e1ff">MODULES</span>  <span style="color:#fff">theme</span> switch · <span style="color:#fff">weather</span> cairo · <span style="color:#fff">skills</span> graph`,
+
+    // Integrations
+    arcade: () => { if(window._openArcade) window._openArcade(); return '🕹️ Opening Arcade...'; },
+    wall: () => { if(window.openGuestbook) window.openGuestbook(); return '🌍 Opening Guestbook...'; },
+    search: () => { if(window._openPalette) window._openPalette(); return '⌨️ Opening Palette...'; },
+    
+    // Utils
+    weather: () => {
+        try {
+            const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
+            const t = w.data ? Math.round(w.data.temp) : '--';
+            return `<span style="color:#00e1ff">📍 Cairo, Egypt</span> · Temp: ${t}°C`;
+        } catch(e) { return 'Weather data offline.'; }
+    },
+    
+    clear: () => '__CLEAR__',
+    exit: () => { window.closeTerm(); return ''; },
+
+    // Prompt Updater
+    updatePrompt: function() {
+        const p = document.querySelector('.term-prompt');
+        if(p) {
+            const pathStr = this.path.length === 1 ? '~' : '~/' + this.path.slice(1).join('/');
+            p.innerHTML = `amr@v3:<span style="color:#00e1ff">${pathStr}</span>❯`;
+        }
+    }
 };
-window.openTerm=function(){document.getElementById('termOverlay').classList.add('show');setTimeout(()=>document.getElementById('termInput').focus(),300);};
-window.closeTerm=function(){document.getElementById('termOverlay').classList.remove('show');};
-document.getElementById('termInput').addEventListener('keydown',e=>{
-    if(e.key==='Enter'){
-        const input=e.target;const cmd=input.value.trim().toLowerCase();input.value='';
-        const body=document.getElementById('termBody');
-        body.innerHTML+=`<div class="term-line"><span class="term-prompt">❯</span> <span class="term-cmd">${cmd}</span></div>`;
-        const fn=TermCmds[cmd];
-        if(fn){const out=fn();if(out==='__CLEAR__'){body.innerHTML='<div class="term-line"><span class="term-green">Terminal cleared.</span></div>';}else if(out){body.innerHTML+=`<div class="term-line"><span class="term-out">${out.replace(/\n/g,'</span></div><div class="term-line"><span class="term-out">')}</span></div>`;}}
-        else if(cmd)body.innerHTML+=`<div class="term-line"><span class="term-warn">Command not found: ${cmd}. Type <span class="term-accent">help</span></span></div>`;
-        body.scrollTop=body.scrollHeight;
+
+// Terminal UI Logic
+window.openTerm = function() {
+    document.getElementById('termOverlay').classList.add('show');
+    const b = document.getElementById('termBody');
+    // Set initial v3 welcome message if empty
+    if(b.innerHTML.trim().length < 100) { 
+        b.innerHTML = '<div class="term-line"><span style="color:#22c55e">Welcome to AmrOS v3.0</span></div><div class="term-line"><span style="color:#8b949e">Type <span style="color:#00e1ff">help</span> to start.</span></div>';
+    }
+    setTimeout(() => document.getElementById('termInput').focus(), 300);
+};
+window.closeTerm = function() { document.getElementById('termOverlay').classList.remove('show'); };
+
+document.getElementById('termInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        const input = e.target;
+        const raw = input.value.trim();
+        const parts = raw.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1).join(' ');
+        input.value = '';
+
+        const body = document.getElementById('termBody');
+        body.innerHTML += `<div class="term-line"><span class="term-prompt">❯</span> <span class="term-cmd">${raw}</span></div>`;
+
+        if (TermCmds[cmd]) {
+            const out = TermCmds[cmd](args);
+            if (out === '__CLEAR__') body.innerHTML = '';
+            else if (out) body.innerHTML += `<div class="term-line"><span class="term-out">${out.replace(/\n/g, '<br>')}</span></div>`;
+        } else if (raw) {
+            body.innerHTML += `<div class="term-line"><span style="color:#fbbf24">Command not found: ${cmd}</span></div>`;
+        }
+        
+        body.scrollTop = body.scrollHeight;
     }
 });
-
 
 // ═════════════════════════════════════════════════
 // FEATURE: TESTIMONIAL CAROUSEL (80+ recommendations)
@@ -2697,142 +2797,6 @@ addEventListener('scroll',()=>{
         transform: scale(1.1) rotate(-5deg);
     }
 </style>
-
-<script>
-window.addEventListener('load', function() {
-    // Safety delay: Wait 1.5s to ensure Phase 6 is completely done
-    setTimeout(initTerminalV3, 1500);
-
-    function initTerminalV3() {
-        if (!window.TermCmds) {
-            console.warn('Terminal core not found. Retrying...');
-            setTimeout(initTerminalV3, 1000);
-            return;
-        }
-
-        const T = window.TermCmds;
-        
-        // 1. FILE SYSTEM DATA
-        const FS = {
-            '~': {
-                'projects': {
-                    'book.txt': 'The Bilingual Executive: Bridging business & tech. Published 2026.',
-                    'community.txt': 'Fintech Bilinguals: 500+ members bridging the gap.',
-                    'data_mesh.log': 'Architecture impl at Banque Misr: SUCCESS.'
-                },
-                'certs': {
-                    'pmp.crt': 'PMP® Certified (Project Management Professional)',
-                    'cdmp.crt': 'DAMA Certified Data Management Professional',
-                    'safe.crt': 'SAFe® 6 Agilist'
-                },
-                'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
-                'contact.json': '{\n  "email": "a.elharony@gmail.com",\n  "linkedin": "/in/amrmelharony"\n}'
-            }
-        };
-        let path = ['~'];
-
-        // Helper to get current directory object
-        function getDir() {
-            let d = FS['~'];
-            for (let i = 1; i < path.length; i++) d = d[path[i]];
-            return d;
-        }
-
-        // 2. NEW LOGIC OVERRIDES
-        
-        // ls: List files with icons and colors
-        T.ls = () => {
-            const dir = getDir();
-            const items = Object.keys(dir).map(k => {
-                const isDir = typeof dir[k] === 'object';
-                const col = isDir ? 'color:#00e1ff;font-weight:bold' : 'color:#e2e8f0';
-                const icon = isDir ? '📁' : '📄';
-                return `<span style="${col}">${icon} ${k}</span>`;
-            });
-            return items.join('&nbsp;&nbsp;&nbsp;');
-        };
-
-        // cd: Change directory
-        T.cd = (args) => {
-            const t = (args || '').trim();
-            if (!t || t === '~') { path = ['~']; return ''; }
-            if (t === '..') { if (path.length > 1) path.pop(); return ''; }
-            const dir = getDir();
-            if (dir[t] && typeof dir[t] === 'object') {
-                path.push(t);
-                return ''; 
-            }
-            return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
-        };
-
-        // cat: Read file
-        T.cat = (args) => {
-            const t = (args || '').trim();
-            const dir = getDir();
-            if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
-            return `<span style="color:#ef4444">cat: ${t}: No such file</span>`;
-        };
-
-        // pwd: Print path
-        T.pwd = () => `<span style="color:#8b949e">${path.join('/')}</span>`;
-
-        // weather: Live Cairo Data
-        T.weather = () => {
-            try {
-                const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
-                const t = w.data ? Math.round(w.data.temp) : '--';
-                return `<span style="color:#00e1ff">📍 Cairo, Egypt</span>\nTemp: ${t}°C · Status: Online`;
-            } catch(e) { return 'Weather unavailable.'; }
-        };
-
-        // 3. UPDATED HELP MENU
-        T.help = () => `
-<span style="color:#22c55e;font-weight:bold">═══ AmrOS v3.0 (Advanced) ═══</span>
-
-<span style="color:#00e1ff">SYSTEM</span>
-  <span style="color:#fff">ls</span>       List directory
-  <span style="color:#fff">cd</span>       Change dir (try: cd projects)
-  <span style="color:#fff">cat</span>      Read file (try: cat about.md)
-  <span style="color:#fff">clear</span>    Clear screen
-
-<span style="color:#00e1ff">APPS</span>
-  <span style="color:#fff">arcade</span>   Open Game Hub
-  <span style="color:#fff">wall</span>     Open Guestbook
-  <span style="color:#fff">search</span>   Command Palette (⌘K)
-
-<span style="color:#00e1ff">MODULES</span>
-  <span style="color:#fff">theme</span>    Switch theme (cyberpunk/zen)
-  <span style="color:#fff">weather</span>  Live Cairo report
-  <span style="color:#fff">skills</span>   View skill graph`;
-
-        // 4. UI UPDATES
-        
-        // Update the prompt dynamically to match path (e.g. amr@v3:~/projects❯)
-        setInterval(() => {
-            const p = document.querySelector('.term-prompt');
-            if (p) {
-                const pathStr = path.length === 1 ? '~' : '~/' + path.slice(1).join('/');
-                // Only update if text content differs to prevent selection flicker
-                if (!p.innerHTML.includes(pathStr)) {
-                    p.innerHTML = `amr@v3:<span style="color:#00e1ff">${pathStr}</span>❯`;
-                }
-            }
-        }, 500);
-
-        // Inject "System Update" message into the terminal body if it exists
-        const termBody = document.getElementById('termBody');
-        if (termBody) {
-            const line = document.createElement('div');
-            line.className = 'term-line';
-            line.innerHTML = `<span style="color:#22c55e">✔ System updated to AmrOS v3.0 kernel.</span>`;
-            termBody.appendChild(line);
-            termBody.scrollTop = termBody.scrollHeight; // Auto-scroll to bottom
-        }
-
-        console.log('🚀 Terminal v3 Logic Injected Successfully');
-    }
-});
-</script>
     
     
 </body>
