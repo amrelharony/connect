@@ -149,7 +149,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     },
     { keys: ['book','bilingual','executive','author','write','publish'], answer: `<span class="highlight">"The Bilingual Executive"</span> is my book about bridging <strong>business and technology leadership</strong>. It's available as a <strong>printed book, ebook, and AI-narrated audiobook</strong>.` },
     { keys: ['mentor','adplist'], answer: `I'm a <strong>Top Mentor on ADPList</strong> with <strong>2,400+ mentoring minutes</strong>.` },
-    // ... (Keep existing KB or truncated for brevity, functionality remains)
   ];
   const TOPICS = ['career','certifications','mentoring','book','fintech','agile','data','conferences','contact'];
 
@@ -316,7 +315,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     const mv = container.querySelector('model-viewer');
 
     // ─────────────────────────────────────────────
-    // DRAG VS CLICK DETECTION LOGIC
+    // DRAG vs CLICK vs AR-BUTTON LOGIC
     // ─────────────────────────────────────────────
     let startX = 0, startY = 0;
 
@@ -325,20 +324,26 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
       startY = clientY;
     };
 
-    // Track mouse/touch down position
     mv.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
     mv.addEventListener('touchstart', (e) => onDown(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
-    // Handle click logic: Only open if movement is small (<5px)
     mv.addEventListener('click', (e) => {
+      // 1. FIX: Check if the AR button was clicked.
+      // If the target (or any parent) is the AR button, DO NOTHING.
+      // Allow the default behavior (AR launch) to happen.
+      if (e.target.closest('#ar-button')) {
+        return; 
+      }
+
+      // 2. Drag calculation
       const diffX = Math.abs(e.clientX - startX);
       const diffY = Math.abs(e.clientY - startY);
 
+      // 3. Only open the site if it was a quick, non-moving click
       if (diffX < 5 && diffY < 5) {
-        // It's a genuine click
         window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
       } else {
-        // It was a drag/rotate action - prevent default behavior
+        // Prevent random behavior on drag
         e.preventDefault();
         e.stopPropagation();
       }
@@ -367,14 +372,13 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     renderer.setSize(W, H);
     container.insertBefore(renderer.domElement, hint);
 
-    // Simple Mesh Demo
     const geometry = new THREE.IcosahedronGeometry(1.5, 0);
     const material = new THREE.MeshBasicMaterial({ color: 0x00e1ff, wireframe: true });
     const sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
     function animate() {
-      if (!renderer.domElement.closest('body')) return; // Stop if removed
+      if (!renderer.domElement.closest('body')) return;
       requestAnimationFrame(animate);
       sphere.rotation.x += 0.005;
       sphere.rotation.y += 0.005;
@@ -394,7 +398,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
       window.TermCmds.datamesh = () => { setTimeout(launchDataMesh, 300); return '🔀 Launching...'; };
     }
 
-    // ROBUST SEARCH FOR BOOK CARD
     const selectors = ['a.lk[href*="bilingual"]', 'a[href*="bilingual"]', 'a[href*="book"]'];
     let bookCard = null;
     for (const sel of selectors) {
@@ -439,7 +442,6 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   function init() {
     create3DOverlay();
     initAskAmr();
-    // initHoverPreviews(); // <-- REMOVED
     wireUp();
     console.log('%c🤖 Phase 4 Loaded', 'background:#6366f1;color:#fff;padding:2px 5px;border-radius:3px;');
   }
