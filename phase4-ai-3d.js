@@ -1,17 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// PHASE 4: AI & INTERACTIVE 3D — amrelharony.com
+// PHASE 4: AI, INTERACTIVE 3D & AR — amrelharony.com
 // Drop-in: <script src="phase4-ai-3d.js" defer></script>
 //
 // Features:
-//   1. "Ask Amr" Terminal Chatbot (local knowledge base, no API)
-//   2. Context-Aware Hover Previews (tech vs business tone)
-//   3. 3D Book Viewer (Three.js, 360° spin, touch)
-//   4. 3D Data Mesh Visualizer (interactive node graph)
-//
-// Terminal-first: All features accessible via > commands
-// Three.js lazy-loaded only when 3D features are opened
+//   1. "Ask Amr" Terminal Chatbot
+//   2. Context-Aware Hover Previews
+//   3. 3D & AR Book Viewer (<model-viewer> with .glb/.usdz)
+//   4. 3D Data Mesh Visualizer (Three.js)
 // ═══════════════════════════════════════════════════════════════
-(function PhaseFourAI3D() {
+(function PhaseFourAI3DAR() {
   'use strict';
 
   const RM = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -23,6 +20,9 @@
   const css = document.createElement('style');
   css.id = 'phase4-css';
   css.textContent = `
+
+/* [SECTIONS 1 & 2 CSS REMAIN UNCHANGED - SNIPPED FOR BREVITY] */
+/* ... Insert CSS for ASK AMR and HOVER PREVIEWS here ... */
 
 /* ═══════════════════════════════════════════
    1. ASK AMR — TERMINAL CHAT MODE
@@ -133,9 +133,8 @@ body.zen-mode .hover-preview { display: none !important; }
 @media(max-width:768px) { .hover-preview { display: none !important; } }
 @media print { .hover-preview { display: none !important; } }
 
-
 /* ═══════════════════════════════════════════
-   3 & 4. 3D VIEWER OVERLAY
+   3 & 4. 3D VIEWER OVERLAY & AR STYLES
    ═══════════════════════════════════════════ */
 
 #viewer3dOverlay {
@@ -171,7 +170,9 @@ body.zen-mode .hover-preview { display: none !important; }
   transition: transform .5s cubic-bezier(.16,1,.3,1);
 }
 #viewer3dOverlay.show .viewer3d-container { transform: scale(1); }
-.viewer3d-canvas { width: 100%; height: 100%; display: block; }
+/* Ensure model-viewer fills container */
+model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+
 .viewer3d-hud {
   position: absolute;
   top: 10px;
@@ -181,6 +182,7 @@ body.zen-mode .hover-preview { display: none !important; }
   justify-content: space-between;
   align-items: center;
   pointer-events: none;
+  z-index: 10; /* Ensure HUD is above model-viewer */
 }
 .viewer3d-title {
   font-family: 'JetBrains Mono', monospace;
@@ -188,6 +190,7 @@ body.zen-mode .hover-preview { display: none !important; }
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: rgba(0,225,255,.6);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8); /* Added shadow for readability over 3D */
 }
 .viewer3d-close {
   font-family: 'JetBrains Mono', monospace;
@@ -198,7 +201,7 @@ body.zen-mode .hover-preview { display: none !important; }
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid #1a2332;
-  background: rgba(0,0,0,.5);
+  background: rgba(0,0,0,.8); /* Darker background */
   transition: all .2s;
 }
 .viewer3d-close:hover { color: #00e1ff; border-color: rgba(0,225,255,.2); }
@@ -209,9 +212,10 @@ body.zen-mode .hover-preview { display: none !important; }
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px;
-  color: #2d3748;
+  color: #6f7b8f; /* Slightly lighter for better contrast */
   letter-spacing: 1px;
   pointer-events: none;
+  z-index: 10;
 }
 .viewer3d-loading {
   position: absolute;
@@ -222,7 +226,7 @@ body.zen-mode .hover-preview { display: none !important; }
   flex-direction: column;
   gap: 8px;
   background: #060910;
-  z-index: 2;
+  z-index: 20; /* Higher z-index */
   transition: opacity .5s;
 }
 .viewer3d-loading.hidden { opacity: 0; pointer-events: none; }
@@ -238,6 +242,37 @@ body.zen-mode .hover-preview { display: none !important; }
 }
 @keyframes v3dSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }
 
+/* AR Button Styling for model-viewer */
+#ar-button {
+  background-image: url(https://cdn.glitch.global/a92517b6-34df-4658-9b32-0469cb28037f/ar_icon_white.png?v=1660934672966);
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: 12px 50%;
+  background-color: rgba(0, 225, 255, 0.9);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  bottom: 40px;
+  padding: 0px 16px 0px 40px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #060910;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 4px 12px rgba(0,225,255,0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 15;
+}
+#ar-button:hover { background-color: #fff; color: #00e1ff; box-shadow: 0 4px 16px rgba(0,225,255,0.5); }
+#ar-button:active { transform: translateX(-50%) scale(0.95); }
+/* Hide AR button on devices that don't support AR */
+model-viewer:not([ar-status="chosen"]) #ar-button { display: none; }
+
+
 /* Node labels in data mesh */
 .mesh-label {
   position: absolute;
@@ -252,7 +287,7 @@ body.zen-mode .hover-preview { display: none !important; }
 }
 
 @media(max-width:600px) {
-  .viewer3d-container { height: 320px; }
+  .viewer3d-container { height: 450px; /* Taller on mobile for AR view */ max-height: 80vh; }
 }
 @media print { #viewer3dOverlay { display: none !important; } }
 `;
@@ -261,6 +296,7 @@ body.zen-mode .hover-preview { display: none !important; }
 
   // ═══════════════════════════════════════════════════
   // FEATURE 1: "ASK AMR" TERMINAL CHATBOT
+  // [THIS SECTION REMAINS UNCHANGED - SNIPPED FOR BREVITY]
   // ═══════════════════════════════════════════════════
 
   // Knowledge base — structured for keyword matching
@@ -429,6 +465,7 @@ body.zen-mode .hover-preview { display: none !important; }
 
   // ═══════════════════════════════════════════════════
   // FEATURE 2: CONTEXT-AWARE HOVER PREVIEWS
+  // [THIS SECTION REMAINS UNCHANGED - SNIPPED FOR BREVITY]
   // ═══════════════════════════════════════════════════
 
   function initHoverPreviews() {
@@ -506,10 +543,7 @@ body.zen-mode .hover-preview { display: none !important; }
       const preview = tone === 'tech' ? data.tech : data.biz;
       const titleClass = tone === 'tech' ? 'tech' : 'biz';
 
-      tooltip.innerHTML = `
-        <div class="hover-preview-title ${titleClass}">${preview.title}</div>
-        <div class="hover-preview-body">${preview.body}</div>
-      `;
+      tooltip.innerHTML = `<br>        <div class="hover-preview-title ${titleClass}">${preview.title}</div><br>        <div class="hover-preview-body">${preview.body}</div><br>      `;
 
       const rect = el.getBoundingClientRect();
       let left = rect.left + rect.width / 2 - 140;
@@ -570,15 +604,18 @@ body.zen-mode .hover-preview { display: none !important; }
 
 
   // ═══════════════════════════════════════════════════
-  // 3D OVERLAY (shared by book viewer & data mesh)
+  // 3D OVERLAY CORE (SHARED)
   // ═══════════════════════════════════════════════════
 
   let threeLoaded = false;
   let threeLoadPromise = null;
+  let modelViewerLoaded = false;
+  let modelViewerLoadPromise = null;
 
   function create3DOverlay() {
     const overlay = document.createElement('div');
     overlay.id = 'viewer3dOverlay';
+    // Clicking overlay background closes it
     overlay.addEventListener('click', e => { if (e.target === overlay) close3D(); });
     overlay.innerHTML = `
       <div class="viewer3d-container" id="v3dContainer">
@@ -586,28 +623,37 @@ body.zen-mode .hover-preview { display: none !important; }
           <div class="viewer3d-loading-spinner">📦</div>
           <div class="viewer3d-loading-text">Loading 3D engine...</div>
         </div>
-        <div class="viewer3d-hud">
+        <div class="viewer3d-hud" id="v3dHud">
           <span class="viewer3d-title" id="v3dTitle">3D Viewer</span>
           <span class="viewer3d-close" onclick="window._close3D()">✕ Close · ESC</span>
         </div>
-        <div class="viewer3d-hint" id="v3dHint">Drag to rotate · Scroll to zoom</div>
-      </div>`;
+        </div>`;
     document.body.appendChild(overlay);
   }
 
-  function open3D(title, builder) {
+  // engineType: 'three' or 'model-viewer'
+  function open3D(title, builder, engineType = 'three') {
     const overlay = document.getElementById('viewer3dOverlay');
     const loading = document.getElementById('v3dLoading');
     const titleEl = document.getElementById('v3dTitle');
+    const container = document.getElementById('v3dContainer');
+
+    // Reset container content while keeping loader/hud
+    Array.from(container.children).forEach(child => {
+        if (!['v3dLoading', 'v3dHud'].includes(child.id)) child.remove();
+    });
+
     if (titleEl) titleEl.textContent = title;
     if (loading) loading.classList.remove('hidden');
     overlay.classList.add('show');
 
-    loadThreeJS().then(() => {
+    const loader = engineType === 'model-viewer' ? loadModelViewerJS() : loadThreeJS();
+
+    loader.then(() => {
       if (loading) loading.classList.add('hidden');
-      builder();
+      builder(container); // Pass container to builder
     }).catch(err => {
-      console.error('Three.js load failed:', err);
+      console.error(`${engineType} load failed:`, err);
       if (loading) {
         loading.querySelector('.viewer3d-loading-text').textContent = 'Failed to load 3D engine';
         loading.querySelector('.viewer3d-loading-spinner').textContent = '⚠️';
@@ -618,23 +664,30 @@ body.zen-mode .hover-preview { display: none !important; }
   function close3D() {
     const overlay = document.getElementById('viewer3dOverlay');
     overlay?.classList.remove('show');
-    // Clean up canvas
+    // Clean up contents
     const container = document.getElementById('v3dContainer');
-    const canvas = container?.querySelector('canvas');
-    if (canvas) canvas.remove();
-    // Clean up labels
+    if (container) {
+        // Remove canvas (Three.js) or model-viewer tag
+        const canvas = container.querySelector('canvas');
+        if (canvas) canvas.remove();
+        const mv = container.querySelector('model-viewer');
+        if (mv) mv.remove();
+        container.querySelectorAll('.viewer3d-hint').forEach(el => el.remove());
+    }
+    // Clean up labels (Data Mesh)
     container?.querySelectorAll('.mesh-label').forEach(l => l.remove());
-    // Cancel animation
+    // Cancel animation (Three.js)
     if (window._v3dCleanup) { window._v3dCleanup(); window._v3dCleanup = null; }
   }
   window._close3D = close3D;
 
+  // Loader for Three.js (Data Mesh)
   function loadThreeJS() {
     if (threeLoaded && window.THREE) return Promise.resolve();
-    if (threeLoadPromise) return threeLoadPromise;
-
+    if (threeLoadPromise) return threeLoadPromise;<br>
     threeLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
+      // Using r128 as in original script
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
       script.onload = () => { threeLoaded = true; resolve(); };
       script.onerror = reject;
@@ -643,198 +696,111 @@ body.zen-mode .hover-preview { display: none !important; }
     return threeLoadPromise;
   }
 
+  // Loader for Google's <model-viewer> (Book & AR)
+  function loadModelViewerJS() {
+    if (modelViewerLoaded || customElements.get('model-viewer')) {
+        modelViewerLoaded = true;
+        return Promise.resolve();
+    }
+    if (modelViewerLoadPromise) return modelViewerLoadPromise;
+
+    modelViewerLoadPromise = new Promise((resolve, reject) => {
+      // Load polyfills first for better compatibility
+      const polyfill = document.createElement('script');
+      polyfill.src = 'https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js';
+      document.head.appendChild(polyfill);
+
+      const script = document.createElement('script');
+      // Using a stable version of model-viewer
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js';
+      script.onload = () => { modelViewerLoaded = true; resolve(); };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return modelViewerLoadPromise;
+  }
+
 // ═══════════════════════════════════════════════════
-// FEATURE 3: 3D BOOK VIEWER (UPGRADED)
+// FEATURE 3: 3D & AR BOOK VIEWER (REBUILT WITH MODEL-VIEWER)
 // ═══════════════════════════════════════════════════
 
 function launchBookViewer() {
-  open3D('📘 The Bilingual Executive — 3D Preview', buildBookScene);
+  // CRITICAL: You must create 'book.glb' and 'book.usdz' files
+  // and place them in the same root directory as this script.
+  open3D('📘 The Bilingual Executive — 3D & AR', buildBookARScene, 'model-viewer');
 }
 
-function buildBookScene() {
-  const container = document.getElementById('v3dContainer');
-  const W = container.clientWidth;
-  const H = container.clientHeight;
+function buildBookARScene(container) {
+  // Inject the <model-viewer> component
+  // This replaces the manual Three.js construction
+  const mvHTML = `
+    <model-viewer
+      src="book.glb"
+      ios-src="book.usdz"
+      alt="A 3D model of The Bilingual Executive book"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      environment-image="neutral"
+      exposure="1"
+      loading="eager"
+      reveal="auto"
+    >
+      <button slot="ar-button" id="ar-button">
+        View in your space
+      </button>
+    </model-viewer>
+    <div class="viewer3d-hint" id="v3dHint">
+      ${isMobile ? 'Pinch to zoom · Drag to rotate' : 'Scroll to zoom · Drag to rotate · Click to open site'}
+    </div>
+  `;
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x060910);
-  scene.fog = new THREE.FogExp2(0x060910, 0.15);
+  // Create a temporary container to parse the string into DOM elements
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = mvHTML;
+  while (tempDiv.firstChild) {
+      container.appendChild(tempDiv.firstChild);
+  }
 
-  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-  camera.position.set(0, 0.3, 4.5); // Optimal viewing distance
+  const mv = container.querySelector('model-viewer');
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  container.appendChild(renderer.domElement);
-
-  // --- TEXTURE LOADING ---
-  const texLoader = new THREE.TextureLoader();
-  
-  const frontTex = texLoader.load('be.png');
-  const backTex  = texLoader.load('back.png');
-  const spineTex = texLoader.load('spine.png');
-
-  // Correct color space for vivid textures
-  [frontTex, backTex, spineTex].forEach(t => {
-    t.colorSpace = THREE.SRGBColorSpace; 
+  // Add click-to-buy functionality
+  mv.addEventListener('click', (e) => {
+      // Ensure it's a quick click, not part of a drag interaction
+      if (e.detail === 1) {
+          window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
+      }
   });
 
-  // --- BOOK MATERIALS ---
-  // Order: Right, Left, Top, Bottom, Front, Back
-  const materials = [
-    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Right (Pages)
-    new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.2 }),   // Left (Spine)
-    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Top (Pages)
-    new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.9 }), // Bottom (Pages)
-    new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.2, metalness: 0.1 }), // Front
-    new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.2, metalness: 0.1 })   // Back
-  ];
-
-  // --- BOOK GEOMETRY (CALCULATED FROM YOUR IMAGE DIMENSIONS) ---
-  // 1400px width / 2000px height = 1.4
-  // 310px spine / 2000px height = 0.31
-  const bookGeo = new THREE.BoxGeometry(1.4, 2, 0.31);
-  
-  const book = new THREE.Mesh(bookGeo, materials);
-  book.castShadow = true;
-  book.receiveShadow = true;
-  scene.add(book);
-
-  // --- LIGHTING ---
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambient);
-
-  const spotLight = new THREE.SpotLight(0xffffff, 10);
-  spotLight.position.set(2, 5, 5);
-  spotLight.angle = Math.PI / 6;
-  spotLight.penumbra = 0.5;
-  spotLight.castShadow = true;
-  scene.add(spotLight);
-
-  const fillLight = new THREE.PointLight(0x6366f1, 2);
-  fillLight.position.set(-3, 1, 2);
-  scene.add(fillLight);
-
-  const rimLight = new THREE.PointLight(0xa855f7, 2);
-  rimLight.position.set(0, -2, -3);
-  scene.add(rimLight);
-
-  // --- INTERACTIVITY ---
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2(-99, -99);
-  let isDragging = false, prevX = 0, prevY = 0;
-  let rotVelX = 0.003, rotVelY = 0.05;
-
-  function onMouseMove(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-    if (isDragging) {
-      rotVelY = (e.clientX - prevX) * 0.005;
-      rotVelX = (e.clientY - prevY) * 0.003;
-      prevX = e.clientX; 
-      prevY = e.clientY;
-    }
-  }
-
-  function onMouseDown(e) { isDragging = true; prevX = e.clientX; prevY = e.clientY; }
-  function onMouseUp() { isDragging = false; }
-  
-  function onClick() {
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([book]);
-    if (intersects.length > 0) {
-      const flash = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 2.1, 0.35),
-        new THREE.MeshBasicMaterial({ color: 0x00e1ff, transparent: true, opacity: 0.5 })
-      );
-      book.add(flash);
-      setTimeout(() => {
-        window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
-        book.remove(flash);
-      }, 100);
-    }
-  }
-
-  renderer.domElement.addEventListener('mousemove', onMouseMove);
-  renderer.domElement.addEventListener('mousedown', onMouseDown);
-  renderer.domElement.addEventListener('mouseup', onMouseUp);
-  renderer.domElement.addEventListener('mouseleave', onMouseUp);
-  renderer.domElement.addEventListener('click', onClick);
-  
-  renderer.domElement.addEventListener('touchstart', e => { 
-    isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.touches[0].clientY - rect.top) / rect.height) * 2 + 1;
-  }, { passive: true });
-  
-  renderer.domElement.addEventListener('touchmove', e => {
-    if (!isDragging) return;
-    rotVelY = (e.touches[0].clientX - prevX) * 0.005;
-    rotVelX = (e.touches[0].clientY - prevY) * 0.003;
-    prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
-  }, { passive: true });
-  
-  renderer.domElement.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
-
-  renderer.domElement.addEventListener('wheel', e => {
-    camera.position.z = Math.max(3, Math.min(8, camera.position.z + e.deltaY * 0.005));
-    e.preventDefault();
-  }, { passive: false });
-
-  let animId;
-  function animate() {
-    animId = requestAnimationFrame(animate);
-
-    if (!isDragging) {
-      rotVelY *= 0.96;
-      rotVelX *= 0.96;
-      if (Math.abs(rotVelY) < 0.001) rotVelY += 0.0002;
-    }
-
-    book.rotation.y += rotVelY;
-    book.rotation.x += rotVelX;
-    book.rotation.x = Math.max(-0.5, Math.min(0.5, book.rotation.x));
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([book]);
-    container.style.cursor = intersects.length > 0 ? 'pointer' : (isDragging ? 'grabbing' : 'grab');
-
-    if (intersects.length > 0) {
-        book.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.1);
-    } else {
-        book.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-    }
-
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window._v3dCleanup = () => {
-    if (animId) cancelAnimationFrame(animId);
-    renderer.dispose();
-    bookGeo.dispose();
-    materials.forEach(m => m.dispose());
-  };
+  // Add hint text depending on interaction state
+  const hint = container.querySelector('#v3dHint');
+  mv.addEventListener('camera-change', (e) => {
+      if (e.detail.source === 'user-interaction') {
+         hint.style.opacity = '0.5';
+      }
+  });
 }
-  
 
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 4: 3D DATA MESH VISUALIZER
+  // FEATURE 4: 3D DATA MESH VISUALIZER (KEEPS USING THREE.JS)
   // ═══════════════════════════════════════════════════
 
   function launchDataMesh() {
-    open3D('🔀 Data Mesh — Interactive Domains', buildMeshScene);
+    open3D('🔀 Data Mesh — Interactive Domains', buildMeshScene, 'three');
   }
 
-  function buildMeshScene() {
-    const container = document.getElementById('v3dContainer');
+  function buildMeshScene(container) {
+    // Add hint text for this mode
+    const hint = document.createElement('div');
+    hint.className = 'viewer3d-hint';
+    hint.id = 'v3dHint';
+    hint.textContent = 'Drag to rotate · Scroll to zoom';
+    container.appendChild(hint);
+
     const W = container.clientWidth;
     const H = container.clientHeight;
 
@@ -847,7 +813,7 @@ function buildBookScene() {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
+    container.insertBefore(renderer.domElement, hint); // Insert before hint
 
     // Domain nodes
     const DOMAINS = [
@@ -1041,6 +1007,7 @@ function buildBookScene() {
 
   // ═══════════════════════════════════════════════════
   // WIRE UP: TERMINAL COMMANDS + TRIGGERS
+  // [THIS SECTION REMAINS UNCHANGED - SNIPPED FOR BREVITY]
   // ═══════════════════════════════════════════════════
 
   function wireUp() {
@@ -1048,10 +1015,9 @@ function buildBookScene() {
     if (window.TermCmds) {
       window.TermCmds.book3d = () => {
         setTimeout(launchBookViewer, 300);
-        return '<span class="term-green">📘 Launching 3D book viewer...</span>';
+        return '<span class="term-green">📘 Launching 3D & AR book viewer...</span>';
       };
-      window.TermCmds.book = window.TermCmds.book3d;
-
+      window.TermCmds.book = window.TermCmds.book3d;<br>
       window.TermCmds.datamesh = () => {
         setTimeout(launchDataMesh, 300);
         return '<span class="term-green">🔀 Launching data mesh visualizer...</span>';
@@ -1062,96 +1028,4 @@ function buildBookScene() {
       const origHelp = window.TermCmds.help;
       window.TermCmds.help = function() {
         let base = typeof origHelp === 'function' ? origHelp() : '';
-        // Only add if not already present (Phase 4 init may run after other phases)
-        if (!base.includes('book3d')) {
-          base += `<br><span class="term-cmd">ask &lt;question&gt;</span> — Ask Amr anything`;
-          base += `<br><span class="term-cmd">book3d</span> — 3D book viewer`;
-          base += `<br><span class="term-cmd">datamesh</span> — Interactive data mesh visualizer`;
-        }
-        return base;
-      };
-    }
-
-    // Book card click → 3D viewer (add a visual badge)
-    const bookCard = document.querySelector('a.lk[href*="bilingual"]');
-    if (bookCard) {
-      const subtitle = bookCard.querySelector('.lsu');
-      if (subtitle) {
-        const badge = document.createElement('span');
-        badge.style.cssText = `
-          font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:1px;
-          text-transform:uppercase;padding:2px 8px;border-radius:100px;
-          background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.12);
-          color:#6366f1;margin-left:6px;cursor:pointer;transition:all .2s;
-          display:inline-flex;align-items:center;gap:3px;white-space:nowrap;
-        `;
-        badge.innerHTML = '📦 3D Preview';
-        badge.addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          launchBookViewer();
-          if (window.VDna) window.VDna.addXp(5);
-        });
-        badge.addEventListener('mouseenter', () => badge.style.borderColor = '#6366f1');
-        badge.addEventListener('mouseleave', () => badge.style.borderColor = 'rgba(99,102,241,.12)');
-        subtitle.appendChild(badge);
-      }
-    }
-
-    // Keyboard: Escape closes 3D viewer
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && document.getElementById('viewer3dOverlay')?.classList.contains('show')) {
-        close3D();
-      }
-    });
-
-    // Add shortcut to panel
-    const panel = document.querySelector('.shortcut-panel');
-    if (panel) {
-      const closeDiv = panel.querySelector('.sc-close');
-      if (closeDiv && !panel.querySelector('[data-p4-key]')) {
-        const row = document.createElement('div');
-        row.className = 'sc-row';
-        row.dataset.p4Key = '1';
-        row.innerHTML = '<span class="sc-key">Terminal</span><span class="sc-desc">> ask / > book3d / > datamesh</span>';
-        panel.insertBefore(row, closeDiv);
-      }
-    }
-  }
-
-
-  // ═══════════════════════════════════════════════════
-  // HELPERS
-  // ═══════════════════════════════════════════════════
-
-  function escHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
-
-
-  // ═══════════════════════════════════════════════════
-  // INIT
-  // ═══════════════════════════════════════════════════
-
-  function init() {
-    create3DOverlay();
-    initAskAmr();
-    initHoverPreviews();
-    wireUp();
-
-    console.log(
-      '%c🤖 Phase 4 Loaded %c Ask Amr · Hover Previews · 3D Book · Data Mesh',
-      'background:#6366f1;color:#fff;padding:4px 8px;border-radius:4px 0 0 4px;font-weight:bold;',
-      'background:#1a2332;color:#6366f1;padding:4px 8px;border-radius:0 4px 4px 0;'
-    );
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 350));
-  } else {
-    setTimeout(init, 350);
-  }
-
-})();
+        // Only add if not already present (Phase 4
