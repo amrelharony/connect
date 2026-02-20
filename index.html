@@ -601,19 +601,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
     <div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
 </a>
 
-    <a href="https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session" target="_blank" rel="noopener" class="lk rv">
-    <div class="ls"></div>
-    <div class="lm"></div>
-    <div class="li">
-        <img src="Adplist.png" alt="ADPList" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" style="width:26px;height:26px;object-fit:contain;">
-        <i class="fa-solid fa-graduation-cap fbi" style="display:none;color:var(--accent2);" aria-hidden="true"></i>
-    </div>
-    <div class="lb">
-        <div class="lt">Get Mentored</div>
-        <div class="lsu">Book a Free Session</div>
-    </div>
-    <div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
-</a>
     </div>
 
     <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
@@ -2598,6 +2585,118 @@ addEventListener('scroll',()=>{
 
 })();
 </script>
+
+<style>
+    /* 1. Container Spacing */
+    .always-cta-row {
+        gap: 12px !important;
+        padding: 0 8px;
+        z-index: 1000 !important;
+    }
+
+    /* 2. Base "Advanced" Button Structure */
+    .always-cta {
+        position: relative;
+        height: 44px; /* Taller touch target */
+        border-radius: 12px !important;
+        border: none !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Hover Lift Effect */
+    .always-cta:hover {
+        transform: translateY(-3px) scale(1.02) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Active Press Effect */
+    .always-cta:active {
+        transform: translateY(-1px) scale(0.98) !important;
+    }
+
+    /* --- LEFT BUTTON: LINKEDIN (Glassy Professional Blue) --- */
+    .always-cta-linkedin {
+        background: linear-gradient(135deg, #0077b5 0%, #005e93 100%) !important;
+        color: #fff !important;
+        /* Inner lighting shine */
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 
+                    0 4px 12px rgba(0, 119, 181, 0.3) !important;
+    }
+    
+    /* Subtle gloss overlay */
+    .always-cta-linkedin::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 50%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
+        pointer-events: none;
+    }
+
+    /* --- RIGHT BUTTON: GET MENTORED (Neon Cyberpunk Gradient) --- */
+    .always-cta-mentor {
+        /* Dark background inside */
+        background: #0f1115 !important; 
+        color: #fff !important;
+        /* The magic: Gradient Border */
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Gradient Border Trick */
+    .always-cta-mentor::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 12px; 
+        padding: 1.5px; /* Border thickness */
+        background: linear-gradient(45deg, #ff0080, #7928ca, #ff0080); 
+        -webkit-mask: 
+           linear-gradient(#fff 0 0) content-box, 
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        animation: borderRotate 4s linear infinite; /* Optional subtle movement */
+    }
+
+    /* Inner Glow */
+    .always-cta-mentor::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,0,128,0.15), rgba(121,40,202,0.15));
+        z-index: -1;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+    }
+
+    /* Hover Glow Up */
+    .always-cta-mentor:hover::after {
+        opacity: 1;
+    }
+    
+    .always-cta-mentor:hover {
+        box-shadow: 0 0 20px rgba(121, 40, 202, 0.4) !important;
+    }
+
+    /* Icon/Image styling */
+    .always-cta img {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        transition: transform 0.3s;
+    }
+    .always-cta:hover img {
+        transform: scale(1.1) rotate(-5deg);
+    }
+</style>
     
 </body>
 </html>
