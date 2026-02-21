@@ -1628,143 +1628,124 @@ const ChallengeSystem={checkProgress(){}};
 // Engagement check interval
 setInterval(checkSmartCta,5000);
 
+    // ═════════════════════════════════════════════════
+// FEATURE: TYPING TERMINAL v4.0 (AmrOS Kernel)
 // ═════════════════════════════════════════════════
-// FEATURE: Terminal 
-// ═════════════════════════════════════════════════
-<script>
-// AMROS V4.0 INTEGRATED KERNEL
-(function() {
-    'use strict';
-
-    // Wait until everything is ready
-    window.addEventListener('load', function() {
-        // Short delay to let Phase 6 finish its setup
-        setTimeout(initIntegratedTerminal, 1500);
-    });
-
-    function initIntegratedTerminal() {
-        const termInput = document.getElementById('termInput');
-        const termBody = document.getElementById('termBody');
-        if (!termInput || !termBody) return;
-
-        // 1. STATE MANAGEMENT
-        const STATE = {
-            history: JSON.parse(localStorage.getItem('amros_history') || '[]'),
-            historyIdx: -1,
-            path: ['~'],
-            booted: sessionStorage.getItem('amros_booted') === 'true'
-        };
-
-        // 2. VIRTUAL FILE SYSTEM
-        const FS = {
-            '~': {
-                'projects': {
-                    'book.txt': 'The Bilingual Executive: Bridging business & tech. Published 2026.',
-                    'community.txt': 'Fintech Bilinguals: 500+ members bridging the gap.',
-                    'data_mesh.log': 'Architecture impl at Banque Misr: SUCCESS.'
-                },
-                'bin': {
-                    'arcade.exe': 'EXEC_ARCADE',
-                    'wall.exe': 'EXEC_GUESTBOOK'
-                },
-                'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
-                'contact.json': '{"email": "a.elharony@gmail.com", "linkedin": "/in/amrmelharony"}'
-            }
-        };
-
-        const getDir = () => {
-            let d = FS['~'];
-            for (let i = 1; i < STATE.path.length; i++) d = d[STATE.path[i]];
-            return d;
-        };
-
-        // 3. CORE COMMANDS
-        const CMDS = {
-            ls: () => {
-                const dir = getDir();
-                return Object.keys(dir).map(k => {
-                    const isDir = typeof dir[k] === 'object';
-                    const isExec = k.endsWith('.exe');
-                    let color = isDir ? '#00e1ff' : (isExec ? '#22c55e' : '#e2e8f0');
-                    return `<span style="color:${color}; font-weight:${isDir?'bold':'normal'}">${isDir?'📁':'📄'} ${k}</span>`;
-                }).join('&nbsp;&nbsp;&nbsp;');
+const TermCmds = {
+    fs: {
+        '~': {
+            'projects': {
+                'book.txt': 'The Bilingual Executive: Bridging business & tech. Published 2026.',
+                'community.txt': 'Fintech Bilinguals: 500+ members bridging the gap.',
+                'data_mesh.log': 'Architecture impl at Banque Misr: SUCCESS.'
             },
-            cd: (args) => {
-                const t = args.trim();
-                if (!t || t === '~') { STATE.path = ['~']; return ''; }
-                if (t === '..') { if (STATE.path.length > 1) STATE.path.pop(); return ''; }
-                const dir = getDir();
-                if (dir[t] && typeof dir[t] === 'object') { STATE.path.push(t); return ''; }
-                return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
+            'certs': {
+                'pmp.crt': 'PMP® Certified (Project Management Professional)',
+                'cdmp.crt': 'DAMA Certified Data Management Professional',
+                'safe.crt': 'SAFe® 6 Agilist'
             },
-            cat: (args) => {
-                const t = args.trim();
-                const dir = getDir();
-                if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
-                return `<span style="color:#ef4444">cat: ${t}: Cannot open file</span>`;
-            },
-            neofetch: () => `
+            'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
+            'contact.json': '{"email": "a.elharony@gmail.com", "linkedin": "/in/amrmelharony"}'
+        }
+    },
+    path: ['~'],
+    history: JSON.parse(localStorage.getItem('amros_history') || '[]'),
+    histIdx: -1,
+
+    getDir: function() {
+        let d = this.fs['~'];
+        for (let i = 1; i < this.path.length; i++) d = d[this.path[i]];
+        return d;
+    },
+
+    ls: function() {
+        const dir = this.getDir();
+        return Object.keys(dir).map(k => {
+            const isDir = typeof dir[k] === 'object';
+            const color = isDir ? '#00e1ff' : '#e2e8f0';
+            return `<span style="color:${color}; font-weight:${isDir?'bold':'normal'}">${isDir?'📁':'📄'} ${k}</span>`;
+        }).join('&nbsp;&nbsp;&nbsp;');
+    },
+
+    cd: function(args) {
+        const t = (args || '').trim();
+        if (!t || t === '~') { this.path = ['~']; return ''; }
+        if (t === '..') { if (this.path.length > 1) this.path.pop(); return ''; }
+        const dir = this.getDir();
+        if (dir[t] && typeof dir[t] === 'object') { this.path.push(t); return ''; }
+        return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
+    },
+
+    cat: function(args) {
+        const t = (args || '').trim();
+        const dir = this.getDir();
+        if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
+        return `<span style="color:#ef4444">cat: ${t}: Cannot open file</span>`;
+    },
+
+    neofetch: () => `
 <span style="color:#00e1ff">       /\\       </span>  <span style="color:#22c55e">amr@v4</span>
 <span style="color:#00e1ff">      /  \\      </span>  -------------
-<span style="color:#00e1ff">     / /\\ \\     </span>  <span style="color:#00e1ff">OS</span>: AmrOS v4.0 (Ultimate)
+<span style="color:#00e1ff">     / /\\ \\     </span>  <span style="color:#00e1ff">OS</span>: AmrOS v4.0 (Singularity)
 <span style="color:#00e1ff">    / /  \\ \\    </span>  <span style="color:#00e1ff">Uptime</span>: ${Math.floor(performance.now()/60000)}m
 <span style="color:#00e1ff"> /_/        \\_\\ </span>  <span style="color:#00e1ff">Status</span>: Operational`,
-            help: () => `<span style="color:#22c55e">══ AmrOS v4.0 ══</span><br>ls, cd, cat, neofetch, arcade, wall, clear`,
-            clear: () => { termBody.innerHTML = ''; return ''; },
-            arcade: () => { if(window._openArcade) window._openArcade(); return 'Launching Arcade...'; },
-            wall: () => { if(window.openGuestbook) window.openGuestbook(); return 'Opening Guestbook...'; }
-        };
 
-        // 4. INPUT HANDLING (CLONE TO KILL OLD LISTENERS)
-        const newInput = termInput.cloneNode(true);
-        termInput.parentNode.replaceChild(newInput, termInput);
+    help: () => `
+<span style="color:#22c55e;font-weight:bold">═══ AmrOS v4.0 ═══</span>
+<span style="color:#00e1ff">SYSTEM</span>   ls, cd, cat, clear
+<span style="color:#00e1ff">APPS</span>     arcade, wall, neofetch
+<span style="color:#00e1ff">UTM</span>      search, theme, weather`,
 
-        newInput.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (STATE.historyIdx < STATE.history.length - 1) {
-                    STATE.historyIdx++;
-                    newInput.value = STATE.history[STATE.history.length - 1 - STATE.historyIdx];
-                }
-            } else if (e.key === 'Enter') {
-                const raw = newInput.value.trim();
-                if (!raw) return;
-                STATE.history.push(raw);
-                localStorage.setItem('amros_history', JSON.stringify(STATE.history));
-                STATE.historyIdx = -1;
-                newInput.value = '';
+    clear: () => '__CLEAR__',
+    arcade: () => { if(window._openArcade) window._openArcade(); return '🕹️ Launching...'; },
+    wall: () => { if(window.openGuestbook) window.openGuestbook(); return '🌍 Opening...'; },
+    search: () => { if(window._openPalette) window._openPalette(); return '⌨️ Opening...'; },
+    weather: () => {
+        const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
+        return `<span style="color:#00e1ff">📍 Cairo</span> · Temp: ${w.data ? Math.round(w.data.temp) : '--'}°C`;
+    },
+    exit: () => { window.closeTerm(); return ''; }
+};
 
-                const pathStr = STATE.path.length === 1 ? '~' : '~/' + STATE.path.slice(1).join('/');
-                termBody.innerHTML += `<div class="term-line"><span style="color:#22c55e">amr@v4</span>:<span style="color:#00e1ff">${pathStr}</span>❯ ${raw}</div>`;
-
-                const parts = raw.split(' ');
-                const cmd = parts[0].toLowerCase();
-                const args = parts.slice(1).join(' ');
-
-                const response = CMDS[cmd] ? CMDS[cmd](args) : `<span style="color:#ef4444">Command not found: ${cmd}</span>`;
-                if (response !== '') termBody.innerHTML += `<div class="term-line">${response}</div>`;
-                termBody.scrollTop = termBody.scrollHeight;
-            }
-        });
-
-        // 5. OVERRIDE GLOBAL OPEN FUNCTION
-        window.openTerm = function() {
-            document.getElementById('termOverlay').classList.add('show');
-            if (!STATE.booted) {
-                STATE.booted = true;
-                sessionStorage.setItem('amros_booted', 'true');
-                termBody.innerHTML = '<span style="color:#22c55e">Booting AmrOS v4.0...</span>';
-                setTimeout(() => {
-                    termBody.innerHTML = '<div class="term-line">Welcome to <strong style="color:#00e1ff">AmrOS v4.0</strong>. Type "help" to begin.</div>';
-                    newInput.focus();
-                }, 800);
-            } else {
-                setTimeout(() => newInput.focus(), 100);
-            }
-        };
+// Unified Terminal UI Logic
+window.openTerm = function() {
+    document.getElementById('termOverlay').classList.add('show');
+    const b = document.getElementById('termBody');
+    if (b.innerHTML.trim() === "" || b.innerHTML.includes('v2.0')) {
+        b.innerHTML = '<div class="term-line"><span style="color:#22c55e">✔ AmrOS v4.0 Singularity Kernel Loaded.</span></div>';
     }
-})();
-</script>
+    setTimeout(() => document.getElementById('termInput').focus(), 300);
+};
+
+window.closeTerm = function() { document.getElementById('termOverlay').classList.remove('show'); };
+
+// Input Handler (Single listener to prevent page hanging)
+const inputField = document.getElementById('termInput');
+inputField.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        const input = e.target;
+        const raw = input.value.trim();
+        const parts = raw.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1).join(' ');
+        input.value = '';
+
+        const body = document.getElementById('termBody');
+        const pathStr = TermCmds.path.length === 1 ? '~' : '~/' + TermCmds.path.slice(1).join('/');
+        body.innerHTML += `<div class="term-line"><span style="color:#22c55e">amr@v4</span>:<span style="color:#00e1ff">${pathStr}</span>❯ ${raw}</div>`;
+
+        if (TermCmds[cmd]) {
+            const out = TermCmds[cmd](args);
+            if (out === '__CLEAR__') body.innerHTML = '';
+            else if (out) body.innerHTML += `<div class="term-line">${out.replace(/\n/g, '<br>')}</div>`;
+        } else if (raw) {
+            body.innerHTML += `<div class="term-line"><span style="color:#ef4444">bash: ${cmd}: command not found</span></div>`;
+        }
+        body.scrollTop = body.scrollHeight;
+    }
+});
+
+
 
 // ═════════════════════════════════════════════════
 // FEATURE: TESTIMONIAL CAROUSEL (80+ recommendations)
