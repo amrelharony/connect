@@ -952,7 +952,7 @@ function initShake() {
     function handleMotion(e) {
         if (contactRevealed) return;
         
-        // Rate limit to prevent battery drain
+        // Rate limit: Checks every 50ms (20 times a second)
         const now = Date.now();
         if (now - lastTime < 50) return; 
         lastTime = now;
@@ -960,18 +960,18 @@ function initShake() {
         const acc = e.accelerationIncludingGravity;
         if (!acc) return;
 
-        // Calculate force ignoring gravity
+        // Calculate total force
         const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
         const accelNet = Math.abs(total - 9.81);
         
-        // Threshold: How hard you have to shake
-        const SHAKE_THRESHOLD = 15;
+        // Threshold: Moderate shake force
+        const SHAKE_THRESHOLD = 20;
 
-        // "Energy Bar" Logic
         if (accelNet > SHAKE_THRESHOLD) {
-            // Adds 15% per event. 
-            // Triggers in approx 6-7 events (~0.35s), effectively "two shakes".
-            shakeScore += 15; 
+            // Adds 15% per check. 
+            // A typical "shake" lasts ~200ms (4 checks) -> 60%
+            // You need exactly 2 shakes to hit 100%
+            shakeScore += 18; 
             
             if (!bar.classList.contains('active')) {
                 hint.classList.add('shaking');
@@ -982,22 +982,23 @@ function initShake() {
             shakeScore -= 2; 
         }
 
-        // Clamp score between 0 and 100
+        // Clamp score
         shakeScore = Math.max(0, Math.min(shakeScore, 100));
 
-        // Update UI
+        // Update Visuals
         fill.style.width = shakeScore + '%';
 
         // SUCCESS
         if (shakeScore >= 100) {
             window.removeEventListener('devicemotion', handleMotion);
             
-            // --- ADDED: Explicit Vibration on Success ---
-            // [Vibrate 200ms, Pause 50ms, Vibrate 200ms]
+            // 1. Force Vibration (Android Only)
+            // Single long pulse is most reliable
             if (navigator.vibrate) {
-                try { navigator.vibrate([200, 50, 200]); } catch(e) {}
+                navigator.vibrate(500); 
             }
-            
+
+            // 2. Unlock
             revealContact();
         } else if (shakeScore === 0) {
             hint.classList.remove('shaking');
@@ -1005,7 +1006,7 @@ function initShake() {
         }
     }
 
-    // Permission handling for iOS 13+
+    // iOS Permission Handler
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         document.body.addEventListener('touchstart', function rp() {
             DeviceMotionEvent.requestPermission().then(r => {
