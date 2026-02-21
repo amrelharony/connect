@@ -1629,10 +1629,9 @@ const ChallengeSystem={checkProgress(){}};
 setInterval(checkSmartCta,5000);
 
 // ═════════════════════════════════════════════════
-// FEATURE: TYPING TERMINAL v3.0 (Advanced AmrOS)
+// FEATURE: TYPING TERMINAL v4.0 (AmrOS Kernel)
 // ═════════════════════════════════════════════════
 const TermCmds = {
-    // 1. File System Data
     fs: {
         '~': {
             'projects': {
@@ -1646,118 +1645,83 @@ const TermCmds = {
                 'safe.crt': 'SAFe® 6 Agilist'
             },
             'about.md': 'Delivery Lead & Scrum Master with 12+ years experience.',
-            'contact.json': '{\n  "email": "a.elharony@gmail.com",\n  "linkedin": "/in/amrmelharony"\n}'
+            'contact.json': '{"email": "a.elharony@gmail.com", "linkedin": "/in/amrmelharony"}'
         }
     },
     path: ['~'],
+    history: JSON.parse(localStorage.getItem('amros_history') || '[]'),
+    histIdx: -1,
 
-    // Helper: Get Current Directory
     getDir: function() {
         let d = this.fs['~'];
-        for (let i = 1; i < this.path.length; i++) {
-            if (d[this.path[i]]) d = d[this.path[i]];
-            else return null;
-        }
+        for (let i = 1; i < this.path.length; i++) d = d[this.path[i]];
         return d;
     },
 
-    // 2. Commands
     ls: function() {
         const dir = this.getDir();
-        if (!dir || typeof dir !== 'object') return '<span style="color:#ef4444">Error reading dir</span>';
         return Object.keys(dir).map(k => {
             const isDir = typeof dir[k] === 'object';
-            const icon = isDir ? '📁' : '📄';
-            const col = isDir ? 'color:#00e1ff;font-weight:bold' : 'color:#e2e8f0';
-            return `<span style="${col}">${icon} ${k}</span>`;
+            const color = isDir ? '#00e1ff' : '#e2e8f0';
+            return `<span style="color:${color}; font-weight:${isDir?'bold':'normal'}">${isDir?'📁':'📄'} ${k}</span>`;
         }).join('&nbsp;&nbsp;&nbsp;');
     },
 
     cd: function(args) {
         const t = (args || '').trim();
-        if (!t || t === '~') { this.path = ['~']; }
-        else if (t === '..') { if (this.path.length > 1) this.path.pop(); }
-        else {
-            const dir = this.getDir();
-            if (dir && dir[t] && typeof dir[t] === 'object') this.path.push(t);
-            else return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
-        }
-        this.updatePrompt();
-        return '';
+        if (!t || t === '~') { this.path = ['~']; return ''; }
+        if (t === '..') { if (this.path.length > 1) this.path.pop(); return ''; }
+        const dir = this.getDir();
+        if (dir[t] && typeof dir[t] === 'object') { this.path.push(t); return ''; }
+        return `<span style="color:#ef4444">cd: ${t}: No such directory</span>`;
     },
 
     cat: function(args) {
         const t = (args || '').trim();
         const dir = this.getDir();
-        if (dir && dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
-        return `<span style="color:#ef4444">cat: ${t}: No such file</span>`;
+        if (dir[t] && typeof dir[t] === 'string') return `<span style="color:#fff">${dir[t]}</span>`;
+        return `<span style="color:#ef4444">cat: ${t}: Cannot open file</span>`;
     },
 
-    pwd: function() {
-        return `<span style="color:#8b949e">${this.path.join('/')}</span>`;
-    },
+    neofetch: () => `
+<span style="color:#00e1ff">       /\\       </span>  <span style="color:#22c55e">amr@v4</span>
+<span style="color:#00e1ff">      /  \\      </span>  -------------
+<span style="color:#00e1ff">     / /\\ \\     </span>  <span style="color:#00e1ff">OS</span>: AmrOS v4.0 (Singularity)
+<span style="color:#00e1ff">    / /  \\ \\    </span>  <span style="color:#00e1ff">Uptime</span>: ${Math.floor(performance.now()/60000)}m
+<span style="color:#00e1ff"> /_/        \\_\\ </span>  <span style="color:#00e1ff">Status</span>: Operational`,
 
     help: () => `
-<span style="color:#22c55e;font-weight:bold">═══ AmrOS v3.0 (Advanced) ═══</span>
-<span style="color:#00e1ff">SYSTEM</span>   <span style="color:#fff">ls</span> list · <span style="color:#fff">cd</span> change dir · <span style="color:#fff">cat</span> read · <span style="color:#fff">clear</span>
-<span style="color:#00e1ff">APPS</span>     <span style="color:#fff">arcade</span> games · <span style="color:#fff">wall</span> guestbook · <span style="color:#fff">search</span> cmd+k
-<span style="color:#00e1ff">MODULES</span>  <span style="color:#fff">theme</span> switch · <span style="color:#fff">weather</span> cairo · <span style="color:#fff">skills</span> graph`,
-
-    // Integrations (safe checks)
-    arcade: () => { if(window._openArcade) window._openArcade(); return '🕹️ Opening Arcade...'; },
-    wall: () => { if(window.openGuestbook) window.openGuestbook(); return '🌍 Opening Guestbook...'; },
-    search: () => { if(window._openPalette) window._openPalette(); return '⌨️ Opening Palette...'; },
-    
-    // Utils
-    weather: () => {
-        try {
-            const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
-            const t = w.data ? Math.round(w.data.temp) : '--';
-            return `<span style="color:#00e1ff">📍 Cairo, Egypt</span> · Temp: ${t}°C`;
-        } catch(e) { return 'Weather data offline.'; }
-    },
-    
-    skills: () => {
-        const skills = [{n:'Agile',v:95},{n:'Data',v:90},{n:'FinTech',v:85}];
-        return skills.map(s => `<span style="color:#00e1ff">${s.n.padEnd(8)}</span> <span style="color:#22c55e">${'█'.repeat(s.v/10)} ${s.v}%</span>`).join('\n');
-    },
+<span style="color:#22c55e;font-weight:bold">═══ AmrOS v4.0 ═══</span>
+<span style="color:#00e1ff">SYSTEM</span>   ls, cd, cat, clear
+<span style="color:#00e1ff">APPS</span>     arcade, wall, neofetch
+<span style="color:#00e1ff">UTM</span>      search, theme, weather`,
 
     clear: () => '__CLEAR__',
-    exit: () => { window.closeTerm(); return ''; },
-
-    // Prompt Updater
-    updatePrompt: function() {
-        const p = document.querySelector('.term-prompt');
-        if(p) {
-            const pathStr = this.path.length === 1 ? '~' : '~/' + this.path.slice(1).join('/');
-            p.innerHTML = `amr@v3:<span style="color:#00e1ff">${pathStr}</span>❯`;
-        }
-    }
+    arcade: () => { if(window._openArcade) window._openArcade(); return '🕹️ Launching...'; },
+    wall: () => { if(window.openGuestbook) window.openGuestbook(); return '🌍 Opening...'; },
+    search: () => { if(window._openPalette) window._openPalette(); return '⌨️ Opening...'; },
+    weather: () => {
+        const w = JSON.parse(localStorage.getItem('cairoWeather') || '{}');
+        return `<span style="color:#00e1ff">📍 Cairo</span> · Temp: ${w.data ? Math.round(w.data.temp) : '--'}°C`;
+    },
+    exit: () => { window.closeTerm(); return ''; }
 };
 
-// Terminal UI Logic
+// Unified Terminal UI Logic
 window.openTerm = function() {
     document.getElementById('termOverlay').classList.add('show');
     const b = document.getElementById('termBody');
-    // Ensure we start fresh or keep history
-    if(b.innerHTML.trim().length < 100 || b.innerHTML.includes('v2.0')) { 
-        b.innerHTML = `
-            <div class="term-line"><span style="color:#22c55e">Welcome to AmrOS v3.0</span></div>
-            <div class="term-line"><span style="color:#8b949e">Type <span style="color:#00e1ff">help</span> to start.</span></div>
-        `;
+    if (b.innerHTML.trim() === "" || b.innerHTML.includes('v2.0')) {
+        b.innerHTML = '<div class="term-line"><span style="color:#22c55e">✔ AmrOS v4.0 Singularity Kernel Loaded.</span></div>';
     }
-    TermCmds.updatePrompt(); // Set correct prompt immediately
     setTimeout(() => document.getElementById('termInput').focus(), 300);
 };
+
 window.closeTerm = function() { document.getElementById('termOverlay').classList.remove('show'); };
 
-// Input Handler
-const termInput = document.getElementById('termInput');
-// Remove old listeners to prevent duplicates (using a clone trick)
-const newTermInput = termInput.cloneNode(true);
-termInput.parentNode.replaceChild(newTermInput, termInput);
-
-newTermInput.addEventListener('keydown', e => {
+// Input Handler (Single listener to prevent page hanging)
+const inputField = document.getElementById('termInput');
+inputField.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         const input = e.target;
         const raw = input.value.trim();
@@ -1767,20 +1731,19 @@ newTermInput.addEventListener('keydown', e => {
         input.value = '';
 
         const body = document.getElementById('termBody');
-        body.innerHTML += `<div class="term-line"><span class="term-prompt">amr@v3:${TermCmds.path.length>1?'~/'+TermCmds.path.slice(1).join('/'):'~'}❯</span> <span class="term-cmd">${raw}</span></div>`;
+        const pathStr = TermCmds.path.length === 1 ? '~' : '~/' + TermCmds.path.slice(1).join('/');
+        body.innerHTML += `<div class="term-line"><span style="color:#22c55e">amr@v4</span>:<span style="color:#00e1ff">${pathStr}</span>❯ ${raw}</div>`;
 
         if (TermCmds[cmd]) {
             const out = TermCmds[cmd](args);
             if (out === '__CLEAR__') body.innerHTML = '';
-            else if (out) body.innerHTML += `<div class="term-line"><span class="term-out">${out.replace(/\n/g, '<br>')}</span></div>`;
+            else if (out) body.innerHTML += `<div class="term-line">${out.replace(/\n/g, '<br>')}</div>`;
         } else if (raw) {
-            body.innerHTML += `<div class="term-line"><span style="color:#fbbf24">Command not found: ${cmd}</span></div>`;
+            body.innerHTML += `<div class="term-line"><span style="color:#ef4444">bash: ${cmd}: command not found</span></div>`;
         }
-        
         body.scrollTop = body.scrollHeight;
     }
 });
-
 // ═════════════════════════════════════════════════
 // FEATURE: TESTIMONIAL CAROUSEL (80+ recommendations)
 // ═════════════════════════════════════════════════
