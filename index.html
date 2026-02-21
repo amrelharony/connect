@@ -1712,7 +1712,11 @@ window.openTerm = function() {
     document.getElementById('termOverlay').classList.add('show');
     const b = document.getElementById('termBody');
     if (b.innerHTML.trim() === "" || b.innerHTML.includes('v2.0')) {
-        b.innerHTML = '<div class="term-line"><span style="color:#22c55e">✔ AmrOS v4.0 Singularity Kernel Loaded.</span></div>';
+        // Updated innerHTML to include the help command hint
+        b.innerHTML = `
+            <div class="term-line"><span style="color:#22c55e">✔ AmrOS v4.0 Singularity Kernel Loaded.</span></div>
+            <div class="term-line"><span style="color:#8b949e">Type <span style="color:#00e1ff">help</span> for available commands</span></div>
+        `;
     }
     setTimeout(() => document.getElementById('termInput').focus(), 300);
 };
