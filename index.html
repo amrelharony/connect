@@ -2425,6 +2425,17 @@ addEventListener('scroll',()=>{
    if(!reducedMotion){document.querySelectorAll('.mesh div').forEach((b,i)=>{b.style.transform=`translateY(${t*(i+1)*.06}px)`;});}
 },{passive:true});
 
+const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('vis');
+            scrollObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.sa').forEach(el => scrollObserver.observe(el));
+
 })(); // ← THIS closes the (()=>{ at the very top of the script
 
 </script>
