@@ -927,14 +927,65 @@ function launch(){
 // ═══ PROXIMITY-GATED CONTACT ═══
 let contactRevealed=false,isNearby=false;
 function revealContact(){
-    if(contactRevealed)return;contactRevealed=true;
-    const secret=document.getElementById('contactSecret'),hint=document.getElementById('shakeHint'),deskHint=document.getElementById('deskHint'),bar=document.getElementById('shakeBar');
-    secret.classList.add('revealed');if(hint){hint.classList.remove('shaking');hint.classList.add('unlocked');hint.innerHTML='<i class="fa-solid fa-lock-open" style="margin-right:4px;"></i> UNLOCKED';}if(bar)bar.classList.remove('active');
-    secret.querySelectorAll('.si').forEach(el=>{const c=el.dataset.c;el.addEventListener('mouseenter',()=>el.style.color=c);el.addEventListener('mouseleave',()=>el.style.color='');});
-    secret.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.5,delay:i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
-    if(D&&!reducedMotion){secret.querySelectorAll('.si').forEach(el=>{el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;});el.addEventListener('mouseleave',()=>{el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';el.style.transform='';setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);});});}
-    if(navigator.vibrate)navigator.vibrate([100,50,100]);
-    setTimeout(()=>{[hint,deskHint].forEach(h=>{if(h){h.style.opacity='0';setTimeout(()=>h.style.display='none',400);}});},3000);
+    if(contactRevealed)return;
+    contactRevealed=true;
+
+    const secret=document.getElementById('contactSecret');
+    const hint=document.getElementById('shakeHint');
+    const deskHint=document.getElementById('deskHint');
+    const bar=document.getElementById('shakeBar');
+
+    // 1. Trigger the visual reveal
+    secret.classList.add('revealed');
+
+    // 2. Update the "Shake" hint text to show it is unlocked
+    if(hint){
+        hint.classList.remove('shaking');
+        hint.classList.add('unlocked');
+        hint.innerHTML='<i class="fa-solid fa-lock-open" style="margin-right:4px;"></i> UNLOCKED';
+    }
+    if(bar) bar.classList.remove('active');
+
+    // 3. Animate the social icons
+    secret.querySelectorAll('.si').forEach(el=>{
+        const c=el.dataset.c;
+        el.addEventListener('mouseenter',()=>el.style.color=c);
+        el.addEventListener('mouseleave',()=>el.style.color='');
+    });
+    secret.querySelectorAll('.si').forEach((s,i)=>{
+        gsap.from(s,{scale:0,rotation:90,duration:.5,delay:i*.08,ease:'back.out(3)',onComplete:()=>{
+            gsap.set(s,{clearProps:'all'});s.style.opacity='1';
+        }});
+    });
+
+    // 4. Desktop mouse effect
+    if(D&&!reducedMotion){
+        secret.querySelectorAll('.si').forEach(el=>{
+            el.addEventListener('mousemove',e=>{
+                const r=el.getBoundingClientRect();
+                el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;
+            });
+            el.addEventListener('mouseleave',()=>{
+                el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';
+                el.style.transform='';
+                setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);
+            });
+        });
+    }
+
+    // --- UPDATED VIBRATION LOGIC HERE ---
+    // Pattern: 50ms buzz, 30ms pause, 50ms buzz, 30ms pause, 200ms strong buzz
+    if(navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 200]);
+
+    // 5. Hide the hints after a delay
+    setTimeout(()=>{
+        [hint,deskHint].forEach(h=>{
+            if(h){
+                h.style.opacity='0';
+                setTimeout(()=>h.style.display='none',400);
+            }
+        });
+    },3000);
 }
 function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById('shakeHint').style.display='block';initShake();}else{document.getElementById('deskHint').style.display='block';}}
 if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
