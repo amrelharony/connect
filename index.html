@@ -994,70 +994,82 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
 }
 function initShake() {
-    let shakeScore = 0;
+    let shakeCount = 0;
+    let lastShakeTime = 0;
     const hint = document.getElementById('shakeHint');
     const bar = document.getElementById('shakeBar');
     const fill = document.getElementById('shakeFill');
-    let lastTime = Date.now();
+
+    // CONFIGURATION
+    const SHAKE_THRESHOLD = 20; // How hard you have to shake (m/s²)
+    const SHAKE_TIMEOUT = 1500; // Max time allowed between shakes (ms)
+    const SHAKE_COOLDOWN = 400; // Min time between shakes (prevents 1 shake counting as 2)
 
     function handleMotion(e) {
         if (contactRevealed) return;
-        
-        // Rate limit: Checks every 50ms (20 times a second)
-        const now = Date.now();
-        if (now - lastTime < 50) return; 
-        lastTime = now;
 
         const acc = e.accelerationIncludingGravity;
         if (!acc) return;
 
-        // Calculate total force
+        // Calculate force (removing gravity)
         const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
         const accelNet = Math.abs(total - 9.81);
-        
-        // Threshold: Moderate shake force
-        const SHAKE_THRESHOLD = 20;
+        const now = Date.now();
 
+        // 1. DETECT SHAKE
         if (accelNet > SHAKE_THRESHOLD) {
-            // Adds 15% per check. 
-            // A typical "shake" lasts ~200ms (4 checks) -> 60%
-            // You need exactly 2 shakes to hit 100%
-            shakeScore += 18; 
             
-            if (!bar.classList.contains('active')) {
-                hint.classList.add('shaking');
-                bar.classList.add('active');
+            // Ensure this isn't the same shake event (Debounce)
+            if (now - lastShakeTime > SHAKE_COOLDOWN) {
+                
+                // If user took too long since shake #1, reset to 0 first
+                if (shakeCount === 1 && now - lastShakeTime > SHAKE_TIMEOUT) {
+                    shakeCount = 0;
+                    fill.style.width = '0%';
+                }
+
+                shakeCount++;
+                lastShakeTime = now;
+
+                // --- SHAKE #1 ---
+                if (shakeCount === 1) {
+                    // Tactile Feedback: Short buzz
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
+                    // Visual Feedback: 50% filled
+                    hint.classList.add('shaking');
+                    bar.classList.add('active');
+                    fill.style.width = '50%'; 
+                    hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" style="margin-right:4px;"></i> ONE MORE!';
+                }
+                
+                // --- SHAKE #2 (SUCCESS) ---
+                else if (shakeCount >= 2) {
+                    fill.style.width = '100%';
+                    
+                    // Stop listening
+                    window.removeEventListener('devicemotion', handleMotion);
+                    
+                    // Success Haptics: Double Pulse
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                    
+                    revealContact();
+                }
             }
-        } else {
-            // Decays slowly so you don't lose progress between the two shakes
-            shakeScore -= 2; 
         }
 
-        // Clamp score
-        shakeScore = Math.max(0, Math.min(shakeScore, 100));
-
-        // Update Visuals
-        fill.style.width = shakeScore + '%';
-
-        // SUCCESS
-        if (shakeScore >= 100) {
-            window.removeEventListener('devicemotion', handleMotion);
-            
-            // 1. Force Vibration (Android Only)
-            // Single long pulse is most reliable
-            if (navigator.vibrate) {
-                navigator.vibrate(500); 
-            }
-
-            // 2. Unlock
-            revealContact();
-        } else if (shakeScore === 0) {
+        // 2. RESET IF TIMEOUT
+        // If user shook once but didn't shake again in time
+        if (shakeCount === 1 && now - lastShakeTime > SHAKE_TIMEOUT) {
+            shakeCount = 0;
+            fill.style.width = '0%';
             hint.classList.remove('shaking');
             bar.classList.remove('active');
+            hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" style="margin-right:4px;"></i> Met me in person? Shake your phone';
         }
     }
 
-    // iOS Permission Handler
+    // iOS Permission Handler (Required for iPhones)
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         document.body.addEventListener('touchstart', function rp() {
             DeviceMotionEvent.requestPermission().then(r => {
