@@ -964,33 +964,40 @@ function initShake() {
         const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
         const accelNet = Math.abs(total - 9.81);
         
-        // Threshold: How hard you have to shake (15 is moderate)
+        // Threshold: How hard you have to shake
         const SHAKE_THRESHOLD = 15;
 
         // "Energy Bar" Logic
         if (accelNet > SHAKE_THRESHOLD) {
-            // UPDATED: Increased from 5 to 20. 
-            // This makes the bar fill up 4x faster (roughly 2 hard shakes)
-            shakeScore += 20; 
+            // Adds 15% per event. 
+            // Triggers in approx 6-7 events (~0.35s), effectively "two shakes".
+            shakeScore += 15; 
             
             if (!bar.classList.contains('active')) {
                 hint.classList.add('shaking');
                 bar.classList.add('active');
             }
         } else {
-            // UPDATED: Slower decay (from 2 to 1) so it doesn't drop between shakes
-            shakeScore -= 1; 
+            // Decays slowly so you don't lose progress between the two shakes
+            shakeScore -= 2; 
         }
 
-        // Keep score between 0 and 100
+        // Clamp score between 0 and 100
         shakeScore = Math.max(0, Math.min(shakeScore, 100));
 
         // Update UI
         fill.style.width = shakeScore + '%';
 
-        // Success
+        // SUCCESS
         if (shakeScore >= 100) {
             window.removeEventListener('devicemotion', handleMotion);
+            
+            // --- ADDED: Explicit Vibration on Success ---
+            // [Vibrate 200ms, Pause 50ms, Vibrate 200ms]
+            if (navigator.vibrate) {
+                try { navigator.vibrate([200, 50, 200]); } catch(e) {}
+            }
+            
             revealContact();
         } else if (shakeScore === 0) {
             hint.classList.remove('shaking');
