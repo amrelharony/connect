@@ -952,7 +952,7 @@ function initShake() {
     function handleMotion(e) {
         if (contactRevealed) return;
         
-        // Rate limit to prevent battery drain and jitter
+        // Rate limit to prevent battery drain
         const now = Date.now();
         if (now - lastTime < 50) return; 
         lastTime = now;
@@ -963,19 +963,23 @@ function initShake() {
         // Calculate force ignoring gravity
         const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
         const accelNet = Math.abs(total - 9.81);
+        
+        // Threshold: How hard you have to shake (15 is moderate)
         const SHAKE_THRESHOLD = 15;
 
         // "Energy Bar" Logic
         if (accelNet > SHAKE_THRESHOLD) {
-            // Shaking adds energy
-            shakeScore += 5;
+            // UPDATED: Increased from 5 to 20. 
+            // This makes the bar fill up 4x faster (roughly 2 hard shakes)
+            shakeScore += 20; 
+            
             if (!bar.classList.contains('active')) {
                 hint.classList.add('shaking');
                 bar.classList.add('active');
             }
         } else {
-            // Not shaking reduces energy slowly (doesn't reset instantly)
-            shakeScore -= 2;
+            // UPDATED: Slower decay (from 2 to 1) so it doesn't drop between shakes
+            shakeScore -= 1; 
         }
 
         // Keep score between 0 and 100
