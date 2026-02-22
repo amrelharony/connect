@@ -221,58 +221,57 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     fetch('https://ipapi.co/json/',{mode:'cors'}).then(r=>r.json()).then(data=>{if(data.latitude){const dist=haversineKm(data.latitude,data.longitude,CAIRO_LAT,CAIRO_LNG);if(dist<=RADIUS_KM)enableNearbyHints();}}).catch(()=>{});
 }
 function initShake() {
-    let shakeScore = 0;
+    const REQUIRED_SHAKES = 2;
+    const SHAKE_THRESHOLD = 15;
+    const SHAKE_COOLDOWN = 300;
+    const SHAKE_WINDOW = 3000;
     const hint = document.getElementById('shakeHint');
     const bar = document.getElementById('shakeBar');
     const fill = document.getElementById('shakeFill');
-    let lastTime = Date.now();
+    let shakeCount = 0;
+    let lastShakeTime = 0;
+    let inShake = false;
+    let lastSample = Date.now();
 
     function handleMotion(e) {
         if (contactRevealed) return;
-        
-        // Rate limit to prevent battery drain and jitter
+
         const now = Date.now();
-        if (now - lastTime < 50) return; 
-        lastTime = now;
+        if (now - lastSample < 50) return;
+        lastSample = now;
 
         const acc = e.accelerationIncludingGravity;
         if (!acc) return;
 
-        // Calculate force ignoring gravity
         const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
         const accelNet = Math.abs(total - 9.81);
-        const SHAKE_THRESHOLD = 15;
 
-        // "Energy Bar" Logic
-        if (accelNet > SHAKE_THRESHOLD) {
-            // Shaking adds energy
-            shakeScore += 5;
-            if (!bar.classList.contains('active')) {
-                hint.classList.add('shaking');
-                bar.classList.add('active');
+        if (accelNet > SHAKE_THRESHOLD && !inShake) {
+            inShake = true;
+
+            if (now - lastShakeTime > SHAKE_WINDOW) shakeCount = 0;
+            lastShakeTime = now;
+            shakeCount++;
+
+            bar.classList.add('active');
+            hint.classList.add('shaking');
+            fill.style.width = (shakeCount / REQUIRED_SHAKES * 100) + '%';
+
+            if (shakeCount >= REQUIRED_SHAKES) {
+                window.removeEventListener('devicemotion', handleMotion);
+                revealContact();
+                return;
             }
-        } else {
-            // Not shaking reduces energy slowly (doesn't reset instantly)
-            shakeScore -= 2;
-        }
 
-        // Keep score between 0 and 100
-        shakeScore = Math.max(0, Math.min(shakeScore, 100));
+            hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> ' +
+                shakeCount + '/' + REQUIRED_SHAKES + ' — shake again!';
 
-        // Update UI
-        fill.style.width = shakeScore + '%';
-
-        // Success
-        if (shakeScore >= 100) {
-            window.removeEventListener('devicemotion', handleMotion);
-            revealContact();
-        } else if (shakeScore === 0) {
-            hint.classList.remove('shaking');
-            bar.classList.remove('active');
+            setTimeout(() => { inShake = false; }, SHAKE_COOLDOWN);
+        } else if (accelNet <= SHAKE_THRESHOLD * 0.5) {
+            inShake = false;
         }
     }
 
-    // Permission handling for iOS 13+
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         document.body.addEventListener('touchstart', function rp() {
             DeviceMotionEvent.requestPermission().then(r => {
