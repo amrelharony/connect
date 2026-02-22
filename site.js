@@ -211,7 +211,7 @@ function revealContact(){
     secret.querySelectorAll('.si').forEach(el=>{const c=el.dataset.c;el.addEventListener('mouseenter',()=>el.style.color=c);el.addEventListener('mouseleave',()=>el.style.color='');});
     secret.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.5,delay:i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
     if(D&&!reducedMotion){secret.querySelectorAll('.si').forEach(el=>{el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;});el.addEventListener('mouseleave',()=>{el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';el.style.transform='';setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);});});}
-    if(navigator.vibrate)navigator.vibrate([100,30,200]);
+    if(navigator.vibrate)try{navigator.vibrate([100,30,200]);}catch(e){}
     setTimeout(()=>{[hint,deskHint].forEach(h=>{if(h){h.style.opacity='0';setTimeout(()=>h.style.display='none',400);}});},3000);
 }
 function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById('shakeHint').style.display='block';initShake();}else{document.getElementById('deskHint').style.display='block';}}
@@ -222,7 +222,7 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
 }
 function initShake() {
     const REQUIRED_SHAKES = 2;
-    const SHAKE_THRESHOLD = 15;
+    const SHAKE_THRESHOLD = 12;
     const SHAKE_COOLDOWN = 300;
     const SHAKE_WINDOW = 3000;
     const hint = document.getElementById('shakeHint');
@@ -232,6 +232,23 @@ function initShake() {
     let lastShakeTime = 0;
     let inShake = false;
     let lastSample = Date.now();
+    let pendingVibration = null;
+
+    // Vibration API requires user-gesture context on Android.
+    // devicemotion is NOT a user gesture, so vibrate() fails silently.
+    // Fix: queue the pattern and fire it from a touchstart listener.
+    function queueVibrate(pattern) {
+        pendingVibration = pattern;
+        // Also try directly — works if page already has sticky activation
+        try { navigator.vibrate(pattern); } catch(e) {}
+    }
+
+    document.addEventListener('touchstart', function flushVibrate() {
+        if (pendingVibration !== null) {
+            try { navigator.vibrate(pendingVibration); } catch(e) {}
+            pendingVibration = null;
+        }
+    }, { passive: true });
 
     function handleMotion(e) {
         if (contactRevealed) return;
@@ -257,12 +274,13 @@ function initShake() {
             hint.classList.add('shaking');
             fill.style.width = (shakeCount / REQUIRED_SHAKES * 100) + '%';
 
-            if (shakeCount < REQUIRED_SHAKES && navigator.vibrate) {
-                navigator.vibrate(50);
+            if (shakeCount < REQUIRED_SHAKES) {
+                queueVibrate(50);
             }
 
             if (shakeCount >= REQUIRED_SHAKES) {
                 window.removeEventListener('devicemotion', handleMotion);
+                queueVibrate([100, 30, 200]);
                 revealContact();
                 return;
             }
