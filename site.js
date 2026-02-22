@@ -211,10 +211,10 @@ function revealContact(){
     secret.querySelectorAll('.si').forEach(el=>{const c=el.dataset.c;el.addEventListener('mouseenter',()=>el.style.color=c);el.addEventListener('mouseleave',()=>el.style.color='');});
     secret.querySelectorAll('.si').forEach((s,i)=>{gsap.from(s,{scale:0,rotation:90,duration:.5,delay:i*.08,ease:'back.out(3)',onComplete:()=>{gsap.set(s,{clearProps:'all'});s.style.opacity='1';}});});
     if(D&&!reducedMotion){secret.querySelectorAll('.si').forEach(el=>{el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();el.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.35}px,${(e.clientY-(r.top+r.height/2))*.35}px)`;});el.addEventListener('mouseleave',()=>{el.style.transition='transform .5s cubic-bezier(.16,1,.3,1),color .3s';el.style.transform='';setTimeout(()=>el.style.transition='color .3s,transform .3s cubic-bezier(.16,1,.3,1)',.5e3);});});}
-    if(navigator.vibrate)try{navigator.vibrate([100,30,200]);}catch(e){}
     setTimeout(()=>{[hint,deskHint].forEach(h=>{if(h){h.style.opacity='0';setTimeout(()=>h.style.display='none',400);}});},3000);
 }
-function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById('shakeHint').style.display='block';initShake();}else{document.getElementById('deskHint').style.display='block';}}
+function enableNearbyHints(){isNearby=true;if(isMobile){document.getElementById('shakeHint').style.display='block';initShake();}}
+if(!isMobile){document.getElementById('deskHint').style.display='block';}
 if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
     const CAIRO_LAT=30.0444,CAIRO_LNG=31.2357,RADIUS_KM=25;
     function haversineKm(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
@@ -230,14 +230,6 @@ function initShake() {
     let lastShakeTime = 0;
     let lastX = null, lastY = null, lastZ = null;
     let lastSample = 0;
-    let armed = false;
-    let vibrationUnlocked = false;
-
-    function vib(pattern) {
-        if (vibrationUnlocked && navigator.vibrate) {
-            try { navigator.vibrate(pattern); } catch(e) {}
-        }
-    }
 
     function onShakeDetected() {
         const now = Date.now();
@@ -251,33 +243,28 @@ function initShake() {
 
         if (shakeCount >= REQUIRED_SHAKES) {
             window.removeEventListener('devicemotion', handleMotion);
-            vib([100, 30, 200]);
             revealContact();
             return;
         }
 
-        vib(50);
         hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> ' +
             shakeCount + '/' + REQUIRED_SHAKES + ' — shake again!';
     }
 
     function handleMotion(e) {
-        if (contactRevealed || !armed) return;
+        if (contactRevealed) return;
 
         const now = Date.now();
         if (now - lastSample < 80) return;
         lastSample = now;
 
-        // Prefer acceleration (gravity-free) when available
         const acc = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : null;
         const accG = e.accelerationIncludingGravity;
 
         if (acc) {
-            // Gravity-free: measure delta between samples
             const delta = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
             if (delta > 25) onShakeDetected();
         } else if (accG) {
-            // Fallback: measure change between samples
             if (lastX === null) { lastX = accG.x; lastY = accG.y; lastZ = accG.z; return; }
             const dx = Math.abs(accG.x - lastX);
             const dy = Math.abs(accG.y - lastY);
@@ -287,45 +274,18 @@ function initShake() {
         }
     }
 
-    // Tap the hint to arm shake detection & unlock vibration in one user gesture
-    hint.style.cursor = 'pointer';
-    hint.addEventListener('click', function arm() {
-        if (armed) return;
-        armed = true;
-        vibrationUnlocked = true;
-
-        // Prime vibration with a tiny pulse so the user knows it's active
-        if (navigator.vibrate) try { navigator.vibrate(15); } catch(e) {}
-
-        hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> Ready! Shake twice now';
-        hint.style.opacity = '.8';
-        hint.style.color = 'var(--accent)';
-
-        // Start listening for motion
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        document.body.addEventListener('touchstart', function rp() {
             DeviceMotionEvent.requestPermission().then(r => {
                 if (r === 'granted') window.addEventListener('devicemotion', handleMotion);
             }).catch(() => {});
-        } else if (typeof DeviceMotionEvent !== 'undefined') {
-            window.addEventListener('devicemotion', handleMotion);
-        }
-    });
-
-    // Also auto-arm if the user scrolls (provides sticky activation for vibration)
-    function autoArm() {
-        if (armed) return;
-        vibrationUnlocked = true;
-        armed = true;
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function') {
-            window.addEventListener('devicemotion', handleMotion);
-        }
-        window.removeEventListener('scroll', autoArm);
-        document.removeEventListener('touchstart', autoArm);
+            document.body.removeEventListener('touchstart', rp);
+        }, { once: true });
+    } else if (typeof DeviceMotionEvent !== 'undefined') {
+        window.addEventListener('devicemotion', handleMotion);
     }
-    window.addEventListener('scroll', autoArm, { passive: true, once: true });
-    document.addEventListener('touchstart', autoArm, { passive: true, once: true });
 }
-document.addEventListener('keydown',e=>{if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
+document.addEventListener('keydown',e=>{if(e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
 
 // ═══ VCARD ═══
 window.downloadVCard=function(){const vcard=['BEGIN:VCARD','VERSION:3.0','N:Elharony;Amr;;;','FN:Amr Elharony','TITLE:Delivery Lead | Mentor | Fintech Author & Speaker','ORG:Banque Misr','TEL;TYPE=CELL:+201114260806','EMAIL;TYPE=INTERNET:a.elharony@gmail.com','URL:https://amrelharony.com','URL:https://bilingualexecutive.amrelharony.com/','URL:https://www.linkedin.com/in/amrmelharony','X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/amrmelharony','X-SOCIALPROFILE;TYPE=telegram:https://t.me/Amrmelharony','NOTE:Scrum Master at Banque Misr. Author of The Bilingual Executive. DBA in Digital Transformation.','END:VCARD'].join('\r\n');
@@ -2293,8 +2253,8 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 
     // Add new shortcuts before the close button
     const shortcuts = [
+      { key: 'S', desc: 'Reveal Contact Info' },
       { key: 'Z', desc: 'Toggle Zen Mode' },
-      { key: 'R', desc: 'Surprise Me (random section)' },
     ];
 
     shortcuts.forEach(sc => {
