@@ -222,88 +222,108 @@ if(params.has('s')){setTimeout(()=>revealContact(),3500);}else{
 }
 function initShake() {
     const REQUIRED_SHAKES = 2;
-    const SHAKE_THRESHOLD = 12;
-    const SHAKE_COOLDOWN = 300;
     const SHAKE_WINDOW = 3000;
     const hint = document.getElementById('shakeHint');
     const bar = document.getElementById('shakeBar');
     const fill = document.getElementById('shakeFill');
     let shakeCount = 0;
     let lastShakeTime = 0;
-    let inShake = false;
-    let lastSample = Date.now();
-    let pendingVibration = null;
+    let lastX = null, lastY = null, lastZ = null;
+    let lastSample = 0;
+    let armed = false;
+    let vibrationUnlocked = false;
 
-    // Vibration API requires user-gesture context on Android.
-    // devicemotion is NOT a user gesture, so vibrate() fails silently.
-    // Fix: queue the pattern and fire it from a touchstart listener.
-    function queueVibrate(pattern) {
-        pendingVibration = pattern;
-        // Also try directly — works if page already has sticky activation
-        try { navigator.vibrate(pattern); } catch(e) {}
+    function vib(pattern) {
+        if (vibrationUnlocked && navigator.vibrate) {
+            try { navigator.vibrate(pattern); } catch(e) {}
+        }
     }
 
-    document.addEventListener('touchstart', function flushVibrate() {
-        if (pendingVibration !== null) {
-            try { navigator.vibrate(pendingVibration); } catch(e) {}
-            pendingVibration = null;
+    function onShakeDetected() {
+        const now = Date.now();
+        if (now - lastShakeTime > SHAKE_WINDOW) shakeCount = 0;
+        lastShakeTime = now;
+        shakeCount++;
+
+        bar.classList.add('active');
+        hint.classList.add('shaking');
+        fill.style.width = (shakeCount / REQUIRED_SHAKES * 100) + '%';
+
+        if (shakeCount >= REQUIRED_SHAKES) {
+            window.removeEventListener('devicemotion', handleMotion);
+            vib([100, 30, 200]);
+            revealContact();
+            return;
         }
-    }, { passive: true });
+
+        vib(50);
+        hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> ' +
+            shakeCount + '/' + REQUIRED_SHAKES + ' — shake again!';
+    }
 
     function handleMotion(e) {
-        if (contactRevealed) return;
+        if (contactRevealed || !armed) return;
 
         const now = Date.now();
-        if (now - lastSample < 50) return;
+        if (now - lastSample < 80) return;
         lastSample = now;
 
-        const acc = e.accelerationIncludingGravity;
-        if (!acc) return;
+        // Prefer acceleration (gravity-free) when available
+        const acc = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : null;
+        const accG = e.accelerationIncludingGravity;
 
-        const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
-        const accelNet = Math.abs(total - 9.81);
-
-        if (accelNet > SHAKE_THRESHOLD && !inShake) {
-            inShake = true;
-
-            if (now - lastShakeTime > SHAKE_WINDOW) shakeCount = 0;
-            lastShakeTime = now;
-            shakeCount++;
-
-            bar.classList.add('active');
-            hint.classList.add('shaking');
-            fill.style.width = (shakeCount / REQUIRED_SHAKES * 100) + '%';
-
-            if (shakeCount < REQUIRED_SHAKES) {
-                queueVibrate(50);
-            }
-
-            if (shakeCount >= REQUIRED_SHAKES) {
-                window.removeEventListener('devicemotion', handleMotion);
-                queueVibrate([100, 30, 200]);
-                revealContact();
-                return;
-            }
-
-            hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> ' +
-                shakeCount + '/' + REQUIRED_SHAKES + ' — shake again!';
-
-            setTimeout(() => { inShake = false; }, SHAKE_COOLDOWN);
-        } else if (accelNet <= SHAKE_THRESHOLD * 0.5) {
-            inShake = false;
+        if (acc) {
+            // Gravity-free: measure delta between samples
+            const delta = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+            if (delta > 25) onShakeDetected();
+        } else if (accG) {
+            // Fallback: measure change between samples
+            if (lastX === null) { lastX = accG.x; lastY = accG.y; lastZ = accG.z; return; }
+            const dx = Math.abs(accG.x - lastX);
+            const dy = Math.abs(accG.y - lastY);
+            const dz = Math.abs(accG.z - lastZ);
+            lastX = accG.x; lastY = accG.y; lastZ = accG.z;
+            if (dx + dy + dz > 30) onShakeDetected();
         }
     }
 
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        document.body.addEventListener('touchstart', function rp() {
+    // Tap the hint to arm shake detection & unlock vibration in one user gesture
+    hint.style.cursor = 'pointer';
+    hint.addEventListener('click', function arm() {
+        if (armed) return;
+        armed = true;
+        vibrationUnlocked = true;
+
+        // Prime vibration with a tiny pulse so the user knows it's active
+        if (navigator.vibrate) try { navigator.vibrate(15); } catch(e) {}
+
+        hint.innerHTML = '<i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> Ready! Shake twice now';
+        hint.style.opacity = '.8';
+        hint.style.color = 'var(--accent)';
+
+        // Start listening for motion
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
             DeviceMotionEvent.requestPermission().then(r => {
                 if (r === 'granted') window.addEventListener('devicemotion', handleMotion);
             }).catch(() => {});
-            document.body.removeEventListener('touchstart', rp);
-        }, { once: true });
-    } else if (typeof DeviceMotionEvent !== 'undefined') {
-        window.addEventListener('devicemotion', handleMotion);
+        } else if (typeof DeviceMotionEvent !== 'undefined') {
+            window.addEventListener('devicemotion', handleMotion);
+        }
+    });
+
+    // Also auto-arm if the user scrolls (provides sticky activation for vibration)
+    function autoArm() {
+        if (armed) return;
+        vibrationUnlocked = true;
+        armed = true;
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function') {
+            window.addEventListener('devicemotion', handleMotion);
+        }
+        window.removeEventListener('scroll', autoArm);
+        document.removeEventListener('touchstart', autoArm);
     }
+    window.addEventListener('scroll', autoArm, { passive: true, once: true });
+    document.addEventListener('touchstart', autoArm, { passive: true, once: true });
 }
 document.addEventListener('keydown',e=>{if(isNearby&&e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
 
