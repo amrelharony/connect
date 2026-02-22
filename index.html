@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Amr Elharony | Delivery Lead | Mentor | Fintech Author & Speaker</title>
+    <meta name="description" content="Amr Elharony — Scrum Master at Banque Misr, FinTech author, and globally recognized mentor. Bridging banking and technology to deliver measurable digital transformation across MENA.">
+    <meta name="author" content="Amr Elharony">
+    <link rel="canonical" href="https://amrelharony.com">
+    <meta property="og:type" content="profile"><meta property="og:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
+    <meta property="og:description" content="Bridging banking and technology to deliver measurable digital transformation. Author of The Bilingual Executive. 2,300+ mentoring minutes on ADPList.">
+    <meta property="og:url" content="https://amrelharony.com"><meta property="og:image" content="https://amrelharony.com/profile.jpg">
+    <meta property="og:site_name" content="Amr Elharony"><meta property="profile:first_name" content="Amr"><meta property="profile:last_name" content="Elharony">
+    <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Amr Elharony — Delivery Lead · Mentor · Fintech Author">
+    <meta name="twitter:description" content="Bridging banking and technology to deliver measurable digital transformation across MENA.">
+    <meta name="twitter:image" content="https://amrelharony.com/profile.jpg">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Amr Elharony","url":"https://amrelharony.com","image":"https://amrelharony.com/profile.jpg","jobTitle":"Scrum Master","worksFor":{"@type":"Organization","name":"Banque Misr"},"description":"Delivery Lead, Mentor, FinTech Author & Speaker bridging banking and technology across MENA.","alumniOf":[{"@type":"CollegeOrUniversity","name":"Helwan University Cairo"},{"@type":"CollegeOrUniversity","name":"Frankfurt School of Finance & Management"}],"knowsAbout":["FinTech","Agile","Scrum","Digital Transformation","Data Analytics","Banking"],"sameAs":["https://www.linkedin.com/in/amrmelharony","https://t.me/Amrmelharony","https://adplist.org/mentors/amr-elharony"]}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://api.open-meteo.com">
+    <link rel="dns-prefetch" href="https://date.nager.at">
+    <link rel="dns-prefetch" href="https://api.qrserver.com">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace'],ar:['Noto Sans Arabic','sans-serif']}}}}</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script>window.va=window.va||function(){(window.va.q=window.va.q||[]).push(arguments);};</script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="noise"></div>
+<div class="sbar" id="sbar"></div>
+<div class="cg" id="cg"></div>
+<div class="cd" id="cdd"></div>
+<div class="mesh"><div class="b1"></div><div class="b2"></div><div class="b3"></div></div>
+<canvas id="bgC" aria-hidden="true"></canvas>
+
+<div class="weather-widget" id="weatherWidget"><span class="weather-icon" id="weatherIcon">⏳</span><span class="weather-temp" id="weatherTemp">--°C</span></div>
+<div class="top-btns" id="topBtns">
+    <button class="tb-toggle" id="tbToggle" aria-label="Menu">⋮</button>
+    <button class="tbtn" id="termBtn" aria-label="Open terminal" onclick="openTerm()" style="display:none"><i class="fa-solid fa-terminal"></i></button>
+    <button class="tbtn" id="gameBtn" aria-label="Play game" onclick="openGame()" style="display:none"><i class="fa-solid fa-gamepad"></i></button>
+    <button class="tbtn trophy-btn" id="trophyBtn" aria-label="Trophy case" style="display:none"><i class="fa-solid fa-trophy"></i><span class="trophy-btn-dot" id="trophyDot" style="display:none"></span></button>
+    <button class="tbtn" id="tbtn" aria-label="Toggle theme"><i class="fa-solid fa-moon" id="ticon"></i></button>
+</div>
+
+<div id="easterEgg" onclick="if(event.target===this)closeEgg()">
+    <div class="egg-card">
+        <div class="egg-emoji">🤫</div>
+        <div class="egg-title">You found a secret!</div>
+        <div class="egg-text" id="eggText">
+            Fun facts: I once debugged a production banking system at 3 AM in my pajamas. My first "app" was an Excel macro that automated my entire department's reporting. I believe the best code is the code you delete. Also — I make really good koshari. 🍲
+        </div>
+        <div class="egg-close" onclick="closeEgg()">[ PRESS ESC OR TAP TO CLOSE ]</div>
+    </div>
+</div>
+
+<div id="shareOverlay" onclick="if(event.target===this)closeShare()"><div class="share-panel" style="position:relative">
+    <button onclick="closeShare()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;z-index:2;transition:all .3s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'"><i class="fa-solid fa-xmark"></i></button>
+    <div class="share-card-preview"><canvas id="shareCanvas" class="share-canvas" width="600" height="340"></canvas><div class="share-copied" id="shareCopied">✓ Copied!</div></div>
+    <div class="share-tabs">
+        <button class="share-tab active" data-tab="platforms"><i class="fa-solid fa-share-nodes" style="margin-right:4px"></i>Share</button>
+        <button class="share-tab" data-tab="qr"><i class="fa-solid fa-qrcode" style="margin-right:4px"></i>QR Code</button>
+        <button class="share-tab" data-tab="card"><i class="fa-solid fa-download" style="margin-right:4px"></i>Save Card</button>
+    </div>
+    <div class="share-platforms share-tab-content active" data-content="platforms">
+        <div class="share-platform-grid">
+            <button class="share-plat" data-platform="linkedin"><div class="share-plat-icon"><i class="fa-brands fa-linkedin"></i></div><div class="share-plat-name">LinkedIn</div></button>
+            <button class="share-plat" data-platform="twitter"><div class="share-plat-icon"><i class="fa-brands fa-x-twitter"></i></div><div class="share-plat-name">X / Twitter</div></button>
+            <button class="share-plat" data-platform="whatsapp"><div class="share-plat-icon"><i class="fa-brands fa-whatsapp"></i></div><div class="share-plat-name">WhatsApp</div></button>
+            <button class="share-plat" data-platform="telegram"><div class="share-plat-icon"><i class="fa-brands fa-telegram"></i></div><div class="share-plat-name">Telegram</div></button>
+            <button class="share-plat" data-platform="email"><div class="share-plat-icon"><i class="fa-solid fa-envelope"></i></div><div class="share-plat-name">Email</div></button>
+            <button class="share-plat" data-platform="facebook"><div class="share-plat-icon"><i class="fa-brands fa-facebook"></i></div><div class="share-plat-name">Facebook</div></button>
+            <button class="share-plat" data-platform="copy"><div class="share-plat-icon"><i class="fa-solid fa-link"></i></div><div class="share-plat-name">Copy Link</div></button>
+            <button class="share-plat" data-platform="native"><div class="share-plat-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div><div class="share-plat-name">More...</div></button>
+        </div>
+    </div>
+    <div class="share-qr-section share-tab-content" data-content="qr"><img id="shareQr" class="share-qr-canvas" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://amrelharony.com&color=00e1ff&bgcolor=ffffff&margin=10" alt="QR Code" width="200" height="200" style="border-radius:12px;border:1px solid var(--border);display:block;margin:0 auto;background:#fff"><div class="share-qr-label">Scan to visit amrelharony.com</div></div>
+    <div class="share-card-section share-tab-content" data-content="card">
+        <div class="share-dl-grid">
+            <button class="share-dl-btn primary" onclick="downloadShareCard()"><i class="fa-solid fa-image"></i> Save as PNG</button>
+            <button class="share-dl-btn" onclick="copyShareImage()"><i class="fa-solid fa-copy"></i> Copy Image</button>
+        </div>
+    </div>
+    <div class="share-close" onclick="closeShare()">[ TAP OR ESC TO CLOSE ]</div>
+</div></div>
+
+<!-- Terminal Overlay -->
+<div id="termOverlay" onclick="if(event.target===this)closeTerm()"><div class="term-win"><div class="term-bar"><span class="term-dot r" onclick="closeTerm()"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">amr@portfolio:~</span></div><div class="term-body" id="termBody"><div class="term-line"><span class="term-green">Welcome to Amr's Terminal v2.0</span></div><div class="term-line"><span class="term-out">Type <span class="term-accent">help</span> for available commands</span></div></div><div class="term-input-line"><span class="term-prompt">❯</span><input class="term-input" id="termInput" type="text" autocomplete="off" spellcheck="false" placeholder="type a command..."></div></div></div>
+<!-- Mini Game Overlay -->
+<div id="gameOverlay" onclick="if(event.target===this)closeGame()"><div class="game-win">
+    <div class="game-hud">
+        <div class="game-hud-item"><div class="game-hud-val" id="hudPortfolio">$0</div><div class="game-hud-label">Portfolio</div></div>
+        <div class="game-hud-item"><div class="game-hud-val" id="hudLevel">1</div><div class="game-hud-label">Quarter</div></div>
+        <div class="game-hud-item"><div class="game-hud-val profit" id="hudPnl">+$0</div><div class="game-hud-label">P&L</div></div>
+        <div class="game-hud-item"><div class="game-hud-val" id="hudStreak">0</div><div class="game-hud-label">Streak</div></div>
+    </div>
+    <div class="game-ticker"><span id="gameTicker">Loading market data...</span></div>
+    <div class="game-canvas-wrap"><canvas id="snakeCanvas" class="game-canvas" width="280" height="280"></canvas></div>
+    <div class="game-level-bar"><span class="game-level-text" id="levelText">Q1</span><div class="game-level-track"><div class="game-level-fill" id="levelFill" style="width:0%"></div></div></div>
+    <div class="game-msg" id="gameMsg">Collect 💰 coins to grow your portfolio</div>
+    <div class="game-hint">Arrow keys · R restart · ESC close</div>
+    <div id="gameTouchHint" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#58a6ff;padding:8px 14px;text-align:center;opacity:1;transition:opacity 1s">👆 Swipe anywhere to move</div>
+    <div class="game-btns"><button class="game-btn" onclick="restartSnake()">↻ New Trade</button><button class="game-btn" onclick="closeGame()">✕ Close</button></div>
+</div></div>
+<!-- Keyboard Shortcuts Overlay -->
+<div id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()"><div class="shortcut-panel"><div class="sc-title">⌨️ Keyboard Shortcuts</div><div class="sc-row"><span class="sc-key">T</span><span class="sc-desc">Open Trophy Case</span></div><div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">This panel</span></div><div class="sc-row"><span class="sc-key">`</span><span class="sc-desc">Open Terminal</span></div><div class="sc-row"><span class="sc-key">G</span><span class="sc-desc">Play Snake</span></div><div class="sc-row"><span class="sc-key">↑↑↓↓←→←→BA</span><span class="sc-desc">Easter Egg</span></div><div class="sc-row"><span class="sc-key">Ctrl+P</span><span class="sc-desc">Print Resume</span></div><div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">Close any overlay</span></div><div class="sc-close" onclick="closeShortcuts()">[ PRESS ? OR ESC TO CLOSE ]</div></div></div>
+<!-- Trophy Case Overlay -->
+<div id="trophyOverlay" onclick="if(event.target===this)closeTrophy()"><div class="trophy-panel"><div class="trophy-header"><div class="trophy-title">🏆 Trophy Case</div><div class="trophy-ring-wrap"><svg class="trophy-ring-svg" width="100" height="100" viewBox="0 0 100 100"><defs><linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent)"/><stop offset="50%" stop-color="var(--accent2)"/><stop offset="100%" stop-color="var(--accent3)"/></linearGradient></defs><circle class="trophy-ring-bg" cx="50" cy="50" r="44"/><circle class="trophy-ring-fill" id="trophyRing" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/></svg><div class="trophy-ring-text"><div class="trophy-ring-pct" id="trophyPct">0%</div><div class="trophy-ring-sub">Complete</div></div></div><div class="trophy-stats"><div class="trophy-stat"><div class="trophy-stat-num" id="trophySBadges">0</div><div class="trophy-stat-label">Badges</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySXp">0</div><div class="trophy-stat-label">Total XP</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySLevel">1</div><div class="trophy-stat-label">Level</div></div></div><div class="trophy-xp-bar"><div class="trophy-xp-fill" id="trophyXpFill" style="width:0%"></div></div><div class="trophy-level" id="trophyLevel">Level 1 · 0 XP to next</div></div><div id="trophyGrid"></div><button class="trophy-share-btn" onclick="shareTrophy()"><i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress</button><div class="trophy-close" onclick="closeTrophy()">[ PRESS T OR TAP TO CLOSE ]</div></div></div>
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+<div class="combo-indicator" id="comboIndicator"><div class="combo-count" id="comboCount">x2</div><div class="combo-label">combo</div><div class="combo-mult" id="comboMult">2× XP</div></div>
+<!-- Smart CTA -->
+<div class="smart-cta" id="smartCta"><a class="smart-cta-inner" id="smartCtaLink" href="#" target="_blank" rel="noopener"><div class="smart-cta-icon" id="smartCtaIcon"><i class="fa-solid fa-comments"></i></div><div class="smart-cta-text"><div class="smart-cta-title" id="smartCtaTitle"></div><div class="smart-cta-sub" id="smartCtaSub"></div></div><div class="smart-cta-close" onclick="event.preventDefault();event.stopPropagation();dismissSmartCta()"><i class="fa-solid fa-xmark"></i></div></a></div>
+
+<div id="preloader" role="status" aria-label="Loading">
+    <div class="pre-line" id="preLine">ESTABLISHING CONNECTION</div>
+    <div class="pre-ctr" id="preCtr">0</div>
+    <div class="pre-bar" id="preBar"><div class="pre-fill" id="preFill"></div></div>
+    <div class="pre-stage" id="preStg"></div>
+</div>
+
+<div id="app">
+    <div class="rv" style="display:flex;justify-content:center;">
+        <div class="st"><span class="sd" id="sdot" style="background:#22c55e;" aria-hidden="true"></span><span id="stxt">LOCATING...</span></div>
+    </div>
+    <div class="pf rv" id="pfw" role="button" tabindex="0" aria-label="Flip to show QR code" onclick="toggleFlip()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFlip();}">
+        <svg viewBox="0 0 136 136" aria-hidden="true"><circle cx="68" cy="68" r="66" stroke="var(--accent)" opacity=".3"/><circle cx="68" cy="68" r="66" stroke="var(--accent2)" opacity=".2" stroke-dasharray="4 10" style="animation-direction:reverse;animation-duration:18s"/></svg>
+        <div class="pfi"><div class="fc"><div class="fi" id="fc">
+            <div class="ff"><img src="profile.jpg" alt="Amr Elharony" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div style="width:100%;height:100%;background:var(--bg2);display:none;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="font-size:36px;color:var(--sub);" aria-hidden="true"></i></div></div>
+            <div class="fb"><img id="qri" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=00e1ff&bgcolor=06080f" alt="QR code" style="width:80%;height:80%;object-fit:contain;"></div>
+        </div></div></div>
+        <div class="qb" aria-hidden="true"><i class="fa-solid fa-qrcode"></i></div>
+    </div>
+    <div class="ph rv">TAP PHOTO FOR QR</div>
+
+    <h1 class="hn rv"><span class="ng" id="hname">Amr Elharony</span></h1>
+    <p class="vp rv" id="vpText">I help <strong>banks and FinTech teams</strong> ship digital products faster through <strong>agile delivery, data-driven decisions</strong>, and bridging the gap between business and technology.</p>
+    <div class="rl rv" id="rtags"><span class="rt" data-ar="قائد التسليم">Delivery Lead</span><span class="rt" data-ar="مُرشد">Mentor</span><span class="rt" data-ar="مؤلف ومتحدث فينتك">Fintech Author & Speaker</span></div>
+
+    <div class="imp rv" aria-label="Key achievements">
+        <div class="imp-item"><div class="imp-num" id="impNum1">12+</div><div class="imp-label" id="impL1">Years in Banking</div></div>
+        <div class="imp-item"><div class="imp-num" id="impNum2">2,300+</div><div class="imp-label" id="impL2">Mentoring Mins</div></div>
+        <div class="imp-item"><div class="imp-num" id="impNum3">9+</div><div class="imp-label" id="impL3">Panel Stages</div></div>
+    </div>
+
+
+    <div class="ticker-wrap rv" aria-label="Recommendations">
+        <div class="ticker" id="ticker"></div>
+    </div>
+
+    <div class="conf-strip rv">
+        <span class="conf-badge">Seamless North Africa</span>
+        <span class="conf-badge">Africa FinTech Forum</span>
+        <span class="conf-badge">DevOpsDays Cairo</span>
+        <span class="conf-badge">Techne Summit</span>
+        <span class="conf-badge">Banking & Fintech Summit</span>
+        <span class="conf-badge">Egypt Career Summit</span>
+        <span class="conf-badge">TechUp Women</span>
+    </div>
+
+    <div class="shake-hint" id="shakeHint"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="margin-right:4px;"></i> Met me in person? Shake your phone</div>
+    <div class="shake-bar" id="shakeBar"><div class="shake-fill" id="shakeFill"></div></div>
+    <div class="desk-hint" id="deskHint"><i class="fa-solid fa-keyboard" aria-hidden="true" style="margin-right:4px;"></i> Met me? Press <strong style="color:var(--accent);">S</strong> to save my contact</div>
+    <div id="contactSecret">
+        <div class="sr" id="srow">
+            <a href="https://www.linkedin.com/in/amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0077b5" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" aria-hidden="true"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=201114260806" target="_blank" rel="noopener" class="si" data-c="#25d366" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
+            <a href="https://t.me/Amrmelharony" target="_blank" rel="noopener" class="si" data-c="#0088cc" aria-label="Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
+            <a href="mailto:a.elharony@gmail.com" class="si" data-c="#ea4335" aria-label="Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
+        </div>
+        <button class="vcb" id="vcBtn" onclick="downloadVCard()"><div class="vcb-shim"></div><i class="fa-solid fa-address-card" aria-hidden="true"></i><span id="vcTxt">Save Contact</span></button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+        <a href="https://bilingualexecutive.amrelharony.com/" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="be.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-book fbi" style="color:var(--accent);" aria-hidden="true"></i></div><div class="lb"><div class="lt">The Bilingual Executive</div><div class="lsu">Bridging Business & Tech</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
+        <a href="https://www.linkedin.com/company/fintech-bilinguals" target="_blank" rel="noopener" class="lk rv"><div class="ls"></div><div class="lm"></div><div class="li"><img src="fb.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><i class="fa-solid fa-users fbi" style="color:var(--accent2);" aria-hidden="true"></i></div><div class="lb"><div class="lt">Fintech Bilinguals</div><div class="lsu">Join the Community</div></div><div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div></a>
+       <a href="https://calendly.com/amrmelharony/30min" target="_blank" rel="noopener" class="lk rv">
+    <div class="ls"></div>
+    <div class="lm"></div>
+    <div class="li">
+        <img src="calendly.webp" alt="Calendly" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <i class="fa-solid fa-calendar-check fbi" style="display:none;color:var(--accent);" aria-hidden="true"></i>
+    </div>
+    <div class="lb">
+        <div class="lt">Book My Calendar</div>
+        <div class="lsu">Free 30-Min Strategy Call</div>
+    </div>
+    <div class="la" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+</a>
+
+    </div>
+
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
+    <div class="tl-wrap rv"><div class="tl-line"></div>
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent);"></div><div class="tl-yr">2026</div><div class="tl-txt"><strong>Author, Founder & Data Leader</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Data & Agile Leader — Navigating data delivery as a Scrum Master at Banque Misr</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Published <strong>"The Bilingual Executive"</strong> (print, ebook & audiobook), launched at the Greek Campus</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Founded <strong>"Fintech Bilinguals"</strong> community in Cairo</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Certified Data Management Professional (CDMP)</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent2);"></div><div class="tl-yr">2025</div><div class="tl-txt"><strong>Agile Mastery & Industry Voice</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Championed hybrid Scrum/Kanban framework for data analytics at Banque Misr</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Earned <strong>SAFe® 6 SM, PSM II, PSPO II, PSK I, PMI-ACP, ICAgile-ATF</strong>, Jira Cloud Management</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Panels & keynotes at <strong>Techne Summit, DevOpsDays Cairo, Africa FinTech Forum</strong></div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent3);"></div><div class="tl-yr">2023–24</div><div class="tl-txt"><strong>Doctorate & The Data Pivot</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Earned <strong>Doctorate (DBA)</strong> in Digital Transformation — Helwan University</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Pivoted to Corporate Banking Data Analyst at Banque Misr + Datacamp Pro certification</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>2,240+ coaching minutes</strong> as ADPList Top Mentor · Won Banque Misr "Best Learner Award"</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:#eab308;"></div><div class="tl-yr">2019–22</div><div class="tl-txt"><strong>Project Management & FinTech Foundations</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Managed complex banking projects at Banque Misr · Earned <strong>PMP</strong> (Sep 2022)</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Certified Expert in Digital Finance — Frankfurt School of Finance & Management</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>MBA in Entrepreneurship</strong> (2019) · Pro bono consulting for Egyptian FinTech Association</div></div>
+
+        <div class="tl-item tl-era"><div class="tl-dot" style="border-color:#22c55e;"></div><div class="tl-yr">2014–16</div><div class="tl-txt"><strong>Security & Economic Roots</strong></div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">IT Officer — Egyptian Armed Forces, commanding digital security operations (2015–2016)</div></div>
+        <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt"><strong>BA in International Economics</strong> — Helwan University (2014) · Internships at Central Bank of Egypt, EGX, Nissan</div></div>
+    </div>
+
+    <!-- Certification Wall -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">CERTIFICATIONS</div><div class="ndl"></div></div>
+    <div class="cert-grid" id="certGrid">
+        <a href="https://www.credly.com/badges/eec32200-0842-43d7-8ba5-336367850fd3" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎯</div><div class="cert-name"><strong>PMP</strong>Project Management</div><div class="cert-org">PMI · 2022</div></a>
+        <a href="https://www.credly.com/badges/5d2548d0-8425-4d55-8ed6-d0f32095c1c8" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🔄</div><div class="cert-name"><strong>SAFe® 6 SM</strong>Scrum Master</div><div class="cert-org">Scaled Agile · 2025</div></a>
+        <a href="https://www.credly.com/badges/72258978-34b5-498b-b79b-d5c1f1bf26fe" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📋</div><div class="cert-name"><strong>PSM II</strong>Pro Scrum Master</div><div class="cert-org">Scrum.org · 2025</div></a>
+        <a href="https://www.credly.com/badges/beca0beb-d17d-4856-80ff-9fb770aa3478" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📦</div><div class="cert-name"><strong>PSPO II</strong>Product Owner</div><div class="cert-org">Scrum.org · 2025</div></a>
+        <a href="https://www.credly.com/badges/ffebe8e4-ee4f-44bc-b8c2-b91659b128e7" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📊</div><div class="cert-name"><strong>PMI-ACP</strong>Agile Certified</div><div class="cert-org">PMI · 2025</div></a>
+        <a href="https://www.credly.com/badges/c8e9e735-7e32-4947-baec-3df79627af6e" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🧠</div><div class="cert-name"><strong>PSK I</strong>Scrum + Kanban</div><div class="cert-org">Scrum.org · 2025</div></a>
+        <a href="https://www.credly.com/badges/a7f59e05-13a7-4de2-aa0a-577d2d3be6e6" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏗️</div><div class="cert-name"><strong>ICAgile ATF</strong>Agile Team Facilit.</div><div class="cert-org">ICAgile · 2025</div></a>
+        <a href="https://certificates.cdmp.info/3bb25e30-c242-47b5-a3ae-d972fb8b7ee1" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">💾</div><div class="cert-name"><strong>CDMP</strong>Data Management</div><div class="cert-org">DAMA · 2026</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQFo34ujncSchA/profile-treasury-image-shrink_1280_1280/B4DZkf0AldGgAQ-/0/1757175352139?e=1771588800&v=beta&t=bE9j3hyEb9F6y4xxgSCJfvoXb02-vsVnCuVSJLB1jKM" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏦</div><div class="cert-name"><strong>CEDF</strong>Digital Finance</div><div class="cert-org">Frankfurt School · 2019</div></a>
+        <a href="https://www.datacamp.com/certificate/DA0026927366011" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📈</div><div class="cert-name"><strong>Datacamp Pro</strong>Data Analyst</div><div class="cert-org">Datacamp · 2023</div></a>
+        <a href="https://cp.certmetrics.com/atlassian/en/public/badge/c?id=5ecee96d9286180c30565dce&ccat=30&date=2025-11-2" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">⚙️</div><div class="cert-name"><strong>Jira Cloud</strong>Management</div><div class="cert-org">Atlassian · 2025</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQEplmYsSyDekg/profile-treasury-image-shrink_1280_1280/profile-treasury-image-shrink_1280_1280/0/1707366993200?e=1771567200&v=beta&t=CKwIiV2jOhNbZOzQxxibKT58VhWqSDhrUl_J18hLW1w" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎓</div><div class="cert-name"><strong>DBA</strong>Digital Transform.</div><div class="cert-org">Helwan Univ. · 2023</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQHpNVAsYWv22g/profile-treasury-image-shrink_1920_1920/B4DZkc7BZfJMAc-/0/1757126860063?e=1771567200&v=beta&t=-niS92ivnjqqsZAogiAfaZYYm5OlBU8VD0-cHxxjN_E" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">💼</div><div class="cert-name"><strong>MBA</strong>Entrepreneurship</div><div class="cert-org">2019</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQG5xCkTacfhLQ/profile-treasury-image-shrink_8192_8192/B4DZkc7Fu7JkAg-/0/1757126876953?e=1771567200&v=beta&t=xHLa4tEySsC3q8VD2yGSZrEnYlYx91uSTY9oSjpO0MU" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🌍</div><div class="cert-name"><strong>BA</strong>Intl. Economics</div><div class="cert-org">Helwan Univ. · 2014</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQHGNYYaz1Xd8w/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720814197947?e=1771567200&v=beta&t=Z_HSYrZmDobUqWjbwnpPHKcpMUoXINyi3_jseIYffCg" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📊</div><div class="cert-name"><strong>Investor Relations</strong>Program</div><div class="cert-org">FRA · May 2014</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQGl168j8JlXZw/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1732801386452?e=1771567200&v=beta&t=leX2wo2S2sKdeuoHDoIGaC4oaydAfhfyytjhkqCua2k" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">💡</div><div class="cert-name"><strong>Innovation</strong>Program</div><div class="cert-org">AMIDEAST · Jul 2024</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQFQTB2JPwAEug/profile-treasury-image-shrink_1920_1920/profile-treasury-image-shrink_1920_1920/0/1720813462120?e=1771567200&v=beta&t=KsoAIvrnF_QF4hJ2jruggZDWuXsrv0dWpWkZ41WBshk" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🌐</div><div class="cert-name"><strong>Best Practices</strong>Intl. Markets</div><div class="cert-org">Feb 2021</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQEigBO4i79udQ/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720811624146?e=1771567200&v=beta&t=2XhQWthV7TE2cMTPIs7T3StCbhKUvE0li5OU2I8_t6Y" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🏛️</div><div class="cert-name"><strong>Treasury Ops</strong>Bank Operations</div><div class="cert-org">Apr 2013</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQGcQlWEOQDjRw/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720811283777?e=1771567200&v=beta&t=nDInMNd55VmAQsUmGUIbJIc_tb2xQlUPE2zi-aVEhn0" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">💳</div><div class="cert-name"><strong>Credit</strong>Course</div><div class="cert-org">Feb 2018</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQGw_hIYiwgBcg/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720811075996?e=1771567200&v=beta&t=3DE_58yZYBjVu-oCNt17UIV8opMLV4-xKg5TTedyBEI" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🌿</div><div class="cert-name"><strong>Green Finance</strong>EBRD Academy</div><div class="cert-org">Dec 2013</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQHm6b8P2iP3dQ/profile-treasury-image-shrink_8192_8192/profile-treasury-image-shrink_8192_8192/0/1720811010808?e=1771567200&v=beta&t=OaKo0HvgLLdvLWm7F93v5f2PBYBnLUqebNofdThXnZk" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎤</div><div class="cert-name"><strong>Prof. Trainer</strong>Certified</div><div class="cert-org">Aug 2023</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQGejtEQL5-A8w/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720616932797?e=1771567200&v=beta&t=u-9U8imn3xD_4j6ghN0ecTs0-5H58Vz1Hg-Imo8fvtE" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📐</div><div class="cert-name"><strong>SME Consultant</strong>Accredited</div><div class="cert-org">Jun 2018</div></a>
+        <a href="https://media.licdn.com/dms/image/v2/D4D2DAQGvesUaGim01A/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1720614658079?e=1771567200&v=beta&t=EGLCujcqfu56bkAleU5X-6wRngm73qT0bSaG_41Bms8" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">📉</div><div class="cert-name"><strong>Data Analysis</strong>Professional</div><div class="cert-org">Feb 2023</div></a>
+    </div>
+
+    <!-- Testimonial Carousel -->
+    <div class="nd rv"><div class="ndl"></div><div class="ndt">WHAT 80+ PEOPLE SAY</div><div class="ndl"></div></div>
+    <div class="tc-section">
+        <div class="tc-cats" id="tcCats"></div>
+        <div class="tc-viewport" id="tcViewport">
+            <div class="tc-track" id="tcTrack"></div>
+        </div>
+        <div class="tc-nav">
+            <button class="tc-arrow" id="tcPrev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="tc-dots" id="tcDots"></div>
+            <button class="tc-arrow" id="tcNext" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="tc-counter" id="tcCounter"></div>
+        <div class="tc-auto-bar"><div class="tc-auto-fill" id="tcAutoFill"></div></div>
+    </div>
+
+    <!-- Print-only resume header -->
+    <div class="print-only" style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #000;">
+        <h1 style="font-size:28px;margin-bottom:4px;">Amr Elharony</h1>
+        <p style="font-size:14px;color:#555;">Delivery Lead · Mentor · Fintech Author & Speaker</p>
+        <p style="font-size:11px;color:#888;">Cairo, Egypt · a.elharony@gmail.com · amrelharony.com · linkedin.com/in/amrmelharony</p>
+    </div>
+
+   <div class="nd rv"><div class="ndl"></div><div class="ndt">LINKEDIN NEWSLETTERS</div><div class="ndl"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+    <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni">
+            <img src="ae.png" alt="AE" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">
+        </div>
+        <span class="nlb">LevelUp Your Leadership</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+    <a href="https://www.linkedin.com/newsletters/levelup-your-tech-7102013426519977984/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni">
+            <img src="ae.png" alt="AE" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">
+        </div>
+        <span class="nlb">LevelUp Your Tech</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+    <a href="https://www.linkedin.com/newsletters/levelup-your-business-7107105796223602689/" target="_blank" rel="noopener" class="nl rv">
+        <div class="ni">
+            <img src="ae.png" alt="AE" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">
+        </div>
+        <span class="nlb">LevelUp Your Business</span>
+        <i class="fa-solid fa-arrow-right ne"></i>
+    </a>
+</div>
+    
+    <!-- Personalized Recommendation -->
+    <div id="recContainer" style="margin-bottom:16px;"></div>
+
+    <button class="vcb rv" style="background:var(--card);color:var(--text);border:1px solid var(--border);margin-bottom:24px;" onclick="openShare()"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share My Profile</span></button>
+
+    <div class="visitor-count" id="visitorCount"></div>
+    <div class="streak" id="streakCount"></div>
+    <div class="xp-footer" id="xpFooter" onclick="openTrophy()"><span class="xp-text" id="xpText">0 XP</span><div class="xp-bar-mini"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div><span class="xp-level-badge" id="xpLevel" style="color:var(--accent);background:rgba(0,225,255,.1);">LVL 1</span></div>
+    <div class="live-console" id="liveConsole"><span class="cursor-blink">▊</span></div>
+    <div class="foot">&copy; <span id="yr"></span> Amr Elharony</div>
+</div>
+
+
+<script src="site.js" defer></script>
+
+
+    
+</body>
+</html>
