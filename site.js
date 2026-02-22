@@ -986,6 +986,8 @@ const TermCmds = {
     exit: () => { window.closeTerm(); return ''; }
 };
 
+window.TermCmds = TermCmds;
+
 // Unified Terminal UI Logic
 window.openTerm = function() {
     document.getElementById('termOverlay').classList.add('show');
@@ -2084,7 +2086,15 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 
     // Apply / remove zen mode
     function applyZen(active, animate) {
+      
+      // 1. EXCLUSIVE: If Zen is turning ON, force Cyberpunk OFF
+      if (active) {
+        document.body.classList.remove('cyberpunk-mode');
+        localStorage.setItem('cyberpunkMode', '0');
+      }
+
       const icon = document.getElementById('zenIcon');
+      
       if (animate && !REDUCED_MOTION) {
         // Flash transition
         flash.classList.add('active');
@@ -5062,17 +5072,18 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
    ═══════════════════════════════════════════ */
 
 body.cyberpunk-mode {
-  --bg: #0a0010;
-  --bg2: #0f0018;
-  --card: rgba(20,0,40,.7);
-  --cardH: rgba(30,0,60,.8);
-  --border: rgba(255,0,100,.15);
-  --text: #f0d0ff;
-  --sub: #8a5ca0;
-  --accent: #ff0066;
-  --accent2: #00ffcc;
-  --accent3: #ffcc00;
-  --glow: rgba(255,0,102,.25);
+  --bg: #050505;           /* Pure neutral black (no green tint) */
+  --bg2: #111111;          /* Dark grey for contrast */
+  --card: rgba(20, 20, 20, 0.8); /* Neutral cards */
+  --cardH: rgba(40, 40, 40, 0.9);
+  --border: rgba(0, 255, 65, 0.15); /* Subtle green borders remain */
+  --text: #eeeeee;         /* Crisp White text (easier to read) */
+  --sub: #9ca3af;          /* Cool Grey subtext */
+  --accent: #00ff41;       /* The Matrix Green (only for buttons/links) */
+  --accent2: #ffffff;      /* White secondary accent */
+  --accent3: #333333;      /* Dark grey tertiary */
+  --glow: rgba(0, 255, 65, 0.05); /* Very faint glow */
+  --glowS: rgba(0, 255, 65, 0.15);
 }
 
 body.cyberpunk-mode::before {
@@ -5238,6 +5249,17 @@ body.cyberpunk-mode .bio-glow { display: none; }
     }
 
     window._toggleCyberpunk = function(animate) {
+      
+      // 1. EXCLUSIVE: If we are turning Cyberpunk ON, kill Zen Mode first
+      if (!document.body.classList.contains('cyberpunk-mode')) {
+          document.body.classList.remove('zen-mode');
+          localStorage.setItem('zenMode', '0');
+          // Update Zen icon if it exists
+          const zenIcon = document.getElementById('zenIcon');
+          if (zenIcon) zenIcon.className = 'fa-solid fa-eye';
+      }
+
+      // 2. Now proceed with normal Cyberpunk toggle
       const active = document.body.classList.toggle('cyberpunk-mode');
       localStorage.setItem('cyberpunkMode', active ? '1' : '0');
       if (animate && !RM) {
@@ -5264,6 +5286,16 @@ body.cyberpunk-mode .bio-glow { display: none; }
       window.TermCmds.neon = window.TermCmds.cyberpunk;
       window.TermCmds.nightcity = window.TermCmds.cyberpunk;
     }
+    // Add 'C' key listener for Cyberpunk Mode
+    document.addEventListener('keydown', e => {
+      // Ignore if typing in an input field
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      // Toggle if 'c' or 'C' is pressed (without modifiers like Ctrl/Alt)
+      if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          if (window._toggleCyberpunk) window._toggleCyberpunk(true);
+      }
+  });
   }
 
 
@@ -6982,6 +7014,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { key:'⌘K', desc:'Command Palette' },
       { key:'V', desc:'Voice Navigation' },
       { key:'C', desc:'Cyberpunk Theme' },
+      { key:'D', desc:'Toggle Dark/Light' },
     ].forEach(sc => {
       if (panel.querySelector(`[data-p6-key="${sc.key}"]`)) return;
       const row = document.createElement('div');
@@ -7089,15 +7122,55 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     T.zen = () => { const b = document.getElementById('zenBtn'); if (b) b.click(); if (typeof checkTrophy === 'function') checkTrophy('theme_zen'); return '<span class="term-green">🧘 Toggling Zen Mode</span>'; };
     T.cyberpunk = () => { if (window._toggleCyberpunk) window._toggleCyberpunk(true); if (typeof checkTrophy === 'function') checkTrophy('theme_cyberpunk'); return '<span class="term-green">🌆 Toggling Cyberpunk</span>'; };
     T.matrix = () => {
-      // Quick matrix rain effect in terminal
-      const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
-      let lines = [];
-      for (let i = 0; i < 8; i++) {
-        let line = '';
-        for (let j = 0; j < 50; j++) line += chars[Math.floor(Math.random() * chars.length)];
-        lines.push(`<span style="color:#00ff41;opacity:${0.3 + Math.random() * 0.7}">${line}</span>`);
+      // 1. Create full-screen canvas
+      const canvas = document.createElement('canvas');
+      canvas.id = 'matrixCanvas';
+      canvas.style.cssText = 'position:fixed;top:0;left:0;z-index:9998;pointer-events:none;background:#000;';      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      document.body.appendChild(canvas);
+
+      const ctx = canvas.getContext('2d');
+      // Custom characters: Binary + Your Name + Arabic Year
+      const chars = '01AMRELHARONYDATAAGILEFINTECH٢٠٢٦';
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+
+      // 2. Animation Loop
+      function draw() {
+        // Fading trail effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#0F0'; // Hacker Green
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars.charAt(Math.floor(Math.random() * chars.length));
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          
+          // Random reset to top
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+        
+        // Continue if canvas exists
+        if (document.getElementById('matrixCanvas')) {
+            requestAnimationFrame(draw);
+        }
       }
-      return lines.join('\n');
+      draw();
+
+      // 3. Auto-cleanup after 10 seconds (save battery)
+      setTimeout(() => {
+          canvas.style.transition = 'opacity 2s';
+          canvas.style.opacity = '0';
+          setTimeout(() => canvas.remove(), 2000);
+      }, 10000);
+
+      return '<span class="term-green">Wake up, Neo... (Simulation Active)</span>';
     };
 
     // ── Links ──────────────────────────────
@@ -7423,5 +7496,18 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     });
 
     console.log('✅ Unified Toast System: Interceptor Active');
+
+// Add 'D' key listener for Dark/Light Mode
+document.addEventListener('keydown', e => {
+  // 1. Ignore if typing in an input field
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  
+  // 2. Check for 'D' key
+  if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      // 3. Trigger the existing button click
+      const themeBtn = document.getElementById('tbtn');
+      if (themeBtn) themeBtn.click();
+  }
+});
 
 })();
