@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amr Elharony | Delivery Lead | Mentor | Fintech Author & Speaker</title>
     <meta name="description" content="Amr Elharony — Scrum Master at Banque Misr, FinTech author, and globally recognized mentor. Bridging banking and technology to deliver measurable digital transformation across MENA.">
     <meta name="author" content="Amr Elharony">
@@ -99,7 +99,7 @@
         <div class="game-hud-item"><div class="game-hud-val" id="hudStreak">0</div><div class="game-hud-label">Streak</div></div>
     </div>
     <div class="game-ticker"><span id="gameTicker">Loading market data...</span></div>
-    <div class="game-canvas-wrap"><canvas id="snakeCanvas" class="game-canvas" width="280" height="280"></canvas></div>
+    <div class="game-canvas-wrap"><canvas id="snakeCanvas" class="game-canvas" width="280" height="280" role="img" aria-label="FinTech Trader game — use arrow keys to move, collect coins, avoid bombs"></canvas></div>
     <div class="game-level-bar"><span class="game-level-text" id="levelText">Q1</span><div class="game-level-track"><div class="game-level-fill" id="levelFill" style="width:0%"></div></div></div>
     <div class="game-msg" id="gameMsg">Collect 💰 coins to grow your portfolio</div>
     <div class="game-hint">Arrow keys · R restart · ESC close</div>
@@ -107,7 +107,25 @@
     <div class="game-btns"><button class="game-btn" onclick="restartSnake()">↻ New Trade</button><button class="game-btn" onclick="closeGame()">✕ Close</button></div>
 </div></div>
 <!-- Keyboard Shortcuts Overlay -->
-<div id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()"><div class="shortcut-panel"><div class="sc-title">⌨️ Keyboard Shortcuts</div><div class="sc-row"><span class="sc-key">T</span><span class="sc-desc">Open Trophy Case</span></div><div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">This panel</span></div><div class="sc-row"><span class="sc-key">`</span><span class="sc-desc">Open Terminal</span></div><div class="sc-row"><span class="sc-key">G</span><span class="sc-desc">Play Snake</span></div><div class="sc-row"><span class="sc-key">↑↑↓↓←→←→BA</span><span class="sc-desc">Easter Egg</span></div><div class="sc-row"><span class="sc-key">Ctrl+P</span><span class="sc-desc">Print Resume</span></div><div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">Close any overlay</span></div><div class="sc-close" onclick="closeShortcuts()">[ PRESS ? OR ESC TO CLOSE ]</div></div></div>
+<div id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()"><div class="shortcut-panel">
+<div class="sc-title">⌨️ Keyboard Shortcuts</div>
+<div class="sc-row"><span class="sc-key">1–6</span><span class="sc-desc">📍 Jump to Sections</span></div>
+<div class="sc-row"><span class="sc-key">S</span><span class="sc-desc">🔓 Reveal Contacts</span></div>
+<div class="sc-row"><span class="sc-key">G</span><span class="sc-desc">🌍 Guestbook</span></div>
+<div class="sc-row"><span class="sc-key">A</span><span class="sc-desc">🕹️ Arcade</span></div>
+<div class="sc-row"><span class="sc-key">T</span><span class="sc-desc">🏆 Trophy Case</span></div>
+<div class="sc-row"><span class="sc-key">V</span><span class="sc-desc">🎙️ Voice Navigation</span></div>
+<div class="sc-row"><span class="sc-key">D</span><span class="sc-desc">🌗 Dark / Light Mode</span></div>
+<div class="sc-row"><span class="sc-key">C</span><span class="sc-desc">🌆 Cyberpunk Theme</span></div>
+<div class="sc-row"><span class="sc-key">Z</span><span class="sc-desc">🧘 Zen Mode</span></div>
+<div class="sc-row"><span class="sc-key">M</span><span class="sc-desc">💚 Matrix Rain</span></div>
+<div class="sc-row"><span class="sc-key">`</span><span class="sc-desc">💻 Terminal</span></div>
+<div class="sc-row"><span class="sc-key">⌘K</span><span class="sc-desc">🔍 Command Palette</span></div>
+<div class="sc-row"><span class="sc-key">↑↑↓↓</span><span class="sc-desc">🤫 Easter Egg</span></div>
+<div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">⌨️ This panel</span></div>
+<div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">✕ Close any overlay</span></div>
+<div class="sc-close" onclick="closeShortcuts()">[ PRESS ? OR ESC TO CLOSE ]</div>
+</div></div>
 <!-- Trophy Case Overlay -->
 <div id="trophyOverlay" onclick="if(event.target===this)closeTrophy()"><div class="trophy-panel"><div class="trophy-header"><div class="trophy-title">🏆 Trophy Case</div><div class="trophy-ring-wrap"><svg class="trophy-ring-svg" width="100" height="100" viewBox="0 0 100 100"><defs><linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--accent)"/><stop offset="50%" stop-color="var(--accent2)"/><stop offset="100%" stop-color="var(--accent3)"/></linearGradient></defs><circle class="trophy-ring-bg" cx="50" cy="50" r="44"/><circle class="trophy-ring-fill" id="trophyRing" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/></svg><div class="trophy-ring-text"><div class="trophy-ring-pct" id="trophyPct">0%</div><div class="trophy-ring-sub">Complete</div></div></div><div class="trophy-stats"><div class="trophy-stat"><div class="trophy-stat-num" id="trophySBadges">0</div><div class="trophy-stat-label">Badges</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySXp">0</div><div class="trophy-stat-label">Total XP</div></div><div class="trophy-stat"><div class="trophy-stat-num" id="trophySLevel">1</div><div class="trophy-stat-label">Level</div></div></div><div class="trophy-xp-bar"><div class="trophy-xp-fill" id="trophyXpFill" style="width:0%"></div></div><div class="trophy-level" id="trophyLevel">Level 1 · 0 XP to next</div></div><div id="trophyGrid"></div><button class="trophy-share-btn" onclick="shareTrophy()"><i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress</button><div class="trophy-close" onclick="closeTrophy()">[ PRESS T OR TAP TO CLOSE ]</div></div></div>
 <!-- Toast Notifications -->
@@ -194,7 +212,7 @@
 
     </div>
 
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
+    <div class="nd rv" id="secJourney"><div class="ndl"></div><div class="ndt">THE JOURNEY</div><div class="ndl"></div></div>
     <div class="tl-wrap rv"><div class="tl-line"></div>
         <div class="tl-item tl-era"><div class="tl-dot" style="border-color:var(--accent);"></div><div class="tl-yr">2026</div><div class="tl-txt"><strong>Author, Founder & Data Leader</strong></div></div>
         <div class="tl-item tl-sub"><div class="tl-dot"></div><div class="tl-txt">Data & Agile Leader — Navigating data delivery as a Scrum Master at Banque Misr</div></div>
@@ -223,7 +241,7 @@
     </div>
 
     <!-- Certification Wall -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">CERTIFICATIONS</div><div class="ndl"></div></div>
+    <div class="nd rv" id="secCerts"><div class="ndl"></div><div class="ndt">CERTIFICATIONS</div><div class="ndl"></div></div>
     <div class="cert-grid" id="certGrid">
         <a href="https://www.credly.com/badges/eec32200-0842-43d7-8ba5-336367850fd3" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🎯</div><div class="cert-name"><strong>PMP</strong>Project Management</div><div class="cert-org">PMI · 2022</div></a>
         <a href="https://www.credly.com/badges/5d2548d0-8425-4d55-8ed6-d0f32095c1c8" target="_blank" rel="noopener" class="cert-card sa sa-scale"><div class="cert-verify"><i class="fa-solid fa-check"></i></div><div class="cert-icon">🔄</div><div class="cert-name"><strong>SAFe® 6 SM</strong>Scrum Master</div><div class="cert-org">Scaled Agile · 2025</div></a>
@@ -251,7 +269,7 @@
     </div>
 
     <!-- Testimonial Carousel -->
-    <div class="nd rv"><div class="ndl"></div><div class="ndt">WHAT 80+ PEOPLE SAY</div><div class="ndl"></div></div>
+    <div class="nd rv" id="secTestimonials"><div class="ndl"></div><div class="ndt">WHAT 80+ PEOPLE SAY</div><div class="ndl"></div></div>
     <div class="tc-section">
         <div class="tc-cats" id="tcCats"></div>
         <div class="tc-viewport" id="tcViewport">
@@ -273,7 +291,7 @@
         <p style="font-size:11px;color:#888;">Cairo, Egypt · a.elharony@gmail.com · amrelharony.com · linkedin.com/in/amrmelharony</p>
     </div>
 
-   <div class="nd rv"><div class="ndl"></div><div class="ndt">LINKEDIN NEWSLETTERS</div><div class="ndl"></div></div>
+   <div class="nd rv" id="secNewsletters"><div class="ndl"></div><div class="ndt">LINKEDIN NEWSLETTERS</div><div class="ndl"></div></div>
 <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
     <a href="https://www.linkedin.com/newsletters/levelup-your-leadership-6872921030353031168/" target="_blank" rel="noopener" class="nl rv">
         <div class="ni">
@@ -313,7 +331,7 @@
 
 <script src="site.js" defer></script>
 
-
+    
     
 </body>
 </html>
