@@ -409,14 +409,51 @@ window.closeEgg=function(){const el=document.getElementById('easterEgg');if(el)e
 // Escape handled by unified handler below
 
 
-// ═══ VISITOR COUNTER ═══
+// ═══ VISITOR COUNTER + LIVE PRESENCE ═══
 (function(){
-    // Uses countapi.xyz alternative — simple localStorage + estimation
     let count=parseInt(localStorage.getItem('vc')||'0')+1;
-    // Add randomized base to make it feel real
     const base=4200+Math.floor(count*1.3);
     localStorage.setItem('vc',count.toString());
-    document.getElementById('visitorCount').textContent=`Visitor #${base.toLocaleString()}`;
+    const vcEl = document.getElementById('visitorCount');
+    vcEl.textContent=`Visitor #${base.toLocaleString()}`;
+
+    if (!_sb) return;
+
+    const presenceId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+    const channel = _sb.channel('site-presence', { config: { presence: { key: presenceId } } });
+    let liveCount = 0;
+    let trophyAwarded = false;
+
+    const liveEl = document.createElement('div');
+    liveEl.id = 'livePresence';
+    liveEl.className = 'live-presence';
+    vcEl.insertAdjacentElement('afterend', liveEl);
+
+    function updateUI(state) {
+        const keys = Object.keys(state);
+        liveCount = keys.length;
+        const others = Math.max(0, liveCount - 1);
+        if (others > 0) {
+            liveEl.innerHTML = `<span class="live-dot"></span> ${others} other${others > 1 ? ' professionals are' : ' professional is'} viewing right now`;
+            liveEl.classList.add('visible');
+            if (!trophyAwarded) {
+                trophyAwarded = true;
+                if (typeof checkTrophy === 'function') checkTrophy('networking_event');
+            }
+        } else {
+            liveEl.classList.remove('visible');
+        }
+    }
+
+    channel
+        .on('presence', { event: 'sync' }, () => updateUI(channel.presenceState()))
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await channel.track({ online_at: new Date().toISOString() });
+            }
+        });
+
+    window.addEventListener('beforeunload', () => channel.untrack());
 })();
 
     
@@ -1359,6 +1396,7 @@ window.openGame=function(){
 window.closeGame=function(){cancelAutoDismiss('gameOverlay');
     const el=document.getElementById('gameOverlay');if(el)el.classList.remove('show');
     if(snakeGame){clearInterval(snakeGame);snakeGame=null;}
+    window._gamepadActions=null;
 };
 window.restartSnake=function(){
     if(snakeGame){clearInterval(snakeGame);snakeGame=null;}
@@ -1626,6 +1664,7 @@ function startSnake(){
         if(map[e.key]){const d=map[e.key];if(d.x!==-snakeDir.x||d.y!==-snakeDir.y){snakeDir=d;}e.preventDefault();}
     };
     document.addEventListener('keydown',handler);
+    window._gamepadActions = { setDir: (d) => { if(d.x!==-snakeDir.x||d.y!==-snakeDir.y) snakeDir=d; } };
 }
 
 // ═══ LIVE MARKET TICKER ═══
@@ -1879,6 +1918,7 @@ body.zen-mode .shake-bar,
 body.zen-mode .desk-hint,
 body.zen-mode .weather-widget,
 body.zen-mode .visitor-count,
+body.zen-mode .live-presence,
 body.zen-mode .rec-card,
 body.zen-mode #recContainer { display: none !important; }
 
@@ -2162,23 +2202,22 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     const themeBtn = document.getElementById('tbtn');
     if (!topBtns || !themeBtn) return;
 
-    // Create zen toggle button
-    const zenBtn = document.createElement('button');
-    zenBtn.className = 'tbtn';
-    zenBtn.id = 'zenBtn';
-    zenBtn.setAttribute('aria-label', 'Toggle Zen Mode');
-    zenBtn.title = 'Zen Mode (Z)';
-    zenBtn.innerHTML = '<i class="fa-solid fa-eye" id="zenIcon"></i>';
-    themeBtn.insertAdjacentElement('afterend', zenBtn);
-
     const gbBtn = document.createElement('button');
     gbBtn.className = 'tbtn';
     gbBtn.id = 'guestbookBtn';
     gbBtn.setAttribute('aria-label', 'Open Guestbook');
     gbBtn.title = 'Guestbook (G)';
     gbBtn.innerHTML = '<i class="fa-solid fa-book"></i>';
-    zenBtn.insertAdjacentElement('afterend', gbBtn);
+    themeBtn.insertAdjacentElement('afterend', gbBtn);
     gbBtn.addEventListener('click', () => { if (typeof openGuestbook === 'function') openGuestbook(); });
+
+    const zenBtn = document.createElement('button');
+    zenBtn.className = 'tbtn';
+    zenBtn.id = 'zenBtn';
+    zenBtn.setAttribute('aria-label', 'Toggle Zen Mode');
+    zenBtn.title = 'Zen Mode (Z)';
+    zenBtn.innerHTML = '<i class="fa-solid fa-eye" id="zenIcon"></i>';
+    gbBtn.insertAdjacentElement('afterend', zenBtn);
 
     // Create zen banner inside #app
     const app = document.getElementById('app');
@@ -3161,6 +3200,80 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     return false;
   }
 
+  // ───────────────────────────────────────
+  // GAMEPAD MANAGER
+  // ───────────────────────────────────────
+  window._gamepadActions = null;
+  let _gpConnected = false;
+
+  (function initGamepadManager() {
+    const DEADZONE = 0.4;
+    const REPEAT_DELAY = 180;
+    const prev = { left:false, right:false, up:false, down:false, a:false, b:false, start:false };
+    const timers = { left:0, right:0, up:0, down:0 };
+
+    function poll() {
+      requestAnimationFrame(poll);
+      const gp = navigator.getGamepads ? navigator.getGamepads()[0] : null;
+      if (!gp) return;
+      const actions = window._gamepadActions;
+      if (!actions) return;
+
+      const now = performance.now();
+      const axes = gp.axes;
+      const btns = gp.buttons;
+
+      const left  = (axes[0] < -DEADZONE) || (btns[14] && btns[14].pressed);
+      const right = (axes[0] >  DEADZONE) || (btns[15] && btns[15].pressed);
+      const up    = (axes[1] < -DEADZONE) || (btns[12] && btns[12].pressed);
+      const down  = (axes[1] >  DEADZONE) || (btns[13] && btns[13].pressed);
+      const a     = btns[0] && btns[0].pressed;
+      const b     = btns[1] && btns[1].pressed;
+      const start = btns[9] && btns[9].pressed;
+
+      if (actions.continuous) {
+        if (actions.keys) {
+          actions.keys['ArrowLeft']  = left;
+          actions.keys['ArrowRight'] = right;
+        }
+        if (a && !prev.a && actions.shoot) actions.shoot();
+        if (b && !prev.b && actions.restart) actions.restart();
+      } else if (actions.setDir) {
+        if (up    && !prev.up)    actions.setDir({x:0,y:-1});
+        if (down  && !prev.down)  actions.setDir({x:0,y:1});
+        if (left  && !prev.left)  actions.setDir({x:-1,y:0});
+        if (right && !prev.right) actions.setDir({x:1,y:0});
+      } else {
+        const fire = (dir) => {
+          if (!timers[dir] || now - timers[dir] > REPEAT_DELAY) { timers[dir] = now; return true; }
+          return false;
+        };
+        if (left  && fire('left')  && actions.left)  actions.left();
+        if (right && fire('right') && actions.right) actions.right();
+        if (up    && fire('up')    && actions.up)    actions.up();
+        if (down  && fire('down')  && actions.down)  actions.down();
+        if (!left)  timers.left = 0;
+        if (!right) timers.right = 0;
+        if (!up)    timers.up = 0;
+        if (!down)  timers.down = 0;
+        if (a && !prev.a && actions.a) actions.a();
+        if (b && !prev.b && actions.b) actions.b();
+      }
+      if (start && !prev.start && actions.start) actions.start();
+
+      prev.left=left; prev.right=right; prev.up=up; prev.down=down;
+      prev.a=a; prev.b=b; prev.start=start;
+    }
+    requestAnimationFrame(poll);
+
+    window.addEventListener('gamepadconnected', () => {
+      _gpConnected = true;
+      if (window.UniToast) window.UniToast.add('Gamepad Connected', 'Controller ready for Arcade', '🎮', 'success');
+      else console.log('🎮 Gamepad connected');
+    });
+    window.addEventListener('gamepaddisconnected', () => { _gpConnected = false; });
+  })();
+
   // ─── NEW: Cross-game combined score ───
   function getCombinedScore() {
     const s = getArcadeState();
@@ -3380,7 +3493,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     hub.innerHTML = `
       <div class="arcade-header">
         <div class="arcade-title">🕹️ Amr Arcade</div>
-        <div class="arcade-subtitle">Each game reflects a side of my expertise</div>
+        <div class="arcade-subtitle">Each game reflects a side of my expertise${_gpConnected ? ' · <span style="color:#22c55e">🎮 Controller Ready</span>' : ''}</div>
         <div class="arcade-level-bar">
           <span class="arcade-level-badge" style="color:${lvlColor};background:${lvlColor}15">LVL ${lvl} · ${lvlName}</span>
           <div class="arcade-xp-track"><div class="arcade-xp-fill" style="width:${xpPct}%"></div></div>
@@ -3892,6 +4005,10 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     cv.addEventListener('touchend', touchEnd, {passive:true});
 
     window._ssRestart = restart;
+    window._gamepadActions = {
+      left: ()=>move(-1), right: ()=>move(1), up: ()=>rotate(), down: ()=>drop(),
+      a: ()=>rotate(), b: ()=>drop(), start: ()=>{ paused=!paused; }
+    };
     spawn();
     interval = setInterval(tick, 500);
     draw();
@@ -3902,6 +4019,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       document.removeEventListener('keydown', keyHandler);
       cv.removeEventListener('touchstart', touchStart);
       cv.removeEventListener('touchend', touchEnd);
+      window._gamepadActions = null;
       delete window._ssRestart;
     };
   }
@@ -4643,6 +4761,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     cv.addEventListener('touchstart', e => { if (!e.target.closest('.mg-btn,.mg-share-btn')) shoot(); }, {passive:true});
 
     window._sdRestart = restart;
+    window._gamepadActions = { continuous: true, keys: keys, shoot: ()=>shoot(), restart: ()=>{ if(gameOver) restart(); } };
     spawnWave();
     interval = setInterval(update, 16);
     draw();
@@ -4654,6 +4773,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       document.removeEventListener('keydown', keyDown);
       document.removeEventListener('keyup', keyUp);
       cv.removeEventListener('touchmove', touchMove);
+      window._gamepadActions = null;
       delete window._sdRestart;
     };
   }
@@ -4919,7 +5039,40 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   color: rgba(255,255,255,.7); letter-spacing: .5px; pointer-events: none;
   text-shadow: 0 1px 4px rgba(0,0,0,.8); white-space: nowrap; transform: translate(-50%, -50%);
 }
-@media(max-width:600px) { .viewer3d-container { height: 450px; max-height: 80vh; } }
+.ar-btn {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(0,225,255,.25);
+  background: rgba(0,225,255,.08); color: #00e1ff; cursor: pointer;
+  backdrop-filter: blur(8px); transition: all .2s; z-index: 10;
+}
+.ar-btn:hover { background: rgba(0,225,255,.15); border-color: #00e1ff; transform: translateX(-50%) translateY(-1px); }
+
+/* Live FinTech Visualizer HUD */
+.ftv-hud {
+  position: absolute; inset: 0; pointer-events: none; z-index: 10;
+  font-family: 'JetBrains Mono', monospace; padding: 12px 16px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.ftv-hud-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.ftv-price {
+  font-size: 11px; letter-spacing: .5px; color: rgba(255,255,255,.7);
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
+}
+.ftv-tps {
+  font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: 1px;
+}
+.ftv-ticker {
+  display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center;
+  padding-bottom: 24px;
+}
+.ftv-trade {
+  font-size: 8px; color: rgba(255,255,255,.55); letter-spacing: .3px;
+  white-space: nowrap;
+}
+@media(max-width:600px) { .viewer3d-container { height: 450px; max-height: 80vh; } .ftv-hud { padding: 8px 10px; } .ftv-price { font-size: 9px; } }
 @media print { #viewer3dOverlay { display: none !important; } }
 `;
   document.head.appendChild(css);
@@ -5065,18 +5218,19 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   }
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 3: BOOK VIEWER (3D Only - No AR)
+  // FEATURE 3: BOOK VIEWER (3D & AR)
   // ═══════════════════════════════════════════════════
   function launchBookViewer() {
-    // Title updated to remove "AR"
-    open3D('📘 The Bilingual Executive — 3D Viewer', buildBookScene, 'model-viewer');
+    open3D('📘 The Bilingual Executive — 3D & AR Viewer', buildBookScene, 'model-viewer');
   }
 
   function buildBookScene(container) {
-    // REMOVED: ar, ar-modes, ios-src, and the slot="ar-button" button
     const mvHTML = `
       <model-viewer
         src="book.glb"
+        ios-src="book.usdz"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
         alt="A 3D model of The Bilingual Executive book"
         camera-controls
         auto-rotate
@@ -5085,9 +5239,10 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         exposure="1"
         loading="eager"
       >
+        <button slot="ar-button" class="ar-btn">📱 View in Your Space</button>
       </model-viewer>
       <div class="viewer3d-hint" id="v3dHint">
-        ${isMobile ? 'Pinch to zoom · Drag to rotate' : 'Scroll to zoom · Drag to rotate · Click to open site'}
+        ${isMobile ? 'Pinch to zoom · Drag to rotate · Tap AR button to place on your desk' : 'Scroll to zoom · Drag to rotate · Click to open site'}
       </div>
     `;
     const tempDiv = document.createElement('div');
@@ -5132,42 +5287,242 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   }
 
   // ═══════════════════════════════════════════════════
-  // FEATURE 4: DATA MESH (THREE.JS)
+  // FEATURE 4: LIVE FINTECH VISUALIZER (THREE.JS + BINANCE WS)
   // ═══════════════════════════════════════════════════
   function launchDataMesh() {
-    open3D('🔀 Data Mesh — Interactive Domains', buildMeshScene, 'three');
+    open3D('📊 Live FinTech Visualizer — Real-Time Trades', buildMeshScene, 'three');
   }
 
   function buildMeshScene(container) {
+    const ASSET_COLORS = { BTCUSDT: 0x00e1ff, ETHUSDT: 0xa855f7, SOLUSDT: 0x22c55e };
+    const ASSET_LABELS = { BTCUSDT: 'BTC', ETHUSDT: 'ETH', SOLUSDT: 'SOL' };
+    const NODE_LIFETIME = 4000;
+    const MAX_NODES = 60;
+
+    // --- HUD ---
+    const hud = document.createElement('div');
+    hud.className = 'ftv-hud';
+    hud.innerHTML = `
+      <div class="ftv-hud-top">
+        <div class="ftv-price" id="ftvPrice">BTC --</div>
+        <div class="ftv-tps" id="ftvTps">0 trades/s</div>
+      </div>
+      <div class="ftv-ticker" id="ftvTicker"></div>`;
+    container.appendChild(hud);
+
     const hint = document.createElement('div');
     hint.className = 'viewer3d-hint';
-    hint.textContent = 'Drag to rotate · Scroll to zoom';
+    hint.id = 'ftvHint';
+    hint.textContent = 'Live trades from Binance · Each node = 1 real trade';
     container.appendChild(hint);
 
+    // --- THREE.JS SCENE ---
     const W = container.clientWidth, H = container.clientHeight;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x060910);
     const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
     camera.position.set(0, 0, 7);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(W, H);
     container.insertBefore(renderer.domElement, hint);
 
-    const geometry = new THREE.IcosahedronGeometry(1.5, 0);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00e1ff, wireframe: true });
-    const sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
+    const group = new THREE.Group();
+    scene.add(group);
 
+    const coreGeo = new THREE.IcosahedronGeometry(1.2, 1);
+    const coreMat = new THREE.MeshBasicMaterial({ color: 0x00e1ff, wireframe: true, transparent: true, opacity: 0.3 });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    group.add(core);
+
+    const nodes = [];
+    const lines = [];
+    const lineMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.2, color: 0x00e1ff });
+
+    function randomOnSphere(radius) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      return new THREE.Vector3(
+        radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.sin(phi) * Math.sin(theta),
+        radius * Math.cos(phi)
+      );
+    }
+
+    function spawnNode(trade) {
+      const assetColor = ASSET_COLORS[trade.s] || 0x00e1ff;
+      const isBuy = !trade.m;
+      const qty = parseFloat(trade.q) || 0.01;
+      const size = Math.max(0.04, Math.min(0.2, Math.log10(qty + 1) * 0.08));
+      const brightness = isBuy ? 1.0 : 0.5;
+
+      const geo = new THREE.SphereGeometry(size, 8, 8);
+      const mat = new THREE.MeshBasicMaterial({
+        color: assetColor, transparent: true, opacity: brightness
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      const pos = randomOnSphere(2.5 + Math.random() * 1.0);
+      mesh.position.copy(pos);
+      group.add(mesh);
+
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), pos]);
+      const lMat = lineMat.clone();
+      lMat.color = new THREE.Color(assetColor);
+      lMat.opacity = 0.15;
+      const line = new THREE.Line(lineGeo, lMat);
+      group.add(line);
+
+      const born = performance.now();
+      nodes.push({ mesh, mat, born });
+      lines.push({ line, lMat, born });
+
+      while (nodes.length > MAX_NODES) {
+        const old = nodes.shift();
+        group.remove(old.mesh);
+        old.mesh.geometry.dispose();
+        old.mat.dispose();
+      }
+      while (lines.length > MAX_NODES) {
+        const old = lines.shift();
+        group.remove(old.line);
+        old.line.geometry.dispose();
+        old.lMat.dispose();
+      }
+
+      coreMat.opacity = 0.6;
+    }
+
+    // --- ANIMATE ---
+    let alive = true;
     function animate() {
-      if (!renderer.domElement.closest('body')) return;
+      if (!alive || !renderer.domElement.closest('body')) { alive = false; return; }
       requestAnimationFrame(animate);
-      sphere.rotation.x += 0.005;
-      sphere.rotation.y += 0.005;
+
+      group.rotation.y += 0.002;
+      group.rotation.x += 0.0005;
+
+      if (coreMat.opacity > 0.3) coreMat.opacity -= 0.005;
+
+      const now = performance.now();
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        const age = now - n.born;
+        if (age > NODE_LIFETIME) {
+          group.remove(n.mesh);
+          n.mesh.geometry.dispose();
+          n.mat.dispose();
+          nodes.splice(i, 1);
+        } else {
+          n.mat.opacity = Math.max(0, (1 - age / NODE_LIFETIME) * (n.mat.opacity > 0.5 ? 1.0 : 0.5));
+        }
+      }
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const l = lines[i];
+        const age = now - l.born;
+        if (age > NODE_LIFETIME * 0.6) {
+          group.remove(l.line);
+          l.line.geometry.dispose();
+          l.lMat.dispose();
+          lines.splice(i, 1);
+        } else {
+          l.lMat.opacity = Math.max(0, 0.15 * (1 - age / (NODE_LIFETIME * 0.6)));
+        }
+      }
+
       renderer.render(scene, camera);
     }
     animate();
 
-    window._v3dCleanup = () => { renderer.dispose(); };
+    // --- WEBSOCKET ---
+    let ws = null;
+    let reconnectDelay = 1000;
+    let tradeCount = 0;
+    let tpsInterval = null;
+    let lastBtcPrice = null;
+    const recentTrades = [];
+
+    function updateHUD(trade) {
+      const label = ASSET_LABELS[trade.s] || trade.s;
+      const price = parseFloat(trade.p);
+      const qty = parseFloat(trade.q);
+      const arrow = trade.m ? '↓' : '↑';
+      const color = trade.m ? '#ef4444' : '#22c55e';
+
+      if (trade.s === 'BTCUSDT') {
+        const el = document.getElementById('ftvPrice');
+        if (el) {
+          const dir = lastBtcPrice ? (price > lastBtcPrice ? '▲' : price < lastBtcPrice ? '▼' : '') : '';
+          const cls = price >= (lastBtcPrice || price) ? 'color:#22c55e' : 'color:#ef4444';
+          el.innerHTML = `BTC <span style="${cls}">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${dir}</span>`;
+          lastBtcPrice = price;
+        }
+      }
+
+      recentTrades.unshift({ label, price, qty, arrow, color });
+      if (recentTrades.length > 8) recentTrades.length = 8;
+      const ticker = document.getElementById('ftvTicker');
+      if (ticker) {
+        ticker.innerHTML = recentTrades.map(t =>
+          `<span class="ftv-trade"><span style="color:${t.color}">${t.arrow}</span> ${t.label} $${t.price.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="opacity:.4">${t.qty.toFixed(4)}</span></span>`
+        ).join('');
+      }
+
+      tradeCount++;
+    }
+
+    function connectWS() {
+      if (!alive) return;
+      try {
+        ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@trade/ethusdt@trade/solusdt@trade');
+      } catch(e) {
+        fallback(); return;
+      }
+
+      ws.onopen = () => {
+        reconnectDelay = 1000;
+        const h = document.getElementById('ftvHint');
+        if (h) h.textContent = 'Live trades from Binance · Each node = 1 real trade';
+      };
+
+      ws.onmessage = (evt) => {
+        try {
+          const msg = JSON.parse(evt.data);
+          const trade = msg.data;
+          if (!trade || !trade.s) return;
+          spawnNode(trade);
+          updateHUD(trade);
+        } catch(e) {}
+      };
+
+      ws.onerror = () => {};
+      ws.onclose = () => {
+        if (!alive) return;
+        setTimeout(connectWS, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 8000);
+      };
+    }
+
+    function fallback() {
+      const h = document.getElementById('ftvHint');
+      if (h) h.textContent = 'Live data unavailable — showing static visualization';
+    }
+
+    connectWS();
+
+    tpsInterval = setInterval(() => {
+      const el = document.getElementById('ftvTps');
+      if (el) el.textContent = tradeCount + ' trades/s';
+      tradeCount = 0;
+    }, 1000);
+
+    // --- CLEANUP ---
+    window._v3dCleanup = () => {
+      alive = false;
+      if (ws) { ws.onclose = null; ws.close(); ws = null; }
+      if (tpsInterval) clearInterval(tpsInterval);
+      nodes.forEach(n => { n.mesh.geometry.dispose(); n.mat.dispose(); });
+      lines.forEach(l => { l.line.geometry.dispose(); l.lMat.dispose(); });
+      renderer.dispose();
+    };
   }
 
   // ═══════════════════════════════════════════════════
@@ -5176,7 +5531,8 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   function wireUp() {
     window.TermCmds = window.TermCmds || {};
     window.TermCmds.book3d = () => { setTimeout(launchBookViewer, 300); return '📘 Launching...'; };
-    window.TermCmds.datamesh = () => { setTimeout(launchDataMesh, 300); return '🔀 Launching...'; };
+    window.TermCmds.datamesh = () => { setTimeout(launchDataMesh, 300); return '📊 Launching Live FinTech Visualizer...'; };
+    window.TermCmds.visualizer = () => { setTimeout(launchDataMesh, 300); return '📊 Launching Live FinTech Visualizer...'; };
 
     const selectors = ['a.lk[href*="bilingual"]', 'a[href*="bilingual"]', 'a[href*="book"]'];
     let bookCard = null;
@@ -5593,6 +5949,129 @@ body.cyberpunk-mode .bio-glow { display: none; }
   }
 
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// SPATIAL UI AUDIO — Web Audio API synthesized sounds
+// Muted by default. Toggle via terminal: > audio on / audio off
+// ═══════════════════════════════════════════════════════════════
+(function SpatialAudioModule() {
+  'use strict';
+
+  let ctx = null;
+  let enabled = localStorage.getItem('audio_enabled') === '1';
+
+  function getCtx() {
+    if (!ctx) {
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e) { return null; }
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+
+  function blip(freq, duration, panVal, type, vol) {
+    const c = getCtx();
+    if (!c) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    const pan = c.createStereoPanner();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, c.currentTime);
+    gain.gain.setValueAtTime(vol || 0.06, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + duration);
+    pan.pan.setValueAtTime(Math.max(-1, Math.min(1, panVal || 0)), c.currentTime);
+    osc.connect(gain).connect(pan).connect(c.destination);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + duration);
+  }
+
+  function sweep(startFreq, endFreq, duration, panVal) {
+    const c = getCtx();
+    if (!c) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    const pan = c.createStereoPanner();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, c.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, c.currentTime + duration);
+    gain.gain.setValueAtTime(0.05, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + duration);
+    pan.pan.setValueAtTime(Math.max(-1, Math.min(1, panVal || 0)), c.currentTime);
+    osc.connect(gain).connect(pan).connect(c.destination);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + duration);
+  }
+
+  const INTERACTIVE = 'button,.tbtn,.lk,.mg-btn,.arcade-card:not(.locked),.always-cta,.gb-emoji-btn,.gb-submit,.swipe-opt,.trophy-btn,.vcb,.term-chat-topic,.sc-row';
+
+  document.body.addEventListener('mouseenter', (e) => {
+    if (!enabled) return;
+    const el = e.target.closest(INTERACTIVE);
+    if (!el) return;
+    const panVal = (e.clientX / window.innerWidth) * 2 - 1;
+    const freqBase = 2200 + (1 - e.clientY / window.innerHeight) * 1800;
+    blip(freqBase, 0.035, panVal, 'sine', 0.05);
+  }, true);
+
+  document.body.addEventListener('click', (e) => {
+    if (!enabled) return;
+    const el = e.target.closest(INTERACTIVE);
+    if (!el) return;
+    const panVal = (e.clientX / window.innerWidth) * 2 - 1;
+    blip(1400, 0.02, panVal, 'square', 0.03);
+    setTimeout(() => blip(1800, 0.02, panVal, 'square', 0.03), 25);
+  }, true);
+
+  const overlayIds = ['arcadeOverlay','miniGameOverlay','guestbookOverlay','shortcutOverlay','termOverlay','gameOverlay','shareOverlay','viewer3dOverlay','easterEgg'];
+  const overlayObs = new MutationObserver((mutations) => {
+    if (!enabled) return;
+    for (const m of mutations) {
+      if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
+      const el = m.target;
+      if (!overlayIds.includes(el.id)) continue;
+      if (el.classList.contains('show')) sweep(400, 1200, 0.15, 0);
+    }
+  });
+  overlayIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) overlayObs.observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+  setTimeout(() => {
+    overlayIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el._audioObserved) { el._audioObserved = true; overlayObs.observe(el, { attributes: true, attributeFilter: ['class'] }); }
+    });
+  }, 5000);
+
+  window._spatialAudio = {
+    isEnabled: () => enabled,
+    toggle: (on) => {
+      enabled = typeof on === 'boolean' ? on : !enabled;
+      localStorage.setItem('audio_enabled', enabled ? '1' : '0');
+      if (enabled) blip(800, 0.05, 0, 'sine', 0.06);
+      return enabled;
+    }
+  };
+
+  window.TermCmds = window.TermCmds || {};
+  window.TermCmds.audio = (args) => {
+    const arg = (args || '').trim().toLowerCase();
+    if (arg === 'on') {
+      window._spatialAudio.toggle(true);
+      return '<span class="term-green">🔊 Spatial audio enabled — hover over buttons to hear it</span>';
+    }
+    if (arg === 'off') {
+      window._spatialAudio.toggle(false);
+      return '<span class="term-gray">🔇 Spatial audio disabled</span>';
+    }
+    const state = window._spatialAudio.toggle();
+    return state
+      ? '<span class="term-green">🔊 Spatial audio enabled — hover over buttons to hear it</span>'
+      : '<span class="term-gray">🔇 Spatial audio disabled</span>';
+  };
+  window.TermCmds.sound = window.TermCmds.audio;
+})();
+
 // ═══════════════════════════════════════════════════════════════
 // PHASE 6.1: INTELLIGENCE LAYER — amrelharony.com
 // Drop-in: <script src="phase6-intelligence.js" defer></script>
@@ -6302,6 +6781,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     { id:'terminal_used',       icon:'💻', name:'Terminal Hacker',         desc:'Opened the terminal', cat:'Social', xp:5 },
     { id:'theme_cyberpunk',     icon:'🌆', name:'Cyberpunk Activated',    desc:'Enabled the cyberpunk theme', cat:'Social', xp:5 },
     { id:'theme_zen',           icon:'🧘', name:'Zen Master',             desc:'Toggled Zen Mode', cat:'Social', xp:5 },
+    { id:'networking_event',    icon:'👥', name:'Networking Event',        desc:'Was on the site at the same time as another visitor', cat:'Social', xp:15 },
     // Milestones
     { id:'visit_3',             icon:'🔄', name:'Returning Visitor',       desc:'Came back 3+ times', cat:'Milestone', xp:10 },
     { id:'visit_10',            icon:'💎', name:'Loyal Visitor',           desc:'Visited 10+ times', cat:'Milestone', xp:20 },
@@ -7131,7 +7611,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { match:/calendar|schedule|book.*call|meeting/i,        action:()=>{window.open('https://calendly.com/amrmelharony/30min','_blank');return'📅 Opening Calendar';} },
       { match:/linkedin\s*profile|connect.*linkedin/i,        action:()=>{window.open('https://linkedin.com/in/amrmelharony','_blank');return'💼 Opening LinkedIn';} },
       { match:/three\s*d.*book|3d.*book|book.*viewer/i,       action:()=>{if(window.TermCmds?.book3d)window.TermCmds.book3d();return'📦 Opening 3D Book';} },
-      { match:/data\s*mesh\s*3d|mesh.*visual/i,               action:()=>{if(window.TermCmds?.datamesh)window.TermCmds.datamesh();return'🔀 Opening Data Mesh 3D';} },
+      { match:/data\s*mesh|mesh.*visual|visualizer|fintech.*visual/i, action:()=>{if(window.TermCmds?.datamesh)window.TermCmds.datamesh();return'📊 Opening Live FinTech Visualizer';} },
       // Scroll
       { match:/scroll\s*down|next|continue/i,                 action:()=>{window.scrollBy({top:window.innerHeight*0.7,behavior:'smooth'});return'⬇️ Scrolling down';} },
       { match:/scroll\s*up|back|previous/i,                   action:()=>{window.scrollBy({top:-window.innerHeight*0.7,behavior:'smooth'});return'⬆️ Scrolling up';} },
@@ -7252,10 +7732,12 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   <span class="term-white">progress</span>          Show site exploration progress
   <span class="term-white">achievements</span>      Same as trophies
 
-<span class="term-cyan">Themes:</span>
+<span class="term-cyan">Themes & Audio:</span>
   <span class="term-white">zen</span>               Toggle Zen Mode
   <span class="term-white">cyberpunk</span>         Toggle Cyberpunk theme
   <span class="term-white">matrix</span>            Matrix rain effect
+  <span class="term-white">audio</span>             Toggle spatial UI sounds (on/off)
+  <span class="term-white">visualizer</span>        Live FinTech trade visualizer (Binance)
 
 <span class="term-cyan">Timeline:</span>
   <span class="term-white">timeline</span>          Scroll to timeline
