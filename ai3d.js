@@ -16,6 +16,28 @@
   const RM = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   const isMobile = window.matchMedia('(pointer:coarse)').matches;
 
+  // ── ADVANCED HAPTIC ENGINE ──
+  const Haptic = {
+    _ok: !RM && !!navigator.vibrate,
+    _last: 0,
+    _throttle(ms) { const now = Date.now(); if (now - this._last < ms) return false; this._last = now; return true; },
+    tap()        { if (this._ok) navigator.vibrate(8); },
+    doubleTap()  { if (this._ok) navigator.vibrate([8, 40, 8]); },
+    hold()       { if (this._ok) navigator.vibrate([4, 30, 4, 30, 4]); },
+    success()    { if (this._ok) navigator.vibrate([10, 30, 10, 30, 20]); },
+    warning()    { if (this._ok) navigator.vibrate([30, 50, 60]); },
+    arEnter()    { if (this._ok) navigator.vibrate([5, 20, 5, 20, 5, 20, 10, 40, 15]); },
+    trade(isBuy) { if (this._ok && this._throttle(180)) navigator.vibrate(isBuy ? [6, 25, 12] : [12, 25, 6]); },
+    rotate()     { if (this._ok && this._throttle(120)) navigator.vibrate(3); },
+    zoom()       { if (this._ok && this._throttle(100)) navigator.vibrate(4); },
+    pulse(intensity) {
+      if (!this._ok || !this._throttle(200)) return;
+      const d = Math.min(Math.max(Math.round(intensity * 20), 3), 40);
+      navigator.vibrate(d);
+    },
+    sequence(pattern) { if (this._ok) navigator.vibrate(pattern); },
+  };
+
   // ───────────────────────────────────────
   // INJECT CSS
   // ───────────────────────────────────────
@@ -125,13 +147,14 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   text-shadow: 0 1px 4px rgba(0,0,0,.8); white-space: nowrap; transform: translate(-50%, -50%);
 }
 .ar-btn {
-  position: absolute; bottom: 12px; right: 12px;
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .5px;
-  padding: 5px 10px; border-radius: 14px; border: 1px solid rgba(0,225,255,.25);
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; line-height: 1; padding: 0;
+  border-radius: 50%; border: 1px solid rgba(0,225,255,.25);
   background: rgba(0,225,255,.08); color: #00e1ff; cursor: pointer;
-  backdrop-filter: blur(8px); transition: all .2s; z-index: 15;
+  backdrop-filter: blur(8px); transition: all .25s; z-index: 15;
 }
-.ar-btn:hover { background: rgba(0,225,255,.15); border-color: #00e1ff; transform: translateY(-1px); }
+.ar-btn:hover { background: rgba(0,225,255,.2); border-color: #00e1ff; transform: translateY(-50%) scale(1.12); box-shadow: 0 0 12px rgba(0,225,255,.25); }
 
 /* Live FinTech Visualizer HUD */
 .ftv-hud {
@@ -227,7 +250,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
       <div class="viewer3d-container" id="v3dContainer">
         <div class="viewer3d-loading" id="v3dLoading">
           <div class="viewer3d-loading-spinner">📦</div>
-          <div class="viewer3d-loading-text">Loading 3D engine...</div>
+          <div class="viewer3d-loading-text">Loading...</div>
         </div>
         <div class="viewer3d-hud" id="v3dHud">
           <span class="viewer3d-title" id="v3dTitle">3D Viewer</span>
@@ -249,20 +272,24 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     if (titleEl) titleEl.textContent = title;
     if (loading) loading.classList.remove('hidden');
     overlay.classList.add('show');
-    window.autoDismiss('viewer3dOverlay',close3D);
+    Haptic.doubleTap();
+    window.autoDismiss3D('viewer3dOverlay',close3D);
 
     const loader = engineType === 'model-viewer' ? loadModelViewerJS() : loadThreeJS();
 
     loader.then(() => {
       if (loading) loading.classList.add('hidden');
+      Haptic.success();
       builder(container);
     }).catch(err => {
       console.error(`${engineType} load failed:`, err);
-      if (loading) loading.querySelector('.viewer3d-loading-text').textContent = 'Failed to load 3D engine';
+      Haptic.warning();
+      if (loading) loading.querySelector('.viewer3d-loading-text').textContent = 'Failed to load';
     });
   }
 
   function close3D() {
+    Haptic.tap();
     const overlay = document.getElementById('viewer3dOverlay');
     overlay?.classList.remove('show');
     window.cancelAutoDismiss('viewer3dOverlay');
@@ -306,7 +333,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   // FEATURE 3: BOOK VIEWER (3D & AR)
   // ═══════════════════════════════════════════════════
   function launchBookViewer() {
-    open3D('📘 The Bilingual Executive — 3D & AR Viewer', buildBookScene, 'model-viewer');
+    open3D('📘 3D Book Viewer', buildBookScene, 'model-viewer');
   }
 
   function buildBookScene(container) {
@@ -324,10 +351,10 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         exposure="1"
         loading="eager"
       >
-        <button slot="ar-button" class="ar-btn">📱 View in Your Space</button>
+        <button slot="ar-button" class="ar-btn" title="View in AR">👁</button>
       </model-viewer>
       <div class="viewer3d-hint" id="v3dHint">
-        ${isMobile ? 'Pinch to zoom · Drag to rotate · Tap AR button to place on your desk' : 'Scroll to zoom · Drag to rotate · Click to open site'}
+        ${isMobile ? 'Pinch · Drag · Tap AR' : 'Scroll · Drag · Click'}
       </div>
     `;
     const tempDiv = document.createElement('div');
@@ -338,43 +365,72 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
     if (mv) {
       mv.addEventListener('error', () => {
+        Haptic.warning();
         const hint = document.getElementById('v3dHint');
-        if (hint) hint.textContent = '⚠️ 3D model failed to load (book.glb not found)';
+        if (hint) hint.textContent = '⚠️ Model not found';
       });
+
+      mv.addEventListener('camera-change', () => Haptic.rotate());
+      mv.addEventListener('ar-status', (e) => {
+        if (e.detail.status === 'session-started') Haptic.arEnter();
+        else if (e.detail.status === 'not-presenting') Haptic.tap();
+      });
+
+      let lastPinchDist = 0;
+      mv.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (lastPinchDist && Math.abs(dist - lastPinchDist) > 8) Haptic.zoom();
+          lastPinchDist = dist;
+        }
+      }, { passive: true });
+      mv.addEventListener('touchend', () => { lastPinchDist = 0; }, { passive: true });
     }
 
     // ─────────────────────────────────────────────
     // DRAG VS CLICK DETECTION LOGIC
     // ─────────────────────────────────────────────
     let startX = 0, startY = 0;
+    let isDragging = false;
 
     const onDown = (clientX, clientY) => {
       startX = clientX;
       startY = clientY;
+      isDragging = false;
     };
 
     mv.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
     mv.addEventListener('touchstart', (e) => onDown(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
+    mv.addEventListener('mousemove', (e) => {
+      const dx = Math.abs(e.clientX - startX), dy = Math.abs(e.clientY - startY);
+      if (dx > 8 || dy > 8) { isDragging = true; Haptic.rotate(); }
+    });
+
     mv.addEventListener('click', (e) => {
-      if (e.target.closest('.ar-btn, [slot="ar-button"]')) return;
+      if (e.target.closest('.ar-btn, [slot="ar-button"]')) { Haptic.arEnter(); return; }
       const diffX = Math.abs(e.clientX - startX);
       const diffY = Math.abs(e.clientY - startY);
 
       if (diffX < 5 && diffY < 5) {
+        Haptic.hold();
         window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
       } else {
         e.preventDefault();
         e.stopPropagation();
       }
     });
+
+    mv.addEventListener('wheel', () => Haptic.zoom(), { passive: true });
   }
 
   // ═══════════════════════════════════════════════════
   // FEATURE 4: LIVE FINTECH VISUALIZER (THREE.JS + BINANCE WS)
   // ═══════════════════════════════════════════════════
   function launchDataMesh() {
-    open3D('📊 Live FinTech Visualizer — Real-Time Trades', buildMeshScene, 'three');
+    open3D('📊 Live Trades', buildMeshScene, 'three');
   }
 
   function buildMeshScene(container) {
@@ -398,7 +454,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     const hint = document.createElement('div');
     hint.className = 'viewer3d-hint';
     hint.id = 'ftvHint';
-    hint.textContent = 'Live trades from Binance · Each node = 1 real trade';
+    hint.textContent = 'Live · Binance';
     container.appendChild(hint);
 
     // --- THREE.JS SCENE ---
@@ -438,6 +494,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
       const isBuy = !trade.m;
       const qty = parseFloat(trade.q) || 0.01;
       const size = Math.max(0.04, Math.min(0.2, Math.log10(qty + 1) * 0.08));
+      Haptic.trade(isBuy);
       const brightness = isBuy ? 1.0 : 0.5;
 
       const geo = new THREE.SphereGeometry(size, 8, 8);
@@ -565,8 +622,9 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
       ws.onopen = () => {
         reconnectDelay = 1000;
+        Haptic.success();
         const h = document.getElementById('ftvHint');
-        if (h) h.textContent = 'Live trades from Binance · Each node = 1 real trade';
+        if (h) h.textContent = 'Live · Binance';
       };
 
       let lastSpawnTime = 0;
@@ -595,7 +653,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
     function fallback() {
       const h = document.getElementById('ftvHint');
-      if (h) h.textContent = 'Live data unavailable — showing static visualization';
+      if (h) h.textContent = 'Offline mode';
     }
 
     connectWS();
@@ -674,6 +732,8 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   }
 
   function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  window._haptic = Haptic;
 
   function init() {
     create3DOverlay();
