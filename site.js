@@ -36,7 +36,28 @@ function autoDismiss(id, closeFn) {
     };
 }
 function cancelAutoDismiss(id) { clearTimeout(_autoDismissTimers[id]); if (_autoDismissCleanup[id]) { _autoDismissCleanup[id](); delete _autoDismissCleanup[id]; } }
+function autoDismiss3D(id, closeFn) {
+    clearTimeout(_autoDismissTimers[id]);
+    if (_autoDismissCleanup[id]) _autoDismissCleanup[id]();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const V3D_MS = AUTO_DISMISS_MS * 3;
+    function reset() { clearTimeout(_autoDismissTimers[id]); _autoDismissTimers[id] = setTimeout(() => closeFn(), V3D_MS); }
+    reset();
+    const overlayEvents = ['mousemove','touchstart','click','scroll'];
+    const docEvents = ['mousemove','touchstart'];
+    const docKeyEvents = ['keydown'];
+    overlayEvents.forEach(evt => el.addEventListener(evt, reset, {passive:true}));
+    docEvents.forEach(evt => document.addEventListener(evt, reset, {passive:true}));
+    docKeyEvents.forEach(evt => document.addEventListener(evt, reset));
+    _autoDismissCleanup[id] = () => {
+        overlayEvents.forEach(evt => el.removeEventListener(evt, reset));
+        docEvents.forEach(evt => document.removeEventListener(evt, reset));
+        docKeyEvents.forEach(evt => document.removeEventListener(evt, reset));
+    };
+}
 window.autoDismiss = autoDismiss;
+window.autoDismiss3D = autoDismiss3D;
 window.cancelAutoDismiss = cancelAutoDismiss;
 
 // ═══ SOCIAL PROOF TICKER ═══
@@ -243,7 +264,10 @@ gsap.to('#preLine',{opacity:1,duration:.3,delay:.1});gsap.to('#preCtr',{opacity:
 let prog=0;const li=setInterval(()=>{prog=Math.min(100,prog+Math.random()*SPEED+1.5);const p=Math.round(prog);document.getElementById('preCtr').textContent=p;document.getElementById('preFill').style.width=p+'%';document.getElementById('preStg').textContent=stages[Math.min(stages.length-1,Math.floor(p/100*stages.length))];if(p>=100){clearInterval(li);setTimeout(launch,isRepeatVisit?100:300);}},isRepeatVisit?20:30);
 
 function done(el){el.classList.remove('rv');el.style.opacity='';el.style.transform='';gsap.set(el,{clearProps:'all'});el.style.opacity='1';el.style.transform='none';}
+let _siteReady=false;
+window._isSiteReady=()=>_siteReady;
 function launch(){
+    _siteReady=true;
     const pre=document.getElementById('preloader'),app=document.getElementById('app');
     gsap.to('#preCtr',{scale:1.3,opacity:0,duration:.3,ease:'power2.in'});gsap.to(['#preLine','#preBar','#preStg'],{opacity:0,duration:.2});
     pre.style.clipPath='inset(0 0 0% 0)';gsap.to(pre,{clipPath:'inset(0 0 100% 0)',duration:.9,delay:.3,ease:'power4.inOut',onComplete:()=>{pre.style.display='none';document.body.style.overflow='auto';document.body.style.overflowX='hidden';}});
@@ -314,14 +338,18 @@ if (D && !localStorage.getItem('shortcuts_seen')) {
         setTimeout(() => overlay.remove(), 500);
     }
 
-    setTimeout(() => {
-        overlay.classList.add('visible');
-        document.getElementById('swDismiss').addEventListener('click', dismissWelcome);
-        overlay.addEventListener('click', e => { if (e.target === overlay) dismissWelcome(); });
-        document.addEventListener('keydown', function esc(e) {
-            if (e.key === 'Escape' || e.key) { dismissWelcome(); document.removeEventListener('keydown', esc); }
-        });
-    }, 2500);
+    function showWelcome(){
+        if(!_siteReady){setTimeout(showWelcome,500);return;}
+        setTimeout(()=>{
+            overlay.classList.add('visible');
+            document.getElementById('swDismiss').addEventListener('click', dismissWelcome);
+            overlay.addEventListener('click', e => { if (e.target === overlay) dismissWelcome(); });
+            document.addEventListener('keydown', function esc(e) {
+                if (e.key === 'Escape' || e.key) { dismissWelcome(); document.removeEventListener('keydown', esc); }
+            });
+        },800);
+    }
+    setTimeout(showWelcome, 2500);
 }
 
 // ═══ PROXIMITY-GATED CONTACT ═══
@@ -1497,6 +1525,7 @@ const Achieve=(function(){
     let toastActive=false;
     let prevLevel=VDna.get().level;
     function processQueue(){
+        if(!_siteReady){setTimeout(processQueue,500);return;}
         if(queue.length===0){toastActive=false;return;}
         toastActive=true;
         const item=queue.shift();
@@ -1639,7 +1668,7 @@ window.shareTrophy=function(){
     if(navigator.share){navigator.share({title:'My Trophy Progress',text,url:'https://amrelharony.com'}).catch(()=>{});}
     else{navigator.clipboard.writeText(text).then(()=>{const btn=document.querySelector('.trophy-share-btn');btn.textContent='✓ Copied!';setTimeout(()=>{btn.innerHTML='<i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress';},2000);});}
 };
-setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);document.getElementById('termBtn').style.display='flex';document.getElementById('gameBtn').style.display='flex';},4000);
+setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);document.getElementById('termBtn').style.display='flex';document.getElementById('gameBtn').style.display='flex';const aBtn=document.getElementById('audioBtn');if(aBtn){aBtn.style.display='flex';const aIcon=document.getElementById('audioIcon');const setIcon=(on)=>{if(aIcon)aIcon.className=on?'fa-solid fa-volume-high':'fa-solid fa-volume-xmark';aBtn.title=on?'Spatial audio on — click to mute':'Spatial audio off — click to enable';const ind=document.getElementById('mpAudioInd');if(ind){ind.classList.toggle('active',on);const ic=ind.querySelector('.mp-audio-ind-icon');if(ic)ic.textContent=on?'🔊':'🔇';}};setIcon(localStorage.getItem('audio_enabled')==='1');aBtn.addEventListener('click',()=>{if(window._spatialAudio){const on=window._spatialAudio.toggle();setIcon(on);}});}},4000);
 
 // Auto-check achievements on load
 (function(){
@@ -6268,6 +6297,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         },
 
         process() {
+            if(!window._isSiteReady || !window._isSiteReady()){setTimeout(()=>this.process(),500);return;}
             if(this.active || this.queue.length === 0) return;
             this.active = true;
             this.render(this.queue.shift());
