@@ -294,7 +294,7 @@ if (D && !localStorage.getItem('shortcuts_seen')) {
             { key: '6', icon: '📝', label: 'Newsletters' },
         ]},
         { title: '✨ Features', shortcuts: [
-            { key: 'S', icon: '🔓', label: 'Reveal Contacts' },
+            { key: 'S', icon: '🔊', label: 'Sound On/Off' },
             { key: 'G', icon: '🌍', label: 'Guestbook' },
             { key: 'A', icon: '🕹️', label: 'Arcade' },
             { key: 'T', icon: '🏆', label: 'Trophy Case' },
@@ -302,7 +302,7 @@ if (D && !localStorage.getItem('shortcuts_seen')) {
         ]},
         { title: '🎨 Vibes', shortcuts: [
             { key: 'D', icon: '🌗', label: 'Dark / Light' },
-            { key: 'C', icon: '🌆', label: 'Cyberpunk' },
+            { key: 'C', icon: '🔓', label: 'Reveal Contacts' },
             { key: 'Z', icon: '🧘', label: 'Zen Mode' },
             { key: 'M', icon: '💚', label: 'Matrix Rain' },
         ]},
@@ -1668,7 +1668,7 @@ window.shareTrophy=function(){
     if(navigator.share){navigator.share({title:'My Trophy Progress',text,url:'https://amrelharony.com'}).catch(()=>{});}
     else{navigator.clipboard.writeText(text).then(()=>{const btn=document.querySelector('.trophy-share-btn');btn.textContent='✓ Copied!';setTimeout(()=>{btn.innerHTML='<i class="fa-solid fa-share" style="margin-right:4px"></i>Share Progress';},2000);});}
 };
-setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);document.getElementById('termBtn').style.display='flex';document.getElementById('gameBtn').style.display='flex';const aBtn=document.getElementById('audioBtn');if(aBtn){aBtn.style.display='flex';const aIcon=document.getElementById('audioIcon');const setIcon=(on)=>{if(aIcon)aIcon.className=on?'fa-solid fa-volume-high':'fa-solid fa-volume-xmark';aBtn.title=on?'Spatial audio on — click to mute':'Spatial audio off — click to enable';const ind=document.getElementById('mpAudioInd');if(ind){ind.classList.toggle('active',on);const ic=ind.querySelector('.mp-audio-ind-icon');if(ic)ic.textContent=on?'🔊':'🔇';}};setIcon(localStorage.getItem('audio_enabled')==='1');aBtn.addEventListener('click',()=>{if(window._spatialAudio){const on=window._spatialAudio.toggle();setIcon(on);}});}},4000);
+setTimeout(()=>{const btn=document.getElementById('trophyBtn');btn.style.display='flex';btn.addEventListener('click',openTrophy);document.getElementById('termBtn').style.display='flex';document.getElementById('gameBtn').style.display='flex';},4000);
 
 // Auto-check achievements on load
 (function(){
@@ -2091,7 +2091,8 @@ window.closeShortcuts=function(){const el=document.getElementById('shortcutOverl
         const k=(e.key||'').toLowerCase();
         const code=e.code||'';
         const isKey=(char, codeName)=>k===char||code===codeName;
-        if(isKey('s','KeyS'))revealContact();
+        if(isKey('c','KeyC')&&!e.ctrlKey)revealContact();
+        if(isKey('s','KeyS')){if(window._spatialAudio){const on=window._spatialAudio.toggle();if(window._syncAudioBtn)window._syncAudioBtn(on);}}
         if(isKey('m','KeyM')&&window.TermCmds?.matrix)window.TermCmds.matrix();
         if(isKey('t','KeyT')&&!e.ctrlKey&&!e.metaKey)openTrophy();
         if(e.key==='?'||(code==='Slash'&&e.shiftKey))openShortcuts();
@@ -2470,13 +2471,32 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     themeBtn.insertAdjacentElement('afterend', gbBtn);
     gbBtn.addEventListener('click', () => { if (typeof openGuestbook === 'function') openGuestbook(); });
 
+    const audioBtn = document.createElement('button');
+    audioBtn.className = 'tbtn';
+    audioBtn.id = 'audioBtn';
+    audioBtn.setAttribute('aria-label', 'Toggle spatial audio');
+    audioBtn.title = 'Sound On/Off (S)';
+    audioBtn.style.display = 'none';
+    const audioOnInit = localStorage.getItem('audio_enabled') === '1';
+    audioBtn.innerHTML = '<i class="fa-solid ' + (audioOnInit ? 'fa-volume-high' : 'fa-volume-xmark') + '" id="audioIcon"></i>';
+    gbBtn.insertAdjacentElement('afterend', audioBtn);
+    window._syncAudioBtn = function(on) {
+      const ai = document.getElementById('audioIcon');
+      if (ai) ai.className = on ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      audioBtn.title = on ? 'Sound on (S)' : 'Sound off (S)';
+      const ind = document.getElementById('mpAudioInd');
+      if (ind) { ind.classList.toggle('active', on); const ic = ind.querySelector('.mp-audio-ind-icon'); if (ic) ic.textContent = on ? '🔊' : '🔇'; }
+    };
+    audioBtn.addEventListener('click', () => { if (window._spatialAudio) { const on = window._spatialAudio.toggle(); window._syncAudioBtn(on); } });
+    setTimeout(() => { audioBtn.style.display = 'flex'; }, 4000);
+
     const zenBtn = document.createElement('button');
     zenBtn.className = 'tbtn';
     zenBtn.id = 'zenBtn';
     zenBtn.setAttribute('aria-label', 'Toggle Zen Mode');
     zenBtn.title = 'Zen Mode (Z)';
     zenBtn.innerHTML = '<i class="fa-solid fa-eye" id="zenIcon"></i>';
-    gbBtn.insertAdjacentElement('afterend', zenBtn);
+    audioBtn.insertAdjacentElement('afterend', zenBtn);
 
     // Create zen banner inside #app
     const app = document.getElementById('app');
@@ -3667,16 +3687,7 @@ body.cyberpunk-mode .bio-glow { display: none; }
     };
     window.TermCmds.neon = window.TermCmds.cyberpunk;
     window.TermCmds.nightcity = window.TermCmds.cyberpunk;
-    // Add 'C' key listener for Cyberpunk Mode
-    document.addEventListener('keydown', e => {
-      // Ignore if typing in an input field
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      
-      // Toggle if 'c' or 'C' is pressed (without modifiers like Ctrl/Alt)
-      if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey) {
-          if (window._toggleCyberpunk) window._toggleCyberpunk(true);
-      }
-  });
+    // Cyberpunk toggle available via terminal command: > cyberpunk
   }
 
 
@@ -4727,44 +4738,29 @@ body.zen-mode .tl-progress-bar { display: none !important; }
    5. VOICE NAVIGATION
    ═══════════════════════════════════════════ */
 
-.voice-btn {
-  position: fixed; bottom: 24px; left: 16px; z-index: 99;
-  width: 36px; height: 36px; border-radius: 50%;
-  border: 1px solid var(--border); background: var(--card);
-  backdrop-filter: blur(20px); color: var(--sub);
-  font-size: 13px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 4px 16px rgba(0,0,0,.12);
-  opacity: .5; -webkit-tap-highlight-color: transparent;
-}
-.voice-btn:hover { opacity: 1; border-color: var(--accent); color: var(--accent); transform: scale(1.08); }
-.voice-btn.listening {
-  opacity: 1; border-color: #ef4444; color: #ef4444;
+.voice-tbtn.listening {
+  color: #ef4444 !important;
   animation: voicePulse 1.5s ease-in-out infinite;
 }
 @keyframes voicePulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.3); }
-  50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+  50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
 }
 .voice-transcript {
-  position: fixed; bottom: 68px; left: 16px; z-index: 99;
+  position: fixed; top: 52px; right: 16px; z-index: 99;
   max-width: 260px; padding: 8px 12px; border-radius: 10px;
   background: rgba(13,20,32,.95); border: 1px solid #1a2332;
   backdrop-filter: blur(12px);
   font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  color: #8b949e; opacity: 0; transform: translateY(6px);
+  color: #8b949e; opacity: 0; transform: translateY(-6px);
   transition: all .3s; pointer-events: none;
 }
 .voice-transcript.show { opacity: 1; transform: translateY(0); }
 .voice-transcript .heard { color: #00e1ff; }
 .voice-transcript .action { color: #22c55e; font-weight: 600; }
-body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !important; }
-@media(max-width:600px) {
-  .voice-btn { bottom: 14px; left: 12px; width: 32px; height: 32px; font-size: 11px; }
-  .voice-transcript { bottom: 52px; left: 12px; }
-}
-@media print { .voice-btn, .voice-transcript { display: none !important; } }
+body.zen-mode .voice-tbtn, body.zen-mode .voice-transcript { display: none !important; }
+body.zen-mode #audioBtn { display: none !important; }
+@media print { .voice-tbtn, .voice-transcript { display: none !important; } }
 `;
   document.head.appendChild(css);
 
@@ -4787,7 +4783,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { name:'Testimonials',           icon:'⭐', action:()=>scrollTo('.tc-section'),        cat:'Section', desc:'Colleague recommendations', keys:'' },
       { name:'Conferences',            icon:'🎤', action:()=>scrollTo('.conf-strip'),        cat:'Section', desc:'Speaking engagements', keys:'' },
       { name:'LinkedIn Articles',      icon:'📝', action:()=>scrollTo('#linkedinFeed'),      cat:'Section', desc:'Published articles feed', keys:'' },
-      { name:'Contact Info',           icon:'📧', action:()=>{ const s=document.getElementById('contactSecret'); if(s) s.classList.add('revealed'); scrollTo('.sr'); }, cat:'Section', desc:'Reveal contact details', keys:'' },
+      { name:'Contact Info',           icon:'📧', action:()=>{ const s=document.getElementById('contactSecret'); if(s) s.classList.add('revealed'); scrollTo('.sr'); }, cat:'Section', desc:'Reveal contact details', keys:'C' },
       // Links
       { name:'The Bilingual Executive',icon:'📘', action:()=>clickLink('bilingual'),  cat:'Link', desc:'The book on Amazon', keys:'' },
       { name:'ADPList Mentoring',      icon:'🎓', action:()=>window.open('https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session','_blank'),    cat:'Link', desc:'Book a mentoring session', keys:'' },
@@ -4804,7 +4800,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { name:'Snake Game',             icon:'🐍', action:()=>{ if(window.openGame)window.openGame(); },                cat:'Game', desc:'Classic snake with data theme', keys:'' },
       // Features
       { name:'Zen Mode',               icon:'🧘', action:()=>{ const b=document.getElementById('zenBtn'); if(b) b.click(); }, cat:'Feature', desc:'Toggle minimal reading mode', keys:'Z' },
-      { name:'Cyberpunk Theme',        icon:'🌆', action:()=>{ if(window._toggleCyberpunk)window._toggleCyberpunk(true); }, cat:'Feature', desc:'Neon city theme overlay', keys:'C' },
+      { name:'Cyberpunk Theme',        icon:'🌆', action:()=>{ if(window._toggleCyberpunk)window._toggleCyberpunk(true); }, cat:'Feature', desc:'Neon city theme overlay', keys:'' },
       { name:'3D Book Viewer',         icon:'📦', action:()=>launchCmd('book3d'),            cat:'Feature', desc:'Interactive 3D book model', keys:'' },
       { name:'Data Mesh 3D',           icon:'🔀', action:()=>launchCmd('datamesh'),          cat:'Feature', desc:'3D data mesh visualization', keys:'' },
       { name:'Guestbook',              icon:'🌍', action:()=>openGuestbook(),                cat:'Feature', desc:'Sign the visitor wall', keys:'G' },
@@ -5779,10 +5775,12 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     recognition.maxAlternatives = 3;
 
     const btn = document.createElement('button');
-    btn.className = 'voice-btn'; btn.id = 'voiceBtn';
+    btn.className = 'tbtn voice-tbtn'; btn.id = 'voiceBtn';
     btn.setAttribute('aria-label','Voice Navigation'); btn.title = 'Voice Command (V)';
     btn.innerHTML = '<i class="fa-solid fa-microphone-slash" id="voiceIcon"></i>';
-    document.body.appendChild(btn);
+    const zenBtnRef = document.getElementById('zenBtn');
+    if (zenBtnRef) zenBtnRef.insertAdjacentElement('beforebegin', btn);
+    else document.getElementById('topBtns')?.appendChild(btn);
 
     const transcript = document.createElement('div');
     transcript.className = 'voice-transcript'; transcript.id = 'voiceTranscript';
