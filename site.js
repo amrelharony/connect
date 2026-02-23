@@ -7,6 +7,32 @@ const isRepeatVisit=!!localStorage.getItem('visited');localStorage.setItem('visi
 const isMobile=window.matchMedia('(pointer:coarse)').matches;
 const params=new URLSearchParams(location.search);
 
+// Auto-dismiss overlays after inactivity
+const AUTO_DISMISS_MS = 8000;
+const _autoDismissTimers = {};
+const _autoDismissCleanup = {};
+function autoDismiss(id, closeFn) {
+    clearTimeout(_autoDismissTimers[id]);
+    if (_autoDismissCleanup[id]) _autoDismissCleanup[id]();
+    const el = document.getElementById(id);
+    if (!el) return;
+    function reset() { clearTimeout(_autoDismissTimers[id]); _autoDismissTimers[id] = setTimeout(() => closeFn(), AUTO_DISMISS_MS); }
+    reset();
+    const overlayEvents = ['mousemove','touchstart','click','scroll'];
+    const docEvents = ['mousemove','touchstart'];
+    const docKeyEvents = ['keydown'];
+    overlayEvents.forEach(evt => el.addEventListener(evt, reset, {passive:true}));
+    docEvents.forEach(evt => document.addEventListener(evt, reset, {passive:true}));
+    docKeyEvents.forEach(evt => document.addEventListener(evt, reset));
+    _autoDismissCleanup[id] = () => {
+        overlayEvents.forEach(evt => el.removeEventListener(evt, reset));
+        docEvents.forEach(evt => document.removeEventListener(evt, reset));
+        docKeyEvents.forEach(evt => document.removeEventListener(evt, reset));
+    };
+}
+function cancelAutoDismiss(id) { clearTimeout(_autoDismissTimers[id]); if (_autoDismissCleanup[id]) { _autoDismissCleanup[id](); delete _autoDismissCleanup[id]; } }
+window.autoDismiss = autoDismiss;
+window.cancelAutoDismiss = cancelAutoDismiss;
 
 // ═══ SOCIAL PROOF TICKER ═══
 const quotes=[
@@ -202,6 +228,72 @@ function launch(){
     document.querySelectorAll('.tl-item').forEach((t,i)=>{gsap.fromTo(t,{opacity:0,x:-15},{opacity:1,x:0,duration:.5,delay:2.2+i*.12,ease:'power2.out'});});
 }
 
+// ═══ FIRST-LOAD SHORTCUTS OVERLAY (Desktop) ═══
+if (D && !localStorage.getItem('shortcuts_seen')) {
+    const GROUPS = [
+        { title: '📍 Navigate Sections', shortcuts: [
+            { key: '1', icon: '👤', label: 'Profile & Intro' },
+            { key: '2', icon: '🚀', label: 'The Journey' },
+            { key: '3', icon: '📜', label: 'Certifications' },
+            { key: '4', icon: '⭐', label: 'Testimonials' },
+            { key: '5', icon: '📧', label: 'Contact & Links' },
+            { key: '6', icon: '📝', label: 'Newsletters' },
+        ]},
+        { title: '✨ Features', shortcuts: [
+            { key: 'S', icon: '🔓', label: 'Reveal Contacts' },
+            { key: 'G', icon: '🌍', label: 'Guestbook' },
+            { key: 'A', icon: '🕹️', label: 'Arcade' },
+            { key: 'T', icon: '🏆', label: 'Trophy Case' },
+            { key: 'V', icon: '🎙️', label: 'Voice Nav' },
+        ]},
+        { title: '🎨 Vibes', shortcuts: [
+            { key: 'D', icon: '🌗', label: 'Dark / Light' },
+            { key: 'C', icon: '🌆', label: 'Cyberpunk' },
+            { key: 'Z', icon: '🧘', label: 'Zen Mode' },
+            { key: 'M', icon: '💚', label: 'Matrix Rain' },
+        ]},
+        { title: '🛠️ Tools', shortcuts: [
+            { key: '`', icon: '💻', label: 'Terminal' },
+            { key: '⌘K', icon: '🔍', label: 'Search' },
+            { key: '?', icon: '⌨️', label: 'All Shortcuts' },
+            { key: 'Esc', icon: '✕', label: 'Close Overlay' },
+        ]},
+    ];
+    const overlay = document.createElement('div');
+    overlay.id = 'shortcutsWelcome';
+    overlay.innerHTML = `<div class="sw-panel">
+        <div class="sw-header">
+            <div class="sw-title">⌨️ Keyboard Shortcuts</div>
+            <div class="sw-sub">This site is fully keyboard-navigable. Here are your keys.</div>
+        </div>
+        <div class="sw-groups">${GROUPS.map(g => `
+            <div class="sw-group">
+                <div class="sw-group-title">${g.title}</div>
+                <div class="sw-grid">${g.shortcuts.map(s =>
+                    `<div class="sw-item"><span class="sw-kbd">${s.key}</span><span class="sw-label">${s.icon} ${s.label}</span></div>`
+                ).join('')}</div>
+            </div>`).join('')}
+        </div>
+        <button class="sw-dismiss" id="swDismiss">Got it — Let's go</button>
+    </div>`;
+    document.body.appendChild(overlay);
+
+    function dismissWelcome() {
+        localStorage.setItem('shortcuts_seen', '1');
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+    }
+
+    setTimeout(() => {
+        overlay.classList.add('visible');
+        document.getElementById('swDismiss').addEventListener('click', dismissWelcome);
+        overlay.addEventListener('click', e => { if (e.target === overlay) dismissWelcome(); });
+        document.addEventListener('keydown', function esc(e) {
+            if (e.key === 'Escape' || e.key) { dismissWelcome(); document.removeEventListener('keydown', esc); }
+        });
+    }, 2500);
+}
+
 // ═══ PROXIMITY-GATED CONTACT ═══
 let contactRevealed=false,isNearby=false;
 function revealContact(){
@@ -285,7 +377,19 @@ function initShake() {
         window.addEventListener('devicemotion', handleMotion);
     }
 }
-document.addEventListener('keydown',e=>{if(e.key==='s'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement.tagName!=='INPUT')revealContact();});
+function flashSection(el){}
+document.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey||document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA')return;
+    const k = e.key;
+    const sectionMap = {
+        '1':'#pfw','2':'#secJourney','3':'#secCerts',
+        '4':'#secTestimonials','5':'.sr','6':'#secNewsletters'
+    };
+    if(sectionMap[k]){
+        const el=document.querySelector(sectionMap[k]);
+        if(el){el.scrollIntoView({behavior:'smooth',block:'start'});flashSection(el);}
+    }
+});
 
 // ═══ VCARD ═══
 window.downloadVCard=function(){const vcard=['BEGIN:VCARD','VERSION:3.0','N:Elharony;Amr;;;','FN:Amr Elharony','TITLE:Delivery Lead | Mentor | Fintech Author & Speaker','ORG:Banque Misr','TEL;TYPE=CELL:+201114260806','EMAIL;TYPE=INTERNET:a.elharony@gmail.com','URL:https://amrelharony.com','URL:https://bilingualexecutive.amrelharony.com/','URL:https://www.linkedin.com/in/amrmelharony','X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/amrmelharony','X-SOCIALPROFILE;TYPE=telegram:https://t.me/Amrmelharony','NOTE:Scrum Master at Banque Misr. Author of The Bilingual Executive. DBA in Digital Transformation.','END:VCARD'].join('\r\n');
@@ -293,11 +397,11 @@ const blob=new Blob([vcard],{type:'text/vcard;charset=utf-8'}),url=URL.createObj
 const btn=document.getElementById('vcBtn'),txt=document.getElementById('vcTxt'),icon=btn.querySelector('i');btn.classList.add('vcb-done');icon.className='fa-solid fa-check';txt.textContent='SAVED!';setTimeout(()=>{btn.classList.remove('vcb-done');icon.className='fa-solid fa-address-card';txt.textContent='Save Contact';},2500);};
 
 // ═══ EASTER EGG (Konami Code + Double-tap logo) ═══
-const konami=[38,38,40,40,37,39,37,39,66,65];let kIdx=0;
+const konami=[38,38,40,40];let kIdx=0;
 document.addEventListener('keydown',e=>{if(e.keyCode===konami[kIdx]){kIdx++;if(kIdx===konami.length){kIdx=0;showEgg();}}else{kIdx=0;}});
 let lastTap=0;document.getElementById('pfw').addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300){e.preventDefault();showEgg();}lastTap=now;});
-function showEgg(){const el=document.getElementById('easterEgg');el.classList.add('show');if(navigator.vibrate)navigator.vibrate([50,30,50,30,100]);}
-window.closeEgg=function(){document.getElementById('easterEgg').classList.remove('show');};
+function showEgg(){const el=document.getElementById('easterEgg');if(!el)return;el.classList.add('show');if(navigator.vibrate)navigator.vibrate([50,30,50,30,100]);autoDismiss('easterEgg',closeEgg);}
+window.closeEgg=function(){const el=document.getElementById('easterEgg');if(el)el.classList.remove('show');cancelAutoDismiss('easterEgg');};
 // Escape handled by unified handler below
 
 
@@ -387,9 +491,10 @@ window.openShare=function(){
     ctx.fillText('linkedin.com/in/amrmelharony',W-220,H-20);
 
     document.getElementById('shareOverlay').classList.add('show');
+    autoDismiss('shareOverlay',closeShare);
 };
 
-window.closeShare=function(){document.getElementById('shareOverlay').classList.remove('show');};
+window.closeShare=function(){const el=document.getElementById('shareOverlay');if(el)el.classList.remove('show');cancelAutoDismiss('shareOverlay');};
 
 // QR code now uses external API image — no canvas generation needed
 
@@ -610,10 +715,15 @@ function showSmartCta(type){
     }
     cta.classList.add('show');
     VDna.addXp(2);
+    // Auto-dismiss after inactivity
+    let ctaTimer = setTimeout(dismissSmartCta, AUTO_DISMISS_MS);
+    cta.onmouseenter = () => { clearTimeout(ctaTimer); ctaTimer = setTimeout(dismissSmartCta, AUTO_DISMISS_MS); };
+    cta.ontouchstart = () => { clearTimeout(ctaTimer); ctaTimer = setTimeout(dismissSmartCta, AUTO_DISMISS_MS); };
 }
 window.dismissSmartCta=function(){
-    document.getElementById('smartCta').classList.remove('show');
-    const p=VDna.get();p.smartCtaDismissed=true;VDna.save();
+    const el=document.getElementById('smartCta');
+    if(el)el.classList.remove('show');
+    try{const p=VDna.get();p.smartCtaDismissed=true;VDna.save();}catch(e){}
 };
 
 // ═════════════════════════════════════════════════
@@ -848,9 +958,11 @@ function openTrophy(){
     grid.innerHTML=html;
     // Hide notification dot
     const dot=document.getElementById('trophyDot');if(dot)dot.style.display='none';
-    document.getElementById('trophyOverlay').classList.add('show');
+    const tO=document.getElementById('trophyOverlay'); if(!tO)return;
+    tO.classList.add('show');
+    autoDismiss('trophyOverlay',closeTrophy);
 }
-window.closeTrophy=function(){document.getElementById('trophyOverlay').classList.remove('show');};
+window.closeTrophy=function(){const el=document.getElementById('trophyOverlay');if(el)el.classList.remove('show');cancelAutoDismiss('trophyOverlay');};
 // Share progress
 window.shareTrophy=function(){
     const p=VDna.get();
@@ -990,7 +1102,8 @@ window.TermCmds = TermCmds;
 
 // Unified Terminal UI Logic
 window.openTerm = function() {
-    document.getElementById('termOverlay').classList.add('show');
+    const tEl=document.getElementById('termOverlay'); if(!tEl)return;
+    tEl.classList.add('show');
     const b = document.getElementById('termBody');
     if (b.innerHTML.trim() === "" || b.innerHTML.includes('v2.0')) {
         // Updated innerHTML to include the help command hint
@@ -1000,9 +1113,10 @@ window.openTerm = function() {
         `;
     }
     setTimeout(() => document.getElementById('termInput').focus(), 300);
+    autoDismiss('termOverlay',closeTerm);
 };
 
-window.closeTerm = function() { document.getElementById('termOverlay').classList.remove('show'); };
+window.closeTerm = function() { const el=document.getElementById('termOverlay');if(el)el.classList.remove('show'); cancelAutoDismiss('termOverlay'); };
 
 // Input Handler (Single listener to prevent page hanging)
 const inputField = document.getElementById('termInput');
@@ -1233,11 +1347,13 @@ setTimeout(startAuto,5000);
 // ═════════════════════════════════════════════════
 let snakeGame=null,snakeDir={x:1,y:0};
 window.openGame=function(){
-    document.getElementById('gameOverlay').classList.add('show');
+    const el=document.getElementById('gameOverlay'); if(!el)return;
+    el.classList.add('show');
     startSnake();
+    autoDismiss('gameOverlay',closeGame);
 };
-window.closeGame=function(){
-    document.getElementById('gameOverlay').classList.remove('show');
+window.closeGame=function(){cancelAutoDismiss('gameOverlay');
+    const el=document.getElementById('gameOverlay');if(el)el.classList.remove('show');
     if(snakeGame){clearInterval(snakeGame);snakeGame=null;}
 };
 window.restartSnake=function(){
@@ -1448,6 +1564,8 @@ function startSnake(){
             if(navigator.vibrate)navigator.vibrate([100,50,200]);
             document.getElementById('gameMsg').innerHTML='<span class="warn">📉 MARGIN CALL — Portfolio liquidated</span>';
             VDna.addXp(Math.floor(portfolio/100));
+            if(window.recordScore)window.recordScore('trader',portfolio);
+            else{try{const s=JSON.parse(localStorage.getItem('arcade_state')||'{}');s.highScores=s.highScores||{};if(!s.highScores.trader||portfolio>s.highScores.trader)s.highScores.trader=portfolio;localStorage.setItem('arcade_state',JSON.stringify(s));}catch(e){}}
             draw();return;
         }
 
@@ -1655,32 +1773,10 @@ function startSnake(){
 // ═════════════════════════════════════════════════
 // FEATURE: KEYBOARD SHORTCUTS
 // ═════════════════════════════════════════════════
-window.openShortcuts=function(){document.getElementById('shortcutOverlay').classList.add('show');};
-window.closeShortcuts=function(){document.getElementById('shortcutOverlay').classList.remove('show');};
+window.openShortcuts=function(){const el=document.getElementById('shortcutOverlay');if(!el)return;el.classList.add('show');autoDismiss('shortcutOverlay',closeShortcuts);};
+window.closeShortcuts=function(){const el=document.getElementById('shortcutOverlay');if(el)el.classList.remove('show');cancelAutoDismiss('shortcutOverlay');};
 
-// ═════════════════════════════════════════════════
-// FEATURE: CURSOR TRAIL (desktop only)
-// ═════════════════════════════════════════════════
-if(D&&!reducedMotion){
-    const particles=[];
-    document.addEventListener('mousemove',e=>{
-        const p=document.createElement('div');p.className='cursor-particle';
-        p.style.left=e.clientX+'px';p.style.top=e.clientY+'px';
-        p.style.opacity='0.6';
-        const hue=Math.random()*60+170;// cyan-purple range
-        p.style.background=`hsl(${hue},100%,70%)`;
-        p.style.width=(2+Math.random()*3)+'px';p.style.height=p.style.width;
-        document.body.appendChild(p);
-        const angle=Math.random()*Math.PI*2;const dist=10+Math.random()*20;
-        const dx=Math.cos(angle)*dist;const dy=Math.sin(angle)*dist;
-        requestAnimationFrame(()=>{
-            p.style.transition='all .6s ease-out';
-            p.style.transform=`translate(${dx}px,${dy}px)`;
-            p.style.opacity='0';
-        });
-        setTimeout(()=>p.remove(),700);
-    });
-}
+// Old cursor-particle trail removed — superseded by Phase 1 emoji cursor
 
 // ═════════════════════════════════════════════════
 // UNIFIED KEYBOARD HANDLER (enhanced)
@@ -1688,13 +1784,19 @@ if(D&&!reducedMotion){
 // Remove old keydown handler first — we'll replace with unified
 (function(){
     const unifiedKeys=e=>{
+        if(e.key==='Escape'){if(window.closeEgg)window.closeEgg();if(window.closeShare)window.closeShare();if(window.closeTrophy)window.closeTrophy();if(window.closeTerm)window.closeTerm();if(window.closeGame)window.closeGame();if(window.closeShortcuts)window.closeShortcuts();if(window._closeArcade)window._closeArcade();if(window._closeMG)window._closeMG();if(window._closeGuestbook)window._closeGuestbook();if(window._closeAdmin)window._closeAdmin();if(window._close3D)window._close3D();if(window._closePalette)window._closePalette();dismissSmartCta();document.activeElement.blur();return;}
         const tag=document.activeElement.tagName;
-        if(tag==='INPUT'||tag==='TEXTAREA')return;// Don't capture when typing
-        if(e.key==='Escape'){closeEgg();closeShare();closeTrophy();closeTerm();closeGame();closeShortcuts();}
-        if(e.key==='t'&&!e.ctrlKey&&!e.metaKey)openTrophy();
-        if(e.key==='?')openShortcuts();
-        if(e.key==='`')openTerm();
-        if(e.key==='g'&&!e.ctrlKey)openGame();
+        if(tag==='INPUT'||tag==='TEXTAREA')return;
+        const k=(e.key||'').toLowerCase();
+        const code=e.code||'';
+        const isKey=(char, codeName)=>k===char||code===codeName;
+        if(isKey('s','KeyS'))revealContact();
+        if(isKey('m','KeyM')&&window.TermCmds?.matrix)window.TermCmds.matrix();
+        if(isKey('t','KeyT')&&!e.ctrlKey&&!e.metaKey)openTrophy();
+        if(e.key==='?'||(code==='Slash'&&e.shiftKey))openShortcuts();
+        if(e.key==='`'||code==='Backquote')openTerm();
+        if(isKey('g','KeyG')&&!e.ctrlKey){if(window.openGuestbook)window.openGuestbook();}
+        if(isKey('a','KeyA')&&!e.ctrlKey){if(window._openArcade)window._openArcade();}
     };
     // Remove previous listeners (they're anonymous so can't remove — but our new unified one will work alongside)
     document.addEventListener('keydown',unifiedKeys);
@@ -2251,32 +2353,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 
 
   // ═══════════════════════════════════════════════════
-  // UPDATE KEYBOARD SHORTCUTS OVERLAY
-  // ═══════════════════════════════════════════════════
-
-  function updateShortcutsPanel() {
-    const panel = document.querySelector('.shortcut-panel');
-    if (!panel) return;
-
-    const closeDiv = panel.querySelector('.sc-close');
-    if (!closeDiv) return;
-
-    // Add new shortcuts before the close button
-    const shortcuts = [
-      { key: 'S', desc: 'Reveal Contact Info' },
-      { key: 'Z', desc: 'Toggle Zen Mode' },
-    ];
-
-    shortcuts.forEach(sc => {
-      // Check if already added
-      if (panel.querySelector(`[data-p1-key="${sc.key}"]`)) return;
-      const row = document.createElement('div');
-      row.className = 'sc-row';
-      row.dataset.p1Key = sc.key;
-      row.innerHTML = `<span class="sc-key">${sc.key}</span><span class="sc-desc">${sc.desc}</span>`;
-      panel.insertBefore(row, closeDiv);
-    });
-  }
+  function updateShortcutsPanel() {}
 
 
   // ═══════════════════════════════════════════════════
@@ -3086,11 +3163,11 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
   css.id = 'phase3-css';
   css.textContent = `
 /* ARCADE HUB OVERLAY */
-#arcadeOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(14px);pointer-events:none}
+#arcadeOverlay{position:fixed;inset:0;z-index:9999;background:transparent;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;backdrop-filter:blur(6px);pointer-events:none}
 #arcadeOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.arcade-hub{width:96%;max-width:420px;max-height:88vh;overflow-y:auto;padding:20px;border-radius:20px;background:linear-gradient(180deg,#080c16,#0d1420);border:1px solid #1a2332;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.arcade-hub{width:96%;max-width:420px;max-height:88vh;overflow-y:auto;padding:20px;border-radius:20px;background:#080c16;border:none;transform:scale(.9);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 #arcadeOverlay.show .arcade-hub{transform:scale(1)}
-.arcade-hub::-webkit-scrollbar{width:3px}.arcade-hub::-webkit-scrollbar-thumb{background:#1a2332;border-radius:3px}
+.arcade-hub::-webkit-scrollbar{width:0;display:none}
 
 .arcade-header{text-align:center;margin-bottom:16px}
 .arcade-title{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(135deg,#00e1ff,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
@@ -3134,9 +3211,9 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 .arcade-close{text-align:center;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5568;opacity:.4;cursor:pointer}.arcade-close:hover{opacity:1;color:#00e1ff}
 
 /* GAME OVERLAY */
-#miniGameOverlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;pointer-events:none}
+#miniGameOverlay{position:fixed;inset:0;z-index:10000;background:transparent;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;backdrop-filter:blur(6px);pointer-events:none}
 #miniGameOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.mg-container{width:96%;max-width:400px;max-height:90vh;overflow-y:auto;border-radius:16px;background:#080c14;border:1px solid #1a2332;transform:scale(.9);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.mg-container{width:96%;max-width:400px;max-height:90vh;overflow-y:auto;border-radius:16px;background:#080c14;border:none;transform:scale(.9);transition:transform .4s cubic-bezier(.16,1,.3,1)}
 #miniGameOverlay.show .mg-container{transform:scale(1)}
 .mg-hud{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#0a0f1a;border-bottom:1px solid #1a2332}
 .mg-hud-item{text-align:center}
@@ -3297,8 +3374,8 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     });
   }
 
-  function openArcade() { initBaseGame(); renderArcadeHub(); document.getElementById('arcadeOverlay').classList.add('show'); addXP(1); }
-  function closeArcade() { document.getElementById('arcadeOverlay')?.classList.remove('show'); }
+  function openArcade() { initBaseGame(); renderArcadeHub(); const el=document.getElementById('arcadeOverlay'); if(!el)return; el.classList.add('show'); addXP(1); autoDismiss('arcadeOverlay',closeArcade); }
+  function closeArcade() { document.getElementById('arcadeOverlay')?.classList.remove('show'); cancelAutoDismiss('arcadeOverlay'); }
   window._closeArcade = closeArcade;
   window._openArcade = openArcade;
 
@@ -3314,6 +3391,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     if (activeGameCleanup) { activeGameCleanup(); activeGameCleanup = null; }
     const g = GAMES[gameId];
     document.getElementById('miniGameOverlay').classList.add('show');
+    autoDismiss('miniGameOverlay',closeMiniGame);
     const s = getArcadeState();
     s.totalPlays = (s.totalPlays || 0) + 1;
     saveArcadeState(s);
@@ -3324,9 +3402,12 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       case 'defender':  activeGameCleanup = GameDefender(container, g); break;
     }
   }
+  // Expose launcher immediately so palette actions do not depend on init timing.
+  window._launchGame = launchGame;
 
   function closeMiniGame() {
     document.getElementById('miniGameOverlay')?.classList.remove('show');
+    cancelAutoDismiss('miniGameOverlay');
     if (activeGameCleanup) { activeGameCleanup(); activeGameCleanup = null; }
   }
 
@@ -3336,6 +3417,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     saveArcadeState(s);
     addXP(Math.floor(score / 50) + 5);
   }
+  window.recordScore = recordScore;
 
 
   // ═══════════════════════════════════════
@@ -3472,7 +3554,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
         <div class="mg-hud-item"><div class="mg-hud-val" id="ssLines">0</div><div class="mg-hud-label">Sprints</div></div>
         <div class="mg-hud-item"><div class="mg-hud-val" id="ssLevel">1</div><div class="mg-hud-label">Velocity</div></div>
       </div>
-      <div class="mg-canvas-wrap"><canvas id="ssCanvas" class="mg-canvas" width="${W}" height="${H}"></canvas></div>
+      <div class="mg-canvas-wrap"><canvas id="ssCanvas" class="mg-canvas" width="${W}" height="${H}" role="img" aria-label="Sprint Stacker game — arrows to move, up to rotate, down to drop"></canvas></div>
       <div class="mg-msg" id="ssMsg">Pack features into sprints — clear rows to deliver!</div>
       <div class="mg-hint">← → move · ↑ rotate · ↓ drop · P pause</div>
       <div class="mg-btns"><button class="mg-btn" onclick="window._ssRestart()">↻ New Sprint</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
@@ -3748,7 +3830,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
         <div class="mg-hud-item"><div class="mg-hud-val" id="drTimer">45</div><div class="mg-hud-label">Seconds</div></div>
         <div class="mg-hud-item"><div class="mg-hud-val" id="drDomain">—</div><div class="mg-hud-label">Domain</div></div>
       </div>
-      <div class="mg-canvas-wrap"><canvas id="drCanvas" class="mg-canvas" width="${W}" height="${H}"></canvas></div>
+      <div class="mg-canvas-wrap"><canvas id="drCanvas" class="mg-canvas" width="${W}" height="${H}" role="img" aria-label="Data Mesh Router game — click pipes to rotate and connect routes"></canvas></div>
       <div class="mg-msg" id="drMsg">Click pipes to rotate them — connect source to domain!</div>
       <div class="mg-hint">Click/tap pipes to rotate · Connect the highlighted path</div>
       <div class="mg-btns"><button class="mg-btn" onclick="window._drRestart()">↻ New Routes</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
@@ -4125,7 +4207,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
         <div class="mg-hud-item"><div class="mg-hud-val" id="sdLives">❤️❤️❤️</div><div class="mg-hud-label">Sprint Health</div></div>
       </div>
       <div class="sd-powerup-bar" id="sdPowerUps"></div>
-      <div class="mg-canvas-wrap"><canvas id="sdCanvas" class="mg-canvas" width="${W}" height="${H}"></canvas></div>
+      <div class="mg-canvas-wrap"><canvas id="sdCanvas" class="mg-canvas" width="${W}" height="${H}" role="img" aria-label="Scope Defender game — arrows to move, space to shoot"></canvas></div>
       <div class="mg-msg" id="sdMsg">Defend the sprint! Shoot down scope creep & prod bugs</div>
       <div class="mg-hint">← → move · Space shoot · Catch power-ups!</div>
       <div class="mg-btns"><button class="mg-btn" onclick="window._sdRestart()">↻ New Wave</button><button class="mg-btn" onclick="window._closeMG()">✕ Close</button></div>`;
@@ -4565,29 +4647,18 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       gameBtn.addEventListener('click', openArcade);
     }
 
-    if (window.TermCmds) {
-      window.TermCmds.play = () => { closeMiniGame(); setTimeout(openArcade, 300); return '<span class="term-green">Launching Amr Arcade...</span>'; };
-      window.TermCmds.arcade = window.TermCmds.play;
-    }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.play = (arg) => {
+      const game = (arg||'').trim().toLowerCase();
+      if (game && GAMES[game]) { closeMiniGame(); setTimeout(() => launchGame(game), 300); return `<span class="term-green">🕹️ Launching ${GAMES[game].name}...</span>`; }
+      if (game === 'snake') { closeMiniGame(); setTimeout(() => { if(window.openGame) window.openGame(); }, 300); return '<span class="term-green">🐍 Launching Snake...</span>'; }
+      closeMiniGame(); setTimeout(openArcade, 300); return '<span class="term-green">Launching Amr Arcade...</span>';
+    };
+    window.TermCmds.arcade = window.TermCmds.play;
 
     window._closeMG = closeMiniGame;
+    window._launchGame = launchGame;
 
-    document.addEventListener('keydown', e => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'Escape') { closeMiniGame(); closeArcade(); }
-    });
-
-    const panel = document.querySelector('.shortcut-panel');
-    if (panel) {
-      const closeDiv = panel.querySelector('.sc-close');
-      if (closeDiv && !panel.querySelector('[data-p3-key]')) {
-        const row = document.createElement('div');
-        row.className = 'sc-row';
-        row.dataset.p3Key = '1';
-        row.innerHTML = '<span class="sc-key">G</span><span class="sc-desc">Open Amr Arcade</span>';
-        panel.insertBefore(row, closeDiv);
-      }
-    }
   }
 
 
@@ -4687,10 +4758,10 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
    2. 3D VIEWER OVERLAY STYLES
    ═══════════════════════════════════════════ */
 #viewer3dOverlay {
-  position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.96);
+  position: fixed; inset: 0; z-index: 9999; background: transparent;
   display: flex; align-items: center; justify-content: center; flex-direction: column;
   opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
-  pointer-events: none; backdrop-filter: blur(14px);
+  pointer-events: none; backdrop-filter: blur(6px);
 }
 #viewer3dOverlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
 .viewer3d-container {
@@ -4778,7 +4849,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   }
 
   function initAskAmr() {
-    if (!window.TermCmds) return;
+    window.TermCmds = window.TermCmds || {};
     window.TermCmds.ask = function(args) {
       const question = (args || '').trim();
       if (!question) return formatWelcome();
@@ -4829,6 +4900,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     if (titleEl) titleEl.textContent = title;
     if (loading) loading.classList.remove('hidden');
     overlay.classList.add('show');
+    autoDismiss('viewer3dOverlay',close3D);
 
     const loader = engineType === 'model-viewer' ? loadModelViewerJS() : loadThreeJS();
 
@@ -4844,6 +4916,7 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   function close3D() {
     const overlay = document.getElementById('viewer3dOverlay');
     overlay?.classList.remove('show');
+    cancelAutoDismiss('viewer3dOverlay');
     const container = document.getElementById('v3dContainer');
     if (container) {
         if (container.querySelector('canvas')) container.querySelector('canvas').remove();
@@ -4911,6 +4984,13 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     while (tempDiv.firstChild) container.appendChild(tempDiv.firstChild);
 
     const mv = container.querySelector('model-viewer');
+
+    if (mv) {
+      mv.addEventListener('error', () => {
+        const hint = document.getElementById('v3dHint');
+        if (hint) hint.textContent = '⚠️ 3D model failed to load (book.glb not found)';
+      });
+    }
 
     // ─────────────────────────────────────────────
     // DRAG VS CLICK DETECTION LOGIC
@@ -4983,10 +5063,9 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   // WIRE UP (ROBUST BADGE FINDER)
   // ═══════════════════════════════════════════════════
   function wireUp() {
-    if (window.TermCmds) {
-      window.TermCmds.book3d = () => { setTimeout(launchBookViewer, 300); return '📘 Launching...'; };
-      window.TermCmds.datamesh = () => { setTimeout(launchDataMesh, 300); return '🔀 Launching...'; };
-    }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.book3d = () => { setTimeout(launchBookViewer, 300); return '📘 Launching...'; };
+    window.TermCmds.datamesh = () => { setTimeout(launchDataMesh, 300); return '🔀 Launching...'; };
 
     const selectors = ['a.lk[href*="bilingual"]', 'a[href*="bilingual"]', 'a[href*="book"]'];
     let bookCard = null;
@@ -5276,16 +5355,15 @@ body.cyberpunk-mode .bio-glow { display: none; }
       return active;
     };
 
-    if (window.TermCmds) {
-      window.TermCmds.cyberpunk = () => {
-        const active = window._toggleCyberpunk(true);
-        return active
-          ? '<span style="color:#ff0066;text-shadow:0 0 8px rgba(255,0,102,.5)">◆ CYBERPUNK MODE ACTIVATED ◆</span><br><span style="color:#8a5ca0">Neon dreams loading... Welcome to Night City, choom.</span>'
-          : '<span style="color:#00e1ff">Cyberpunk mode deactivated. Reality restored.</span>';
-      };
-      window.TermCmds.neon = window.TermCmds.cyberpunk;
-      window.TermCmds.nightcity = window.TermCmds.cyberpunk;
-    }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.cyberpunk = () => {
+      const active = window._toggleCyberpunk(true);
+      return active
+        ? '<span style="color:#ff0066;text-shadow:0 0 8px rgba(255,0,102,.5)">◆ CYBERPUNK MODE ACTIVATED ◆</span><br><span style="color:#8a5ca0">Neon dreams loading... Welcome to Night City, choom.</span>'
+        : '<span style="color:#00e1ff">Cyberpunk mode deactivated. Reality restored.</span>';
+    };
+    window.TermCmds.neon = window.TermCmds.cyberpunk;
+    window.TermCmds.nightcity = window.TermCmds.cyberpunk;
     // Add 'C' key listener for Cyberpunk Mode
     document.addEventListener('keydown', e => {
       // Ignore if typing in an input field
@@ -5440,7 +5518,7 @@ body.cyberpunk-mode .bio-glow { display: none; }
 
 #cmdPaletteOverlay {
   position: fixed; inset: 0; z-index: 99999;
-  background: rgba(0,0,0,.7); backdrop-filter: blur(12px);
+  background: transparent; backdrop-filter: blur(6px);
   display: flex; align-items: flex-start; justify-content: center;
   padding-top: 18vh;
   opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; pointer-events: none;
@@ -5500,9 +5578,9 @@ body.cyberpunk-mode .bio-glow { display: none; }
 
 #adminOverlay {
   position: fixed; inset: 0; z-index: 99999;
-  background: rgba(0,0,0,.96); display: flex; align-items: center; justify-content: center;
+  background: transparent; display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
-  pointer-events: none; backdrop-filter: blur(14px);
+  pointer-events: none; backdrop-filter: blur(6px);
 }
 #adminOverlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
 .admin-panel {
@@ -5783,9 +5861,9 @@ body.zen-mode .tl-progress-bar { display: none !important; }
 
 #guestbookOverlay {
   position: fixed; inset: 0; z-index: 99999;
-  background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center;
+  background: transparent; display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
-  pointer-events: none; backdrop-filter: blur(10px);
+  pointer-events: none; backdrop-filter: blur(6px);
 }
 #guestbookOverlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
 .gb-panel {
@@ -5926,12 +6004,13 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       { name:'LinkedIn Profile',       icon:'💼', action:()=>window.open('https://linkedin.com/in/amrmelharony','_blank'), cat:'Link', desc:'Connect on LinkedIn', keys:'' },
       { name:'Book My Calendar',       icon:'📅', action:()=>window.open('https://calendly.com/amrmelharony/30min','_blank'), cat:'Link', desc:'Schedule a 30-min call', keys:'' },
       // Games
-      { name:'Open Arcade',            icon:'🕹️', action:()=>{ if(window._openArcade)window._openArcade(); }, cat:'Game', desc:'All 5 mini-games', keys:'' },
-      { name:'Sprint Stacker',         icon:'🧱', action:()=>launchCmd('play stacker'),     cat:'Game', desc:'Stack agile sprint blocks', keys:'' },
-      { name:'Data Mesh Router',       icon:'🔀', action:()=>launchCmd('play router'),      cat:'Game', desc:'Route data to correct domains', keys:'' },
-      { name:'FinTech Trader',         icon:'📈', action:()=>{ if(window.openGame)window.openGame(); }, cat:'Game', desc:'Real-time stock trading sim', keys:'' },
-      { name:'Bilingual Swipe',        icon:'🌐', action:()=>launchCmd('play bilingual'),   cat:'Game', desc:'Swipe-match bilingual terms', keys:'' },
-      { name:'Snake Game',             icon:'🐍', action:()=>launchCmd('play snake'),        cat:'Game', desc:'Classic snake with data theme', keys:'' },
+      { name:'Open Arcade',            icon:'🕹️', action:()=>{ if(window._openArcade)window._openArcade(); }, cat:'Game', desc:'All 5 mini-games', keys:'A' },
+      { name:'Sprint Stacker',         icon:'🧱', action:()=>{ if(window._launchGame)window._launchGame('stacker'); else if(window.TermCmds?.play)window.TermCmds.play('stacker'); }, cat:'Game', desc:'Stack agile sprint blocks', keys:'' },
+      { name:'Data Mesh Router',       icon:'🔀', action:()=>{ if(window._launchGame)window._launchGame('router'); else if(window.TermCmds?.play)window.TermCmds.play('router'); },  cat:'Game', desc:'Route data to correct domains', keys:'' },
+      { name:'FinTech Trader',         icon:'📈', action:()=>{ if(window._launchGame)window._launchGame('trader'); else if(window.openGame)window.openGame(); },  cat:'Game', desc:'Real-time stock trading sim', keys:'' },
+      { name:'Bilingual Swipe',        icon:'🌐', action:()=>{ if(window._launchGame)window._launchGame('bilingual'); else if(window.TermCmds?.play)window.TermCmds.play('bilingual'); }, cat:'Game', desc:'Swipe-match bilingual terms', keys:'' },
+      { name:'Scope Defender',         icon:'🛡️', action:()=>{ if(window._launchGame)window._launchGame('defender'); else if(window.TermCmds?.play)window.TermCmds.play('defender'); }, cat:'Game', desc:'Defend sprint from scope creep', keys:'' },
+      { name:'Snake Game',             icon:'🐍', action:()=>{ if(window.openGame)window.openGame(); },                cat:'Game', desc:'Classic snake with data theme', keys:'' },
       // Features
       { name:'Zen Mode',               icon:'🧘', action:()=>{ const b=document.getElementById('zenBtn'); if(b) b.click(); }, cat:'Feature', desc:'Toggle minimal reading mode', keys:'Z' },
       { name:'Cyberpunk Theme',        icon:'🌆', action:()=>{ if(window._toggleCyberpunk)window._toggleCyberpunk(true); }, cat:'Feature', desc:'Neon city theme overlay', keys:'C' },
@@ -6013,8 +6092,8 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         .map(r => r.item);
     }
 
-    function openPalette() { overlay.classList.add('show'); input.value=''; activeIdx=0; catFilter=null; filtered=getFiltered(''); render(); setTimeout(()=>input.focus(),80); }
-    function closePalette() { overlay.classList.remove('show'); input.blur(); }
+    function openPalette() { overlay.classList.add('show'); input.value=''; activeIdx=0; catFilter=null; filtered=getFiltered(''); render(); setTimeout(()=>input.focus(),80); autoDismiss('cmdPaletteOverlay',closePalette); }
+    function closePalette() { overlay.classList.remove('show'); input.blur(); cancelAutoDismiss('cmdPaletteOverlay'); }
 
     function render() {
       if (!filtered.length) { resultsEl.innerHTML = '<div class="cmd-empty">No results found — try different keywords</div>'; return; }
@@ -6074,13 +6153,13 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       }
     });
 
-    document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();overlay.classList.contains('show')?closePalette():openPalette();} });
+    document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&(String(e.key).toLowerCase()==='k'||e.code==='KeyK')){e.preventDefault();overlay.classList.contains('show')?closePalette():openPalette();} });
 
-    if(window.TermCmds){
-      window.TermCmds.search=()=>{setTimeout(openPalette,200);return'<span class="term-green">Opening command palette...</span>';};
-      window.TermCmds.find=window.TermCmds.search;
-    }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.search=()=>{setTimeout(openPalette,200);return'<span class="term-green">Opening command palette...</span>';};
+    window.TermCmds.find=window.TermCmds.search;
     window._openPalette = openPalette;
+    window._closePalette = closePalette;
   }
 
 
@@ -6212,8 +6291,8 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     overlay.innerHTML = `<div class="admin-panel" id="adminPanel"></div>`;
     document.body.appendChild(overlay);
 
-    function openAdmin() { renderAdmin(); overlay.classList.add('show'); }
-    function closeAdmin() { overlay.classList.remove('show'); }
+    function openAdmin() { renderAdmin(); overlay.classList.add('show'); autoDismiss(overlay.id,closeAdmin); }
+    function closeAdmin() { overlay.classList.remove('show'); cancelAutoDismiss(overlay.id); }
     window._closeAdmin = closeAdmin;
     window._openTrophies = openAdmin;
 
@@ -6289,16 +6368,14 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         <div class="admin-close" onclick="window._closeAdmin()">[ ESC or tap to close ]</div>`;
     }
 
-    if(window.TermCmds){
-      window.TermCmds.admin=()=>{setTimeout(openAdmin,200);return'<span style="color:#ef4444">🔒 Opening Trophy Case & Progress...</span>';};
-      window.TermCmds.stats=window.TermCmds.admin;
-      window.TermCmds.insights=window.TermCmds.admin;
-      window.TermCmds.trophies=window.TermCmds.admin;
-      window.TermCmds.trophy=window.TermCmds.admin;
-      window.TermCmds.progress=window.TermCmds.admin;
-      window.TermCmds.achievements=window.TermCmds.admin;
-    }
-    document.addEventListener('keydown', e => { if(e.key==='Escape'&&overlay.classList.contains('show')) closeAdmin(); });
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.admin=()=>{setTimeout(openAdmin,200);return'<span style="color:#ef4444">🔒 Opening Trophy Case & Progress...</span>';};
+    window.TermCmds.stats=window.TermCmds.admin;
+    window.TermCmds.insights=window.TermCmds.admin;
+    window.TermCmds.trophies=window.TermCmds.admin;
+    window.TermCmds.trophy=window.TermCmds.admin;
+    window.TermCmds.progress=window.TermCmds.admin;
+    window.TermCmds.achievements=window.TermCmds.admin;
   }
 
 
@@ -6323,9 +6400,9 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       anchor = lastLk.closest('div[style*="flex"]') || lastLk.closest('.rv') || lastLk.parentElement;
     }
 
-    // Strategy 2: Find the bio/subtitle area
+    // Strategy 2: Find the value proposition / bio area
     if (!anchor) {
-      anchor = document.querySelector('.bio') || document.querySelector('.sub-bio') || document.querySelector('.desc');
+      anchor = document.querySelector('.vp') || document.querySelector('#vpText') || document.querySelector('.imp');
     }
 
     // Strategy 3: Insert before impact numbers section
@@ -6740,17 +6817,16 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     }
 
     // ─── 10. TERMINAL INTEGRATION ───
-    if (window.TermCmds) {
-      window.TermCmds.timeline = (args) => {
-        const tag = (args || '').trim().toLowerCase();
-        if (tag && Object.keys(TAGS).includes(tag)) {
-          filterTimeline(tag);
-          setTimeout(() => scrollTo('.tl-wrap'), 200);
-          return `<span class="term-green">Filtered timeline to: ${tag}</span>`;
-        }
-        return `<span class="term-gray">Usage: timeline [banking|agile|data|speaking|learning|author]</span>`;
-      };
-    }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.timeline = (args) => {
+      const tag = (args || '').trim().toLowerCase();
+      if (tag && Object.keys(TAGS).includes(tag)) {
+        filterTimeline(tag);
+        setTimeout(() => scrollTo('.tl-wrap'), 200);
+        return `<span class="term-green">Filtered timeline to: ${tag}</span>`;
+      }
+      return `<span class="term-gray">Usage: timeline [banking|agile|data|speaking|learning|author]</span>`;
+    };
 
     function scrollTo(sel) { const el = document.querySelector(sel); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
@@ -6826,9 +6902,10 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           </div>`).join('');
     }
 
-    if(window.TermCmds){ window.TermCmds.guestbook=()=>{setTimeout(openGuestbook,200);return'<span class="term-green">🌍 Opening guestbook...</span>';}; window.TermCmds.wall=window.TermCmds.guestbook; }
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.guestbook=()=>{setTimeout(openGuestbook,200);return'<span class="term-green">🌍 Opening guestbook...</span>';};
+    window.TermCmds.wall=window.TermCmds.guestbook;
     window._closeGuestbook = closeGuestbook;
-    document.addEventListener('keydown', e => { if(e.key==='Escape'&&overlay.classList.contains('show')) closeGuestbook(); });
 
     const entries = getGBEntries();
     if (entries.length > 0 && !RM) {
@@ -6836,8 +6913,11 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     }
   }
 
+  window.openGuestbook = openGuestbook;
   function openGuestbook() {
-    document.getElementById('guestbookOverlay').classList.add('show');
+    const el=document.getElementById('guestbookOverlay'); if(!el)return;
+    el.classList.add('show');
+    autoDismiss('guestbookOverlay',closeGuestbook);
     const entries = getGBEntries().reverse();
     const container = document.getElementById('gbEntries');
     container.innerHTML = entries.length === 0
@@ -6851,7 +6931,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
           </div>
         </div>`).join('');
   }
-  function closeGuestbook() { document.getElementById('guestbookOverlay')?.classList.remove('show'); }
+  function closeGuestbook() { document.getElementById('guestbookOverlay')?.classList.remove('show'); cancelAutoDismiss('guestbookOverlay'); }
   function spawnBubble(emoji) {
     const el=document.createElement('span'); el.className='gb-bubble'; el.textContent=emoji;
     el.style.left=(15+Math.random()*70)+'vw'; el.style.bottom='10px';
@@ -6987,42 +7067,20 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     btn.addEventListener('click',toggleVoice);
     document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;if(e.key==='v'&&!e.ctrlKey&&!e.metaKey&&!e.altKey)toggleVoice();});
 
-    if(window.TermCmds){
-      window.TermCmds.voice=()=>{setTimeout(toggleVoice,200);return voiceActive?'<span class="term-gray">🔇 Voice stopped</span>':'<span class="term-green">🎤 Listening... say "help" for commands</span>';};
-      window.TermCmds['voice-help']=()=>{
-        return `<span class="term-green">🎙️ Voice Commands:</span>
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.voice=()=>{setTimeout(toggleVoice,200);return voiceActive?'<span class="term-gray">🔇 Voice stopped</span>':'<span class="term-green">🎤 Listening... say "help" for commands</span>';};
+    window.TermCmds['voice-help']=()=>{
+      return `<span class="term-green">🎙️ Voice Commands:</span>
 <span class="term-gray">Navigation:</span> certifications, timeline, testimonials, contact, impact, conferences, articles
 <span class="term-gray">Arcade:</span> arcade, play stacker, play router, play trader, play snake, play bilingual
 <span class="term-gray">Features:</span> zen mode, cyberpunk, terminal, guestbook, trophy case, search
 <span class="term-gray">Links:</span> linkedin, book a call, mentor, book
 <span class="term-gray">Scroll:</span> scroll down, scroll up, go to top, bottom
 <span class="term-gray">Meta:</span> help, stop`;
-      };
-    }
+    };
   }
 
 
-  // ═══════════════════════════════════════════════════
-  // WIRE SHORTCUTS
-  // ═══════════════════════════════════════════════════
-  function wireShortcuts() {
-    const panel = document.querySelector('.shortcut-panel');
-    if (!panel) return;
-    const closeDiv = panel.querySelector('.sc-close');
-    if (!closeDiv) return;
-    [
-      { key:'⌘K', desc:'Command Palette' },
-      { key:'V', desc:'Voice Navigation' },
-      { key:'C', desc:'Cyberpunk Theme' },
-      { key:'D', desc:'Toggle Dark/Light' },
-    ].forEach(sc => {
-      if (panel.querySelector(`[data-p6-key="${sc.key}"]`)) return;
-      const row = document.createElement('div');
-      row.className = 'sc-row'; row.dataset.p6Key = sc.key;
-      row.innerHTML = `<span class="sc-key">${sc.key}</span><span class="sc-desc">${sc.desc}</span>`;
-      panel.insertBefore(row, closeDiv);
-    });
-  }
 
 
 
@@ -7031,7 +7089,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   // ADVANCED TERMINAL COMMANDS
   // ═══════════════════════════════════════════════════
   function wireAdvancedTerminal() {
-    if (!window.TermCmds) return;
+    window.TermCmds = window.TermCmds || {};
     const T = window.TermCmds;
 
     // ── Help system ──────────────────────────────
@@ -7122,53 +7180,66 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     T.zen = () => { const b = document.getElementById('zenBtn'); if (b) b.click(); if (typeof checkTrophy === 'function') checkTrophy('theme_zen'); return '<span class="term-green">🧘 Toggling Zen Mode</span>'; };
     T.cyberpunk = () => { if (window._toggleCyberpunk) window._toggleCyberpunk(true); if (typeof checkTrophy === 'function') checkTrophy('theme_cyberpunk'); return '<span class="term-green">🌆 Toggling Cyberpunk</span>'; };
     T.matrix = () => {
-      // 1. Create full-screen canvas
       const canvas = document.createElement('canvas');
       canvas.id = 'matrixCanvas';
-      canvas.style.cssText = 'position:fixed;top:0;left:0;z-index:9998;pointer-events:none;background:#000;';      canvas.width = window.innerWidth;
+      canvas.style.cssText = 'position:fixed;top:0;left:0;z-index:9998;pointer-events:none;';
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       document.body.appendChild(canvas);
 
       const ctx = canvas.getContext('2d');
-      // Custom characters: Binary + Your Name + Arabic Year
       const chars = '01AMRELHARONYDATAAGILEFINTECH٢٠٢٦';
       const fontSize = 14;
       const columns = canvas.width / fontSize;
       const drops = Array(Math.floor(columns)).fill(1);
+      let lastFrame = 0;
+      const FRAME_INTERVAL = 80;
 
-      // 2. Animation Loop
-      function draw() {
-        // Fading trail effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.fillStyle = '#0F0'; // Hacker Green
-        ctx.font = fontSize + 'px monospace';
+      function draw(ts) {
+        if (!document.getElementById('matrixCanvas')) return;
+
+        if (ts - lastFrame < FRAME_INTERVAL) {
+          requestAnimationFrame(draw);
+          return;
+        }
+        lastFrame = ts;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         for (let i = 0; i < drops.length; i++) {
           const text = chars.charAt(Math.floor(Math.random() * chars.length));
-          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-          
-          // Random reset to top
+          const y = drops[i] * fontSize;
+
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#0F0';
+          ctx.font = fontSize + 'px monospace';
+          ctx.fillText(text, i * fontSize, y);
+
+          const trailLen = 12;
+          for (let t = 1; t <= trailLen; t++) {
+            const ty = y - t * fontSize;
+            if (ty < 0) break;
+            ctx.globalAlpha = (1 - t / trailLen) * 0.4;
+            const tc = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.fillText(tc, i * fontSize, ty);
+          }
+          ctx.globalAlpha = 1;
+
           if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
             drops[i] = 0;
           }
           drops[i]++;
         }
-        
-        // Continue if canvas exists
-        if (document.getElementById('matrixCanvas')) {
-            requestAnimationFrame(draw);
-        }
-      }
-      draw();
 
-      // 3. Auto-cleanup after 10 seconds (save battery)
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+
       setTimeout(() => {
           canvas.style.transition = 'opacity 2s';
           canvas.style.opacity = '0';
           setTimeout(() => canvas.remove(), 2000);
-      }, 10000);
+      }, 30000);
 
       return '<span class="term-green">Wake up, Neo... (Simulation Active)</span>';
     };
@@ -7355,7 +7426,6 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     initInteractiveTimeline();
     initGuestbook();
     initVoiceNav();
-    wireShortcuts();
     wireAdvancedTerminal();
     initTrophySystem();
     console.log(
@@ -7427,73 +7497,63 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     };
 
     // 3. The Interceptor (MutationObserver)
-    // This watches the DOM. If an old toast tries to exist, we catch it.
-    const Interceptor = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            
-            // A. Catch newly added elements (Standard Toasts & Trophy Toasts)
-            mutation.addedNodes.forEach((node) => {
-                if(node.nodeType === 1) { // Element
-                    
-                    // Case 1: Standard .toast (Arcade/Achievements)
-                    if(node.classList.contains('toast')) {
-                        // Extract data
-                        const icon = node.querySelector('.toast-emoji')?.textContent || '🏆';
-                        const title = node.querySelector('.toast-title')?.textContent || 'Achievement';
-                        let meta = node.querySelector('.toast-desc')?.textContent || '';
-                        const xp = node.querySelector('.toast-xp')?.textContent;
-                        if(xp) meta += ` · ${xp}`;
+    // Scoped: childList on body (direct children only) for toast interception
+    const ChildInterceptor = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            for (const node of mutation.addedNodes) {
+                if (node.nodeType !== 1) continue;
 
-                        // Determine Type
-                        let type = 'default';
-                        if(node.classList.contains('legendary') || node.classList.contains('toast-levelup')) type = 'legendary';
-                        else if(node.classList.contains('epic')) type = 'rare';
-                        else if(node.classList.contains('rare')) type = 'accent';
+                if (node.classList.contains('toast')) {
+                    const icon = node.querySelector('.toast-emoji')?.textContent || '🏆';
+                    const title = node.querySelector('.toast-title')?.textContent || 'Achievement';
+                    let meta = node.querySelector('.toast-desc')?.textContent || '';
+                    const xp = node.querySelector('.toast-xp')?.textContent;
+                    if (xp) meta += ` · ${xp}`;
 
-                        // Kill old, spawn new
-                        node.remove(); 
-                        UniToast.add(title, meta, icon, type);
-                    }
+                    let type = 'default';
+                    if (node.classList.contains('legendary') || node.classList.contains('toast-levelup')) type = 'legendary';
+                    else if (node.classList.contains('epic')) type = 'rare';
+                    else if (node.classList.contains('rare')) type = 'accent';
 
-                    // Case 2: Phase 6 .trophy-toast (Bottom right ones)
-                    if(node.classList.contains('trophy-toast')) {
-                        const icon = node.querySelector('.trophy-toast-icon')?.textContent || '✨';
-                        const title = node.querySelector('strong')?.textContent || 'Unlocked';
-                        const meta = node.querySelector('span')?.textContent || '';
-                        
-                        node.remove();
-                        UniToast.add(title, meta, icon, 'accent');
-                    }
-                }
-            });
-
-            // B. Catch class changes on existing elements (Surprise Me & Copied)
-            if(mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const target = mutation.target;
-
-                // Case 3: "Copied!" alert
-                if(target.id === 'shareCopied' && target.classList.contains('show')) {
-                    target.classList.remove('show');
-                    UniToast.add('Copied to clipboard', '', '✓', 'success');
+                    node.remove();
+                    UniToast.add(title, meta, icon, type);
                 }
 
-                // Case 4: Surprise Me Toast
-                if(target.classList.contains('surprise-toast') && target.classList.contains('show')) {
-                    const text = target.textContent;
-                    target.classList.remove('show');
-                    UniToast.add(text, 'Jumped to section', '🚀', 'accent');
+                if (node.classList.contains('trophy-toast')) {
+                    const icon = node.querySelector('.trophy-toast-icon')?.textContent || '✨';
+                    const title = node.querySelector('strong')?.textContent || 'Unlocked';
+                    const meta = node.querySelector('span')?.textContent || '';
+                    node.remove();
+                    UniToast.add(title, meta, icon, 'accent');
                 }
             }
-        });
+        }
     });
+    ChildInterceptor.observe(document.body, { childList: true });
 
-    // Start watching the body
-    Interceptor.observe(document.body, { 
-        childList: true, 
-        subtree: true, 
-        attributes: true, 
-        attributeFilter: ['class'] 
-    });
+    // Targeted attribute observers for specific elements (no subtree scanning)
+    const shareCopied = document.getElementById('shareCopied');
+    if (shareCopied) {
+        const attrObs = new MutationObserver(() => {
+            if (shareCopied.classList.contains('show')) {
+                shareCopied.classList.remove('show');
+                UniToast.add('Copied to clipboard', '', '✓', 'success');
+            }
+        });
+        attrObs.observe(shareCopied, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    const surpriseToast = document.querySelector('.surprise-toast');
+    if (surpriseToast) {
+        const surpriseObs = new MutationObserver(() => {
+            if (surpriseToast.classList.contains('show')) {
+                const text = surpriseToast.textContent;
+                surpriseToast.classList.remove('show');
+                UniToast.add(text, 'Jumped to section', '🚀', 'accent');
+            }
+        });
+        surpriseObs.observe(surpriseToast, { attributes: true, attributeFilter: ['class'] });
+    }
 
     console.log('✅ Unified Toast System: Interceptor Active');
 
