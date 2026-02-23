@@ -7530,6 +7530,8 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
         }
     });
     ChildInterceptor.observe(document.body, { childList: true });
+    const _toastContainer = document.getElementById('toastContainer');
+    if (_toastContainer) ChildInterceptor.observe(_toastContainer, { childList: true });
 
     // Targeted attribute observers for specific elements (no subtree scanning)
     const shareCopied = document.getElementById('shareCopied');
