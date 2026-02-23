@@ -1,3 +1,7 @@
+const _SB_URL = 'https://ninughddcomniliqimlu.supabase.co';
+const _SB_KEY = 'sb_publishable_YaSfemHxR3HcrzpFW0QvZA_qoOj5SG7';
+const _sb = window.supabase ? window.supabase.createClient(_SB_URL, _SB_KEY) : null;
+
 (()=>{
 'use strict';
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -2165,8 +2169,16 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     zenBtn.setAttribute('aria-label', 'Toggle Zen Mode');
     zenBtn.title = 'Zen Mode (Z)';
     zenBtn.innerHTML = '<i class="fa-solid fa-eye" id="zenIcon"></i>';
-    // Insert after theme button
     themeBtn.insertAdjacentElement('afterend', zenBtn);
+
+    const gbBtn = document.createElement('button');
+    gbBtn.className = 'tbtn';
+    gbBtn.id = 'guestbookBtn';
+    gbBtn.setAttribute('aria-label', 'Open Guestbook');
+    gbBtn.title = 'Guestbook (G)';
+    gbBtn.innerHTML = '<i class="fa-solid fa-book"></i>';
+    zenBtn.insertAdjacentElement('afterend', gbBtn);
+    gbBtn.addEventListener('click', () => { if (typeof openGuestbook === 'function') openGuestbook(); });
 
     // Create zen banner inside #app
     const app = document.getElementById('app');
@@ -3279,6 +3291,27 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 .bug-splat{position:fixed;z-index:9995;font-size:28px;pointer-events:none;animation:bugSplat .5s ease-out forwards}
 @keyframes bugSplat{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
 
+/* GLOBAL LEADERBOARD */
+.arcade-lb-section{margin-top:16px;border-top:1px solid #1a2332;padding-top:14px}
+.arcade-lb-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#fbbf24;text-align:center;margin-bottom:10px}
+.arcade-lb-tabs{display:flex;gap:4px;overflow-x:auto;padding:0 2px 8px;scrollbar-width:none;-ms-overflow-style:none}
+.arcade-lb-tabs::-webkit-scrollbar{display:none}
+.arcade-lb-tab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.5px;padding:5px 10px;border-radius:6px;border:1px solid #1a2332;background:rgba(255,255,255,.02);color:#6b7280;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.arcade-lb-tab:hover{border-color:rgba(0,225,255,.2);color:#e2e8f0}
+.arcade-lb-tab.active{border-color:#00e1ff;color:#00e1ff;background:rgba(0,225,255,.06)}
+.arcade-lb-board{min-height:40px}
+.arcade-lb-loading{font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5568;text-align:center;padding:16px 0}
+.arcade-lb-empty{font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5568;text-align:center;padding:16px 0}
+.arcade-lb-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;transition:background .2s}
+.arcade-lb-row:nth-child(odd){background:rgba(255,255,255,.015)}
+.arcade-lb-row:hover{background:rgba(255,255,255,.04)}
+.arcade-lb-rank{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;width:22px;text-align:center;flex-shrink:0}
+.arcade-lb-rank.gold{color:#fbbf24}.arcade-lb-rank.silver{color:#c0c0c0}.arcade-lb-rank.bronze{color:#cd7f32}
+.arcade-lb-name{font-family:'JetBrains Mono',monospace;font-size:10px;color:#e2e8f0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arcade-lb-score{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00e1ff;flex-shrink:0}
+.arcade-lb-date{font-family:'JetBrains Mono',monospace;font-size:7px;color:#4a5568;flex-shrink:0}
+.arcade-lb-you{background:rgba(0,225,255,.04)!important;border:1px solid rgba(0,225,255,.1);border-radius:8px}
+
 @media print{#arcadeOverlay,#miniGameOverlay,.bug-sprite,.confetti-piece{display:none!important}}
 @media(max-width:600px){.mg-hint{display:none}.arcade-card{padding:10px}.arcade-card-icon{width:36px;height:36px;font-size:22px}}
 `;
@@ -3362,6 +3395,15 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       </div>
       <div class="arcade-grid">${cards}</div>
       ${state.bossBeaten ? '<div style="text-align:center;margin-top:12px;font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#fbbf24;letter-spacing:1px">🏆 BOSS DEFEATED — ALL GAMES MASTERED</div>' : ''}
+      <div class="arcade-lb-section">
+        <div class="arcade-lb-title">🏆 Global Leaderboard</div>
+        <div class="arcade-lb-tabs" id="arcadeLbTabs">
+          ${GAME_ORDER.map(id => `<button class="arcade-lb-tab" data-game="${id}">${GAMES[id].icon} ${GAMES[id].name}</button>`).join('')}
+        </div>
+        <div class="arcade-lb-board" id="arcadeLbBoard">
+          <div class="arcade-lb-loading">Select a game above</div>
+        </div>
+      </div>
       <div class="arcade-close" onclick="window._closeArcade()">[ ESC or tap to close ]</div>
     `;
 
@@ -3372,6 +3414,38 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
         setTimeout(() => launchGame(gid), 300);
       });
     });
+
+    const lbTabs = hub.querySelectorAll('.arcade-lb-tab');
+    lbTabs.forEach(tab => {
+      tab.addEventListener('click', async () => {
+        lbTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const board = document.getElementById('arcadeLbBoard');
+        board.innerHTML = '<div class="arcade-lb-loading">Loading...</div>';
+        const gid = tab.dataset.game;
+        const rows = await fetchLeaderboard(gid);
+        const myName = getArcadePlayerName();
+        if (rows.length === 0) {
+          board.innerHTML = '<div class="arcade-lb-empty">No scores yet — be the first!</div>';
+        } else {
+          board.innerHTML = rows.map((r, i) => {
+            const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+            const isYou = myName && r.player_name === myName;
+            const d = new Date(r.created_at);
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return `<div class="arcade-lb-row${isYou ? ' arcade-lb-you' : ''}">
+              <span class="arcade-lb-rank ${rankCls}">${medal}</span>
+              <span class="arcade-lb-name">${r.player_name}${isYou ? ' (you)' : ''}</span>
+              <span class="arcade-lb-score">${r.score.toLocaleString()}</span>
+              <span class="arcade-lb-date">${dateStr}</span>
+            </div>`;
+          }).join('');
+        }
+      });
+    });
+
+    if (lbTabs.length > 0) lbTabs[0].click();
   }
 
   function openArcade() { initBaseGame(); renderArcadeHub(); const el=document.getElementById('arcadeOverlay'); if(!el)return; el.classList.add('show'); addXP(1); autoDismiss('arcadeOverlay',closeArcade); }
@@ -3411,11 +3485,48 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     if (activeGameCleanup) { activeGameCleanup(); activeGameCleanup = null; }
   }
 
+  function getArcadePlayerName() { return localStorage.getItem('arcade_player_name') || null; }
+
+  function promptArcadePlayerName() {
+    const name = prompt('Enter your name for the global leaderboard:');
+    if (name && name.trim()) {
+      const clean = name.trim().substring(0, 20);
+      localStorage.setItem('arcade_player_name', clean);
+      return clean;
+    }
+    return null;
+  }
+
+  async function submitScoreToSupabase(gameId, score) {
+    if (!_sb) return;
+    let name = getArcadePlayerName();
+    if (!name) name = promptArcadePlayerName();
+    if (!name) return;
+    try {
+      await _sb.from('arcade_scores').insert({ player_name: name, game_id: gameId, score });
+    } catch (e) { console.warn('Supabase score submit failed:', e); }
+  }
+
+  async function fetchLeaderboard(gameId) {
+    if (!_sb) return [];
+    try {
+      const { data, error } = await _sb
+        .from('arcade_scores')
+        .select('player_name, score, created_at')
+        .eq('game_id', gameId)
+        .order('score', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
+    } catch (e) { console.warn('Supabase leaderboard fetch failed:', e); return []; }
+  }
+
   function recordScore(gameId, score) {
     const s = getArcadeState();
     if (!s.highScores[gameId] || score > s.highScores[gameId]) s.highScores[gameId] = score;
     saveArcadeState(s);
     addXP(Math.floor(score / 50) + 5);
+    submitScoreToSupabase(gameId, score);
   }
   window.recordScore = recordScore;
 
@@ -6296,18 +6407,18 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     window._closeAdmin = closeAdmin;
     window._openTrophies = openAdmin;
 
-    function renderAdmin() {
+    async function renderAdmin() {
       const panel=document.getElementById('adminPanel');
       const vdna=window.VDna?window.VDna.get():{};
       const arcade=JSON.parse(localStorage.getItem('arcade_state')||'{}');
-      const gb=JSON.parse(localStorage.getItem('guestbook_entries')||'[]');
+      let gbCount = 0;
+      try { if (_sb) { const { count } = await _sb.from('guestbook_entries').select('*', { count: 'exact', head: true }); gbCount = count || 0; } } catch(e) {}
       const xp=vdna.xp||0, level=vdna.level||1, visits=vdna.visits||1;
       const unlocked=vdna.unlocked||{};
       const unlockedCount=Object.keys(unlocked).length;
       const totalTrophies=TROPHIES.length;
       const totalPlays=arcade.totalPlays||0;
       const highScores=arcade.highScores||{};
-      const gbCount=gb.length;
 
       // Engagement score (weighted)
       const exploredCount = Object.keys(SECTIONS).filter(id => unlocked[id]).length;
@@ -6837,9 +6948,56 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   // ═══════════════════════════════════════════════════
 
   const GB_EMOJIS = ['👋','⭐','🔥','💡','🚀','❤️','🎉','🤝','👏','💪'];
-  const GB_KEY = 'guestbook_entries';
-  function getGBEntries() { try { return JSON.parse(localStorage.getItem(GB_KEY) || '[]'); } catch(e) { return []; } }
-  function saveGBEntries(entries) { localStorage.setItem(GB_KEY, JSON.stringify(entries.slice(-50))); }
+
+  async function fetchGBEntries() {
+    if (!_sb) return [];
+    try {
+      const { data, error } = await _sb
+        .from('guestbook_entries')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data || [];
+    } catch (e) { console.warn('Supabase guestbook fetch failed:', e); return []; }
+  }
+
+  async function insertGBEntry(entry) {
+    if (!_sb) return false;
+    try {
+      const { error } = await _sb.from('guestbook_entries').insert(entry);
+      if (error) throw error;
+      return true;
+    } catch (e) { console.warn('Supabase guestbook insert failed:', e); return false; }
+  }
+
+  function renderGBRows(entries) {
+    const container = document.getElementById('gbEntries');
+    if (!container) return;
+    if (entries.length === 0) {
+      container.innerHTML = '<div class="gb-empty">No entries yet — be the first! ✨</div>';
+      return;
+    }
+    container.innerHTML = entries.map(e => {
+      const ts = e.created_at ? new Date(e.created_at).getTime() : (e.time || Date.now());
+      return `<div class="gb-entry">
+        <span class="gb-entry-emoji">${e.emoji}</span>
+        <div class="gb-entry-meta">
+          <div class="gb-entry-name">${escHtml(e.name)}</div>
+          ${e.msg ? `<div class="gb-entry-msg">${escHtml(e.msg)}</div>` : ''}
+          <div class="gb-entry-time">${timeAgo(ts)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function renderGBEntriesFromSupabase() {
+    const container = document.getElementById('gbEntries');
+    if (!container) return;
+    container.innerHTML = '<div class="gb-empty" style="opacity:.5">Loading entries...</div>';
+    const entries = await fetchGBEntries();
+    renderGBRows(entries);
+  }
 
   function initGuestbook() {
     const overlay = document.createElement('div');
@@ -6876,41 +7034,31 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     function updateSubmit() { submitBtn.disabled = !selectedEmoji || !nameInput.value.trim(); }
     nameInput.addEventListener('input', updateSubmit);
 
-    submitBtn.addEventListener('click', () => {
+    submitBtn.addEventListener('click', async () => {
       if (!selectedEmoji || !nameInput.value.trim()) return;
-      const entry = { emoji:selectedEmoji, name:nameInput.value.trim(), msg:document.getElementById('gbMsg').value.trim(), time:Date.now() };
-      const entries = getGBEntries(); entries.push(entry); saveGBEntries(entries);
-      nameInput.value=''; document.getElementById('gbMsg').value=''; selectedEmoji=null;
-      emojiRow.querySelectorAll('.gb-emoji-btn').forEach(b=>b.classList.remove('selected'));
-      submitBtn.disabled=true; renderEntries(); spawnBubble(entry.emoji);
-      if(window.VDna)window.VDna.addXp(10); if(navigator.vibrate)navigator.vibrate(30);
-      if(typeof checkTrophy==='function') checkTrophy('guestbook_signed');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing...';
+      const entry = { emoji: selectedEmoji, name: nameInput.value.trim(), msg: document.getElementById('gbMsg').value.trim() || null };
+      const success = await insertGBEntry(entry);
+      if (success) {
+        nameInput.value = ''; document.getElementById('gbMsg').value = ''; selectedEmoji = null;
+        emojiRow.querySelectorAll('.gb-emoji-btn').forEach(b => b.classList.remove('selected'));
+        submitBtn.textContent = 'Sign the Wall';
+        await renderGBEntriesFromSupabase();
+        spawnBubble(entry.emoji);
+        if (window.VDna) window.VDna.addXp(10);
+        if (navigator.vibrate) navigator.vibrate(30);
+        if (typeof checkTrophy === 'function') checkTrophy('guestbook_signed');
+      } else {
+        submitBtn.textContent = 'Sign the Wall';
+      }
+      updateSubmit();
     });
-
-    function renderEntries() {
-      const entries = getGBEntries().reverse();
-      const container = document.getElementById('gbEntries');
-      container.innerHTML = entries.length === 0
-        ? '<div class="gb-empty">No entries yet — be the first! ✨</div>'
-        : entries.map(e => `<div class="gb-entry">
-            <span class="gb-entry-emoji">${e.emoji}</span>
-            <div class="gb-entry-meta">
-              <div class="gb-entry-name">${escHtml(e.name)}</div>
-              ${e.msg ? `<div class="gb-entry-msg">${escHtml(e.msg)}</div>` : ''}
-              <div class="gb-entry-time">${timeAgo(e.time)}</div>
-            </div>
-          </div>`).join('');
-    }
 
     window.TermCmds = window.TermCmds || {};
     window.TermCmds.guestbook=()=>{setTimeout(openGuestbook,200);return'<span class="term-green">🌍 Opening guestbook...</span>';};
     window.TermCmds.wall=window.TermCmds.guestbook;
     window._closeGuestbook = closeGuestbook;
-
-    const entries = getGBEntries();
-    if (entries.length > 0 && !RM) {
-      entries.slice(-5).forEach((e, i) => setTimeout(() => spawnBubble(e.emoji), 3000 + i * 2000));
-    }
   }
 
   window.openGuestbook = openGuestbook;
@@ -6918,18 +7066,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     const el=document.getElementById('guestbookOverlay'); if(!el)return;
     el.classList.add('show');
     autoDismiss('guestbookOverlay',closeGuestbook);
-    const entries = getGBEntries().reverse();
-    const container = document.getElementById('gbEntries');
-    container.innerHTML = entries.length === 0
-      ? '<div class="gb-empty">No entries yet — be the first! ✨</div>'
-      : entries.map(e => `<div class="gb-entry">
-          <span class="gb-entry-emoji">${e.emoji}</span>
-          <div class="gb-entry-meta">
-            <div class="gb-entry-name">${escHtml(e.name)}</div>
-            ${e.msg ? `<div class="gb-entry-msg">${escHtml(e.msg)}</div>` : ''}
-            <div class="gb-entry-time">${timeAgo(e.time)}</div>
-          </div>
-        </div>`).join('');
+    renderGBEntriesFromSupabase();
   }
   function closeGuestbook() { document.getElementById('guestbookOverlay')?.classList.remove('show'); cancelAutoDismiss('guestbookOverlay'); }
   function spawnBubble(emoji) {
