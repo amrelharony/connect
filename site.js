@@ -6435,7 +6435,7 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
       </a>
       <a href="https://adplist.org/mentors/amr-elharony?session=46534-mentorship-session" target="_blank" rel="noopener"
          class="always-cta always-cta-mentor">
-        <i class="fa-solid fa-user-group"></i> Get Mentored
+        <img src="Adplist.png" alt="ADPList" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;"> Get Mentored
       </a>`;
 
     anchor.insertAdjacentElement(position, row);
