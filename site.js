@@ -409,7 +409,7 @@ window.closeEgg=function(){const el=document.getElementById('easterEgg');if(el)e
 // Escape handled by unified handler below
 
 
-// ═══ VISITOR COUNTER + LIVE PRESENCE ═══
+// ═══ VISITOR COUNTER + ADVANCED MULTIPLAYER PRESENCE ═══
 (function(){
     let count=parseInt(localStorage.getItem('vc')||'0')+1;
     const base=4200+Math.floor(count*1.3);
@@ -419,41 +419,596 @@ window.closeEgg=function(){const el=document.getElementById('easterEgg');if(el)e
 
     if (!_sb) return;
 
-    const presenceId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-    const channel = _sb.channel('site-presence', { config: { presence: { key: presenceId } } });
+    const AVATARS = ['1F680','1F525','1F4A1','1F30E','1F3AF','1F4BB','1F916','1F9E0','1F3AE','1F4CA','26A1','1F48E','1F6E1','1F52E','1F3C6','2728','1F9D1','1F47E','1F4AB','1F5A5'];
+    const myId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+    const myAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    const myNickname = localStorage.getItem('arcade_player_name') || ('User-' + myId.slice(0, 4));
+
+    const SECTION_MAP = {
+      '.tl-wrap': 'timeline', '#certGrid': 'certs', '.tc-section': 'testimonials',
+      '.conf-strip': 'conferences', '#linkedinFeed': 'articles', '.imp': 'impact'
+    };
+
+    const channel = _sb.channel('site-presence', { config: { presence: { key: myId } } });
+    const evChannel = _sb.channel('site-events');
+
+    let peers = {};
     let liveCount = 0;
     let trophyAwarded = false;
+    let criticalMassActive = false;
+    let mySection = null;
+    let myScrollPct = 0;
+    let myGameState = null;
+    let lastTrackTime = 0;
+    let xpMultiplier = 1;
+    let xpMultiplierEnd = 0;
 
-    const liveEl = document.createElement('div');
-    liveEl.id = 'livePresence';
-    liveEl.className = 'live-presence';
-    vcEl.insertAdjacentElement('afterend', liveEl);
+    // High-five state
+    let pendingHighFives = {};
+    // Whisper state
+    let whisperTarget = null;
+    let sameSecTimers = {};
+    // Co-op lock state
+    let coopLocks = {};
+    // Smart contract state
+    let smartContractInterval = null;
+    let activeToken = null;
+    // Spectator state
+    let spectatingUser = null;
+    // Broadcast rate limit
+    let lastBroadcastTime = 0;
+    let lastTipTime = 0;
 
-    function updateUI(state) {
-        const keys = Object.keys(state);
-        liveCount = keys.length;
-        const others = Math.max(0, liveCount - 1);
-        if (others > 0) {
-            liveEl.innerHTML = `<span class="live-dot"></span> ${others} other${others > 1 ? ' professionals are' : ' professional is'} viewing right now`;
-            liveEl.classList.add('visible');
-            if (!trophyAwarded) {
-                trophyAwarded = true;
-                if (typeof checkTrophy === 'function') checkTrophy('networking_event');
-            }
-        } else {
-            liveEl.classList.remove('visible');
-        }
+    function emojiFromCode(hex) { return String.fromCodePoint(parseInt(hex, 16)); }
+
+    // ── PRESENCE BAR UI ──
+    const barWrap = document.createElement('div');
+    barWrap.id = 'mpBar';
+    barWrap.className = 'mp-bar';
+    barWrap.innerHTML = `<div class="mp-avatars" id="mpAvatars"></div><div class="mp-status" id="mpStatus"></div>`;
+    vcEl.insertAdjacentElement('afterend', barWrap);
+
+    const ctxMenu = document.createElement('div');
+    ctxMenu.id = 'mpCtx';
+    ctxMenu.className = 'mp-ctx';
+    ctxMenu.style.display = 'none';
+    document.body.appendChild(ctxMenu);
+
+    // Whisper bubble
+    const whisperEl = document.createElement('div');
+    whisperEl.id = 'mpWhisper';
+    whisperEl.className = 'mp-whisper';
+    whisperEl.style.display = 'none';
+    whisperEl.innerHTML = `<input type="text" class="mp-whisper-input" id="mpWhisperInput" maxlength="80" placeholder="Say hello..."><span class="mp-whisper-close" id="mpWhisperClose">&times;</span>`;
+    document.body.appendChild(whisperEl);
+
+    // Spectator banner
+    const specBanner = document.createElement('div');
+    specBanner.id = 'mpSpecBanner';
+    specBanner.className = 'mp-spec-banner';
+    specBanner.style.display = 'none';
+    document.body.appendChild(specBanner);
+
+    // Smart contract token container
+    const tokenEl = document.createElement('div');
+    tokenEl.id = 'mpToken';
+    tokenEl.className = 'mp-token';
+    tokenEl.style.display = 'none';
+    tokenEl.innerHTML = '<span class="mp-token-icon">📜</span><span class="mp-token-label">Smart Contract</span>';
+    document.body.appendChild(tokenEl);
+
+    function closeCtx() { ctxMenu.style.display = 'none'; }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#mpCtx, .mp-avatar')) closeCtx(); });
+
+    // ── SECTION DETECTION ──
+    function detectSection() {
+      const vh = window.innerHeight;
+      for (const [sel, name] of Object.entries(SECTION_MAP)) {
+        const el = document.querySelector(sel);
+        if (!el) continue;
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.6 && r.bottom > vh * 0.4) return name;
+      }
+      return 'hero';
     }
 
-    channel
-        .on('presence', { event: 'sync' }, () => updateUI(channel.presenceState()))
-        .subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                await channel.track({ online_at: new Date().toISOString() });
-            }
-        });
+    function getScrollPct() { return Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100) || 0; }
 
-    window.addEventListener('beforeunload', () => channel.untrack());
+    // ── THROTTLED PRESENCE TRACK ──
+    function trackMeta() {
+      const now = Date.now();
+      if (now - lastTrackTime < 2000) return;
+      lastTrackTime = now;
+      mySection = detectSection();
+      myScrollPct = getScrollPct();
+      channel.track({
+        nickname: myNickname, avatar: myAvatar, section: mySection,
+        scrollPct: myScrollPct, gameState: myGameState, online_at: new Date().toISOString()
+      });
+    }
+    window.addEventListener('scroll', () => requestAnimationFrame(trackMeta), { passive: true });
+    setInterval(trackMeta, 3000);
+
+    // Expose for arcade games to set their state
+    window._mpSetGame = (state) => { myGameState = state; trackMeta(); };
+    window._mpClearGame = () => { myGameState = null; trackMeta(); };
+    window._mpGetPeers = () => peers;
+    window._mpMyId = myId;
+
+    // ── RENDER PRESENCE BAR ──
+    function renderBar() {
+      const avatarBox = document.getElementById('mpAvatars');
+      const statusBox = document.getElementById('mpStatus');
+      const peerList = Object.entries(peers).filter(([k]) => k !== myId);
+      liveCount = peerList.length + 1;
+      const others = peerList.length;
+
+      // Status text
+      if (others > 0) {
+        statusBox.innerHTML = `<span class="live-dot"></span> ${others} other${others > 1 ? ' professionals' : ' professional'} viewing now`;
+        statusBox.classList.add('visible');
+        if (!trophyAwarded) { trophyAwarded = true; if (typeof checkTrophy === 'function') checkTrophy('networking_event'); }
+      } else {
+        statusBox.classList.remove('visible');
+        statusBox.innerHTML = '';
+      }
+
+      // Avatar bubbles
+      let html = `<div class="mp-avatar mp-avatar-me" title="You (${myNickname})" data-id="${myId}">${emojiFromCode(myAvatar)}</div>`;
+      for (const [pid, pArr] of peerList) {
+        const p = pArr[0] || {};
+        const status = p.gameState ? `Playing ${p.gameState.game}` : (p.section || 'browsing');
+        html += `<div class="mp-avatar" title="${p.nickname || 'Anonymous'}: ${status}" data-id="${pid}" data-nick="${p.nickname||'Anon'}">${emojiFromCode(p.avatar || '1F47E')}</div>`;
+      }
+      avatarBox.innerHTML = html;
+
+      // Attach click handlers
+      avatarBox.querySelectorAll('.mp-avatar:not(.mp-avatar-me)').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const pid = el.dataset.id;
+          const pData = (peers[pid] || [{}])[0];
+          showCtx(el, pid, pData);
+        });
+      });
+
+      // Swarm: attention glowing
+      checkAttentionGlow();
+      // Bio: critical mass
+      checkCriticalMass();
+      // Whisper: proximity check
+      checkProximityWhisper();
+      // VS mode check
+      checkVSMode();
+    }
+
+    // ── CONTEXT MENU ──
+    function showCtx(anchorEl, pid, pData) {
+      const nick = pData.nickname || 'Anon';
+      const isPlaying = pData.gameState && pData.gameState.status;
+      const isBoss = pData.gameState && pData.gameState.status === 'boss';
+      const sameSection = pData.section && pData.section === mySection;
+
+      let items = `<div class="mp-ctx-title">${nick}</div>`;
+      items += `<div class="mp-ctx-item" data-action="highfive" data-pid="${pid}">✋ High-Five</div>`;
+      if (sameSection) items += `<div class="mp-ctx-item" data-action="whisper" data-pid="${pid}">💬 Whisper</div>`;
+      items += `<div class="mp-ctx-item" data-action="tip" data-pid="${pid}">🪙 Tip 5 XP</div>`;
+      items += `<div class="mp-ctx-item" data-action="spectate" data-pid="${pid}">👁 Spectate</div>`;
+      if (isPlaying && pData.gameState.game === 'defender' && isBoss) {
+        items += `<div class="mp-ctx-item" data-action="invest" data-pid="${pid}">🛡 Invest (Power-Up)</div>`;
+      }
+      ctxMenu.innerHTML = items;
+      const rect = anchorEl.getBoundingClientRect();
+      ctxMenu.style.left = rect.left + 'px';
+      ctxMenu.style.top = (rect.bottom + 4) + 'px';
+      ctxMenu.style.display = 'block';
+
+      ctxMenu.querySelectorAll('.mp-ctx-item').forEach(it => {
+        it.addEventListener('click', () => {
+          const action = it.dataset.action;
+          const targetId = it.dataset.pid;
+          handleCtxAction(action, targetId);
+          closeCtx();
+        });
+      });
+    }
+
+    // ── CONTEXT ACTIONS ──
+    function handleCtxAction(action, targetId) {
+      switch (action) {
+        case 'highfive': sendHighFive(targetId); break;
+        case 'whisper': openWhisper(targetId); break;
+        case 'tip': sendTip(targetId); break;
+        case 'spectate': startSpectate(targetId); break;
+        case 'invest': sendInvest(targetId); break;
+      }
+    }
+
+    // ── SYSTEM 1a: HIGH-FIVE ──
+    function sendHighFive(targetId) {
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'high_five', from: myId, to: targetId, fromNick: myNickname } });
+      pendingHighFives[targetId] = Date.now();
+      if (window.UniToast) window.UniToast('✋ High-five sent! Waiting for them to high-five back...');
+    }
+
+    function receiveHighFive(from, fromNick) {
+      if (pendingHighFives[from] && Date.now() - pendingHighFives[from] < 10000) {
+        delete pendingHighFives[from];
+        spawnParticleBurst();
+        if (typeof checkTrophy === 'function') checkTrophy('team_player');
+        if (window.UniToast) window.UniToast('🎉 DOUBLE HIGH-FIVE with ' + fromNick + '! +25 XP!');
+      } else {
+        pendingHighFives[from] = Date.now();
+        evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'high_five', from: myId, to: from, fromNick: myNickname } });
+        if (window.UniToast) window.UniToast('✋ ' + fromNick + ' wants to high-five! High-fiving back...');
+        setTimeout(() => {
+          spawnParticleBurst();
+          if (typeof checkTrophy === 'function') checkTrophy('team_player');
+        }, 300);
+      }
+    }
+
+    function spawnParticleBurst() {
+      const burst = document.createElement('div');
+      burst.className = 'mp-particle-burst';
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('span');
+        p.className = 'mp-particle';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 40 + Math.random() * 80;
+        p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+        p.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+        p.style.setProperty('--delay', (Math.random() * 0.2) + 's');
+        p.textContent = ['✋','⭐','🎉','💥','✨'][Math.floor(Math.random()*5)];
+        burst.appendChild(p);
+      }
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 1500);
+    }
+
+    // ── SYSTEM 1b: PROXIMITY WHISPERS ──
+    function checkProximityWhisper() {
+      const peerList = Object.entries(peers).filter(([k]) => k !== myId);
+      for (const [pid, pArr] of peerList) {
+        const p = pArr[0] || {};
+        if (p.section && p.section === mySection && mySection !== 'hero') {
+          if (!sameSecTimers[pid]) sameSecTimers[pid] = Date.now();
+        } else {
+          delete sameSecTimers[pid];
+        }
+      }
+    }
+
+    function openWhisper(targetId) {
+      whisperTarget = targetId;
+      const pData = (peers[targetId] || [{}])[0];
+      whisperEl.style.display = 'flex';
+      const inp = document.getElementById('mpWhisperInput');
+      inp.placeholder = `Whisper to ${pData.nickname || 'Anon'}...`;
+      inp.focus();
+    }
+
+    document.getElementById('mpWhisperClose').addEventListener('click', () => {
+      whisperEl.style.display = 'none';
+      whisperTarget = null;
+    });
+
+    document.getElementById('mpWhisperInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && whisperTarget) {
+        const msg = e.target.value.trim().substring(0, 80);
+        if (!msg) return;
+        evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'whisper', from: myId, to: whisperTarget, fromNick: myNickname, text: msg } });
+        e.target.value = '';
+        if (window.UniToast) window.UniToast('💬 Whisper sent');
+        whisperEl.style.display = 'none';
+        whisperTarget = null;
+      }
+    });
+
+    function receiveWhisper(fromNick, text) {
+      if (window.UniToast) window.UniToast(`💬 ${fromNick}: ${text}`);
+    }
+
+    // ── SYSTEM 2: ARCADE SPECTATOR ──
+    let vsPanel = null;
+    function checkVSMode() {
+      if (!myGameState) { if (vsPanel) { vsPanel.remove(); vsPanel = null; } return; }
+      const rival = Object.entries(peers).find(([k, pArr]) => {
+        if (k === myId) return false;
+        const p = pArr[0] || {};
+        return p.gameState && p.gameState.game === myGameState.game;
+      });
+      if (rival) {
+        const [rid, rArr] = rival;
+        const r = rArr[0];
+        if (!vsPanel) {
+          vsPanel = document.createElement('div');
+          vsPanel.className = 'mp-vs-panel';
+          document.body.appendChild(vsPanel);
+        }
+        vsPanel.innerHTML = `<div class="mp-vs-label">VS</div><div class="mp-vs-nick">${r.nickname || 'Anon'}</div><div class="mp-vs-score">${r.gameState.score || 0}</div>`;
+        vsPanel.style.display = 'flex';
+        // Ghost line
+        window._mpGhostScore = r.gameState.score || 0;
+      } else {
+        if (vsPanel) { vsPanel.style.display = 'none'; }
+        window._mpGhostScore = null;
+      }
+    }
+
+    // ── SYSTEM 2c: ANGEL INVESTOR ──
+    function sendInvest(targetId) {
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'power_up', from: myId, to: targetId, fromNick: myNickname, kind: 'shield' } });
+      if (typeof checkTrophy === 'function') checkTrophy('angel_investor');
+      if (window.VDna) window.VDna.addXp(10);
+      if (window.UniToast) window.UniToast('🛡 Power-up sent! +10 XP');
+    }
+
+    function receivePowerUp(fromNick) {
+      if (window._gamePowerUp) window._gamePowerUp('shield');
+      if (window.VDna) window.VDna.addXp(10);
+      if (window.UniToast) window.UniToast('🛡 ' + fromNick + ' invested in you! Shield activated! +10 XP');
+    }
+
+    // ── SYSTEM 3a: BROADCAST TERMINAL ──
+    function termBroadcast(text) {
+      const now = Date.now();
+      if (now - lastBroadcastTime < 10000) return '<span class="term-red">Rate limited. Wait 10s between broadcasts.</span>';
+      if (!text || !text.trim()) return '<span class="term-gray">Usage: broadcast &lt;message&gt;</span>';
+      lastBroadcastTime = now;
+      const msg = text.trim().substring(0, 200);
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'broadcast_msg', from: myId, fromNick: myNickname, text: msg } });
+      return `<span class="term-green">📡 Broadcast sent: "${msg}"</span>`;
+    }
+
+    function receiveBroadcast(fromNick, text) {
+      const body = document.getElementById('termBody');
+      if (body) {
+        body.innerHTML += `<div class="term-line"><span style="color:#a855f7">[broadcast]</span> <span style="color:#22c55e">${fromNick}</span>: ${text}</div>`;
+        body.scrollTop = body.scrollHeight;
+      }
+      if (window.UniToast) window.UniToast('📡 ' + fromNick + ': ' + text);
+    }
+
+    // ── SYSTEM 3b: CO-OP LOCKS ──
+    function termEngage(args) {
+      const match = (args || '').match(/(\d)/);
+      const num = match ? parseInt(match[1]) : NaN;
+      if (num !== 1 && num !== 2) return '<span class="term-gray">Usage: engage lock 1 or engage lock 2</span>';
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'co_op_lock', from: myId, fromNick: myNickname, lockNum: num } });
+      coopLocks['self_' + num] = Date.now();
+      checkCoopUnlock();
+      return `<span class="term-cyan">🔒 Lock ${num} engaged. Waiting for partner...</span>`;
+    }
+
+    function receiveCoopLock(from, fromNick, lockNum) {
+      coopLocks['peer_' + lockNum] = { time: Date.now(), from, fromNick };
+      checkCoopUnlock();
+    }
+
+    function checkCoopUnlock() {
+      const s1 = coopLocks['self_1'], s2 = coopLocks['self_2'];
+      const p1 = coopLocks['peer_1'], p2 = coopLocks['peer_2'];
+      const now = Date.now();
+      const W = 5000;
+      const hasBoth = (
+        ((s1 && p2 && p2.time && now - s1 < W && now - p2.time < W) ||
+         (s2 && p1 && p1.time && now - s2 < W && now - p1.time < W))
+      );
+      if (hasBoth) {
+        coopLocks = {};
+        if (typeof checkTrophy === 'function') checkTrophy('hacker_coop');
+        const body = document.getElementById('termBody');
+        if (body) {
+          body.innerHTML += `<div class="term-line"><span style="color:#22c55e;text-shadow:0 0 8px #22c55e">
+╔══════════════════════════════════════╗
+║  🔓 DUAL-LOCK SEQUENCE COMPLETE!    ║
+║  Co-op hack successful.             ║
+║  Hacker trophy unlocked! +30 XP     ║
+╚══════════════════════════════════════╝</span></div>`;
+          body.scrollTop = body.scrollHeight;
+        }
+        if (window.UniToast) window.UniToast('🔓 Hacker trophy unlocked! Co-op with another user!');
+      }
+    }
+
+    // ── SYSTEM 4a: ATTENTION GLOWING ──
+    function checkAttentionGlow() {
+      const sectionCounts = {};
+      const allPeers = Object.entries(peers);
+      for (const [, pArr] of allPeers) {
+        const p = pArr[0] || {};
+        if (p.section) sectionCounts[p.section] = (sectionCounts[p.section] || 0) + 1;
+      }
+      // Also count self
+      if (mySection) sectionCounts[mySection] = (sectionCounts[mySection] || 0) + 1;
+
+      const selMap = { timeline: '.tl-wrap', certs: '#certGrid', testimonials: '.tc-section', conferences: '.conf-strip', articles: '#linkedinFeed', impact: '.imp' };
+      for (const [secName, sel] of Object.entries(selMap)) {
+        const el = document.querySelector(sel);
+        if (!el) continue;
+        const cnt = sectionCounts[secName] || 0;
+        let badge = el.querySelector('.mp-attn-badge');
+        if (cnt >= 3) {
+          el.classList.add('attention-glow');
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'mp-attn-badge';
+            el.style.position = el.style.position || 'relative';
+            el.appendChild(badge);
+          }
+          badge.textContent = cnt + ' viewing now';
+        } else {
+          el.classList.remove('attention-glow');
+          if (badge) badge.remove();
+        }
+      }
+    }
+
+    // ── SYSTEM 4b: SPECTATOR MODE ──
+    function startSpectate(targetId) {
+      spectatingUser = targetId;
+      const pData = (peers[targetId] || [{}])[0];
+      specBanner.innerHTML = `👁 Spectating <strong>${pData.nickname || 'Anon'}</strong> <span class="mp-spec-exit" id="mpSpecExit">✕ Exit</span>`;
+      specBanner.style.display = 'flex';
+      document.getElementById('mpSpecExit').addEventListener('click', stopSpectate);
+      doSpectateScroll();
+    }
+
+    function stopSpectate() {
+      spectatingUser = null;
+      specBanner.style.display = 'none';
+    }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && spectatingUser) stopSpectate(); });
+    document.addEventListener('click', (e) => { if (spectatingUser && !e.target.closest('#mpSpecBanner, .mp-avatar, #mpCtx')) stopSpectate(); });
+
+    function doSpectateScroll() {
+      if (!spectatingUser) return;
+      const pData = (peers[spectatingUser] || [{}])[0];
+      if (!pData || pData.scrollPct === undefined) return;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const targetY = (pData.scrollPct / 100) * maxScroll;
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+    }
+
+    // ── SYSTEM 5a: XP TIPPING ──
+    function sendTip(targetId) {
+      const now = Date.now();
+      if (now - lastTipTime < 30000) { if (window.UniToast) window.UniToast('⏳ Wait 30s between tips'); return; }
+      const vdna = window.VDna ? window.VDna.get() : {};
+      if ((vdna.xp || 0) < 10) { if (window.UniToast) window.UniToast('❌ Need at least 10 XP to tip'); return; }
+      lastTipTime = now;
+      if (window.VDna) { window.VDna.get().xp -= 5; window.VDna.save(); }
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'xp_tip', from: myId, to: targetId, fromNick: myNickname, amount: 5 } });
+      spawnCoinAnimation();
+      if (window.UniToast) window.UniToast('🪙 Sent 5 XP tip!');
+    }
+
+    function receiveTip(fromNick, amount) {
+      if (window.VDna) window.VDna.addXp(amount);
+      spawnCoinAnimation();
+      if (window.UniToast) window.UniToast('🪙 ' + fromNick + ' tipped you ' + amount + ' XP!');
+    }
+
+    function spawnCoinAnimation() {
+      const coin = document.createElement('div');
+      coin.className = 'mp-coin';
+      coin.textContent = '🪙';
+      document.body.appendChild(coin);
+      setTimeout(() => coin.remove(), 1200);
+    }
+
+    // ── SYSTEM 5b: SMART CONTRACTS ──
+    function spawnSmartContract() {
+      if (liveCount < 2 || activeToken) return;
+      const tid = Math.random().toString(36).slice(2, 8);
+      activeToken = tid;
+      tokenEl.style.left = (20 + Math.random() * 60) + 'vw';
+      tokenEl.style.top = (20 + Math.random() * 50) + 'vh';
+      tokenEl.style.display = 'flex';
+      tokenEl.onclick = () => claimContract(tid);
+      setTimeout(() => { if (activeToken === tid) { activeToken = null; tokenEl.style.display = 'none'; } }, 15000);
+    }
+
+    function claimContract(tid) {
+      if (activeToken !== tid) return;
+      activeToken = null;
+      tokenEl.style.display = 'none';
+      evChannel.send({ type: 'broadcast', event: 'mp_event', payload: { type: 'smart_contract', from: myId, fromNick: myNickname, tokenId: tid } });
+      xpMultiplier = 2;
+      xpMultiplierEnd = Date.now() + 60000;
+      if (typeof checkTrophy === 'function') checkTrophy('smart_trader');
+      if (window.UniToast) window.UniToast('📜 Smart Contract executed! 2x XP for 60s!');
+      setTimeout(() => { xpMultiplier = 1; }, 60000);
+    }
+
+    function receiveSmartContract(fromNick) {
+      if (activeToken) { activeToken = null; tokenEl.style.display = 'none'; }
+      xpMultiplier = 2;
+      xpMultiplierEnd = Date.now() + 60000;
+      if (window.UniToast) window.UniToast('📜 ' + fromNick + ' executed a Smart Contract! You get 2x XP for 60s!');
+      setTimeout(() => { xpMultiplier = 1; }, 60000);
+    }
+
+    // ── SYSTEM 6: CRITICAL MASS ──
+    function checkCriticalMass() {
+      if (liveCount >= 5 && !criticalMassActive) {
+        criticalMassActive = true;
+        if (window._toggleCyberpunk) window._toggleCyberpunk(true);
+        if (typeof checkTrophy === 'function') checkTrophy('critical_mass');
+        if (window.UniToast) window.UniToast('⚡ Critical mass reached. Mainframe overloaded.');
+      } else if (liveCount < 5 && criticalMassActive) {
+        criticalMassActive = false;
+        if (window._toggleCyberpunk) window._toggleCyberpunk(true);
+      }
+    }
+
+    // ── EVENT DISPATCHER ──
+    function handleBroadcastEvent(payload) {
+      if (!payload || !payload.type) return;
+      switch (payload.type) {
+        case 'high_five':
+          if (payload.to === myId) receiveHighFive(payload.from, payload.fromNick);
+          break;
+        case 'whisper':
+          if (payload.to === myId) receiveWhisper(payload.fromNick, payload.text);
+          break;
+        case 'power_up':
+          if (payload.to === myId) receivePowerUp(payload.fromNick);
+          break;
+        case 'broadcast_msg':
+          if (payload.from !== myId) receiveBroadcast(payload.fromNick, payload.text);
+          break;
+        case 'co_op_lock':
+          if (payload.from !== myId) receiveCoopLock(payload.from, payload.fromNick, payload.lockNum);
+          break;
+        case 'xp_tip':
+          if (payload.to === myId) receiveTip(payload.fromNick, payload.amount);
+          break;
+        case 'smart_contract':
+          if (payload.from !== myId) receiveSmartContract(payload.fromNick);
+          break;
+      }
+    }
+
+    // ── PRESENCE SYNC HANDLER ──
+    function onPresenceSync() {
+      const state = channel.presenceState();
+      peers = state;
+      renderBar();
+      if (spectatingUser) doSpectateScroll();
+    }
+
+    // ── SUBSCRIBE ──
+    channel
+      .on('presence', { event: 'sync' }, onPresenceSync)
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            nickname: myNickname, avatar: myAvatar, section: detectSection(),
+            scrollPct: getScrollPct(), gameState: null, online_at: new Date().toISOString()
+          });
+        }
+      });
+
+    evChannel
+      .on('broadcast', { event: 'mp_event' }, ({ payload }) => handleBroadcastEvent(payload))
+      .subscribe();
+
+    // Smart contract spawner
+    smartContractInterval = setInterval(spawnSmartContract, 60000);
+    setTimeout(spawnSmartContract, 10000);
+
+    window.addEventListener('beforeunload', () => {
+      channel.untrack();
+      if (smartContractInterval) clearInterval(smartContractInterval);
+    });
+
+    // ── TERMINAL COMMANDS ──
+    window.TermCmds = window.TermCmds || {};
+    window.TermCmds.broadcast = (args) => termBroadcast(args);
+    window.TermCmds.engage = (args) => termEngage(args);
 })();
 
     
@@ -1919,6 +2474,7 @@ body.zen-mode .desk-hint,
 body.zen-mode .weather-widget,
 body.zen-mode .visitor-count,
 body.zen-mode .live-presence,
+body.zen-mode .mp-bar,
 body.zen-mode .rec-card,
 body.zen-mode #recContainer { display: none !important; }
 
@@ -3582,6 +4138,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     const s = getArcadeState();
     s.totalPlays = (s.totalPlays || 0) + 1;
     saveArcadeState(s);
+    if (window._mpSetGame) window._mpSetGame({ game: gameId, score: 0, status: 'playing' });
     switch (gameId) {
       case 'stacker':   activeGameCleanup = GameStacker(container, g); break;
       case 'router':    activeGameCleanup = GameRouter(container, g); break;
@@ -3596,6 +4153,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     document.getElementById('miniGameOverlay')?.classList.remove('show');
     cancelAutoDismiss('miniGameOverlay');
     if (activeGameCleanup) { activeGameCleanup(); activeGameCleanup = null; }
+    if (window._mpClearGame) window._mpClearGame();
   }
 
   function getArcadePlayerName() { return localStorage.getItem('arcade_player_name') || null; }
@@ -3640,6 +4198,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     saveArcadeState(s);
     addXP(Math.floor(score / 50) + 5);
     submitScoreToSupabase(gameId, score);
+    if (window._mpSetGame) window._mpSetGame({ game: gameId, score, status: 'finished' });
   }
   window.recordScore = recordScore;
 
@@ -4610,6 +5169,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       document.getElementById('sdScore').textContent = score;
       document.getElementById('sdWave').textContent = wave;
       document.getElementById('sdLives').textContent = '❤️'.repeat(Math.max(0, lives));
+      if (window._mpSetGame) window._mpSetGame({ game: 'defender', score, status: wave >= 5 ? 'boss' : 'playing' });
     }
 
     function draw() {
@@ -4762,6 +5322,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
 
     window._sdRestart = restart;
     window._gamepadActions = { continuous: true, keys: keys, shoot: ()=>shoot(), restart: ()=>{ if(gameOver) restart(); } };
+    window._gamePowerUp = (kind) => { if (kind === 'shield') activePU.shield = 600; };
     spawnWave();
     interval = setInterval(update, 16);
     draw();
@@ -4774,6 +5335,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
       document.removeEventListener('keyup', keyUp);
       cv.removeEventListener('touchmove', touchMove);
       window._gamepadActions = null;
+      window._gamePowerUp = null;
       delete window._sdRestart;
     };
   }
@@ -5040,13 +5602,13 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   text-shadow: 0 1px 4px rgba(0,0,0,.8); white-space: nowrap; transform: translate(-50%, -50%);
 }
 .ar-btn {
-  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
-  padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(0,225,255,.25);
+  position: absolute; bottom: 12px; right: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .5px;
+  padding: 5px 10px; border-radius: 14px; border: 1px solid rgba(0,225,255,.25);
   background: rgba(0,225,255,.08); color: #00e1ff; cursor: pointer;
-  backdrop-filter: blur(8px); transition: all .2s; z-index: 10;
+  backdrop-filter: blur(8px); transition: all .2s; z-index: 15;
 }
-.ar-btn:hover { background: rgba(0,225,255,.15); border-color: #00e1ff; transform: translateX(-50%) translateY(-1px); }
+.ar-btn:hover { background: rgba(0,225,255,.15); border-color: #00e1ff; transform: translateY(-1px); }
 
 /* Live FinTech Visualizer HUD */
 .ftv-hud {
@@ -5272,14 +5834,13 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     mv.addEventListener('touchstart', (e) => onDown(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
     mv.addEventListener('click', (e) => {
+      if (e.target.closest('.ar-btn, [slot="ar-button"]')) return;
       const diffX = Math.abs(e.clientX - startX);
       const diffY = Math.abs(e.clientY - startY);
 
-      // Only open if movement is minimal (a genuine click, not a rotate drag)
       if (diffX < 5 && diffY < 5) {
         window.open('https://bilingualexecutive.amrelharony.com/', '_blank');
       } else {
-        // Prevent default behavior if it was a drag
         e.preventDefault();
         e.stopPropagation();
       }
@@ -5483,13 +6044,19 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         if (h) h.textContent = 'Live trades from Binance · Each node = 1 real trade';
       };
 
+      let lastSpawnTime = 0;
+      const SPAWN_INTERVAL = 200;
       ws.onmessage = (evt) => {
         try {
           const msg = JSON.parse(evt.data);
           const trade = msg.data;
           if (!trade || !trade.s) return;
-          spawnNode(trade);
           updateHUD(trade);
+          const now = performance.now();
+          if (now - lastSpawnTime >= SPAWN_INTERVAL) {
+            lastSpawnTime = now;
+            spawnNode(trade);
+          }
         } catch(e) {}
       };
 
@@ -6030,6 +6597,7 @@ body.cyberpunk-mode .bio-glow { display: none; }
       const el = m.target;
       if (!overlayIds.includes(el.id)) continue;
       if (el.classList.contains('show')) sweep(400, 1200, 0.15, 0);
+      else sweep(1200, 400, 0.1, 0);
     }
   });
   overlayIds.forEach(id => {
@@ -6782,6 +7350,11 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
     { id:'theme_cyberpunk',     icon:'🌆', name:'Cyberpunk Activated',    desc:'Enabled the cyberpunk theme', cat:'Social', xp:5 },
     { id:'theme_zen',           icon:'🧘', name:'Zen Master',             desc:'Toggled Zen Mode', cat:'Social', xp:5 },
     { id:'networking_event',    icon:'👥', name:'Networking Event',        desc:'Was on the site at the same time as another visitor', cat:'Social', xp:15 },
+    { id:'team_player',        icon:'✋', name:'Team Player',             desc:'Mutual high-five with another user', cat:'Social', xp:25 },
+    { id:'hacker_coop',        icon:'🔓', name:'Hacker',                 desc:'Co-op unlocked the dual-lock sequence with another user', cat:'Social', xp:30 },
+    { id:'angel_investor',     icon:'🛡️', name:'Angel Investor',         desc:'Sent a power-up to another player', cat:'Social', xp:10 },
+    { id:'critical_mass',      icon:'⚡', name:'Mainframe Overload',     desc:'5+ users online simultaneously', cat:'Social', xp:20 },
+    { id:'smart_trader',       icon:'📜', name:'Smart Trader',           desc:'Executed a Smart Contract token', cat:'Social', xp:15 },
     // Milestones
     { id:'visit_3',             icon:'🔄', name:'Returning Visitor',       desc:'Came back 3+ times', cat:'Milestone', xp:10 },
     { id:'visit_10',            icon:'💎', name:'Loyal Visitor',           desc:'Visited 10+ times', cat:'Milestone', xp:20 },
@@ -7749,6 +8322,10 @@ body.zen-mode .voice-btn, body.zen-mode .voice-transcript { display: none !impor
   <span class="term-white">book</span>              Open The Bilingual Executive
   <span class="term-white">mentor</span>            Book a mentoring session
   <span class="term-white">community</span>         Open Fintech Bilinguals
+
+<span class="term-cyan">Multiplayer:</span>
+  <span class="term-white">broadcast &lt;msg&gt;</span>  Send a message to all online users
+  <span class="term-white">engage lock 1|2</span>  Co-op dual-lock puzzle (needs 2 users)
 
 <span class="term-cyan">System:</span>
   <span class="term-white">admin / stats</span>     Visitor insights dashboard
