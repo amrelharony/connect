@@ -370,7 +370,10 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
         if (hint) hint.textContent = '⚠️ Model not found';
       });
 
-      mv.addEventListener('camera-change', () => Haptic.rotate());
+      let userInteracting = false;
+      mv.addEventListener('camera-change', () => { if (userInteracting) Haptic.rotate(); });
+      mv.addEventListener('interact-started', () => { userInteracting = true; });
+      mv.addEventListener('interact-stopped', () => { userInteracting = false; });
       mv.addEventListener('ar-status', (e) => {
         if (e.detail.status === 'session-started') Haptic.arEnter();
         else if (e.detail.status === 'not-presenting') Haptic.tap();
