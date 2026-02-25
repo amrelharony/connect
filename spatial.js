@@ -68,7 +68,7 @@
   // ═══════════════════════════════════════════════════
   function initWorker() {
     return new Promise((resolve, reject) => {
-      try { worker = new Worker('spatial-worker.js', { type: 'module' }); }
+      try { worker = new Worker('spatial-worker.js'); }
       catch (e) { return reject(e); }
 
       const timeout = setTimeout(() => reject(new Error('Model load timeout (45s)')), 45000);

@@ -1,6 +1,6 @@
 // spatial-worker.js — MediaPipe Vision Web Worker
 // Runs FaceLandmarker + HandLandmarker on ImageBitmap frames via CPU delegate
-// Loaded as module worker: new Worker('spatial-worker.js', {type:'module'})
+// Loaded as classic worker with dynamic import()
 
 const CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18';
 const MODELS = 'https://storage.googleapis.com/mediapipe-models';

@@ -117,7 +117,7 @@ if(reducedMotion){/* skip particles */}
 else if(_pUsingWorker){_pWorker.postMessage({type:'init',W:W,H:H,count:PC,CD:CD,MR:MR});_pWorker.postMessage({type:'tick'});_workerDraw();}
 else if('requestIdleCallback' in window){requestIdleCallback(()=>{initP();drawP();});}
 else{setTimeout(()=>{initP();drawP();},100);}
-if(!reducedMotion){loadFluid().catch(()=>{});}
+
 loadLake().then(()=>{if(window._lake&&window._lake.waitReady){window._lake.waitReady().then(()=>{const s=localStorage.getItem('streak'),l=localStorage.getItem('lastVisit');if(s)window._lake.put('meta','streak',s);if(l)window._lake.put('meta','lastVisit',l);}).catch(()=>{});}}).catch(()=>{});
 setTimeout(()=>{loadPrefetch().catch(()=>{});},5000);
 addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
@@ -166,7 +166,7 @@ window._userHasInteracted=false;
 function _lakePref(k,v){if(window._lake&&window._lake.isReady)window._lake.put('prefs',k,v);}
 
 // ═══ THEME ═══
-function applyTheme(m){const i=document.getElementById('ticon'),l=m==='light';document.body.classList.toggle('light-mode',l);i.className=l?'fa-solid fa-moon':'fa-solid fa-sun';pC=l?{r:15,g:23,b:42}:{r:0,g:225,b:255};const q=document.getElementById('qri');if(q){const fg=l?'0066ff':'00e1ff',bg=l?'f4f6fb':'06080f';q.src=`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=${fg}&bgcolor=${bg}`;}if(window._fluidSetTheme)window._fluidSetTheme(m);}
+function applyTheme(m){const i=document.getElementById('ticon'),l=m==='light';document.body.classList.toggle('light-mode',l);i.className=l?'fa-solid fa-moon':'fa-solid fa-sun';pC=l?{r:15,g:23,b:42}:{r:0,g:225,b:255};const q=document.getElementById('qri');if(q){const fg=l?'0066ff':'00e1ff',bg=l?'f4f6fb':'06080f';q.src=`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://amrelharony.com&color=${fg}&bgcolor=${bg}`;}}
 const sv=localStorage.getItem('theme'),hr=new Date().getHours();applyTheme(sv||(hr>=6&&hr<18?'light':'dark'));
 document.getElementById('tbtn').addEventListener('click',()=>{const n=document.body.classList.contains('light-mode')?'dark':'light';localStorage.setItem('theme',n);_lakePref('theme',n);applyTheme(n);});
 
@@ -477,800 +477,33 @@ window.closeEgg=function(){const el=document.getElementById('easterEgg');if(el)e
 // Escape handled by unified handler below
 
 
-// ═══ VISITOR COUNTER + ADVANCED MULTIPLAYER PRESENCE ═══
+// ═══ VISITOR COUNTER ═══
 (function(){
     let count=parseInt(localStorage.getItem('vc')||'0')+1;
     const base=4200+Math.floor(count*1.3);
     localStorage.setItem('vc',count.toString());
     const vcEl = document.getElementById('visitorCount');
     vcEl.textContent=`Visitor #${base.toLocaleString()}`;
-
-    if (!_sb) return;
-
-    const AVATARS = ['1F680','1F525','1F4A1','1F30E','1F3AF','1F4BB','1F916','1F9E0','1F3AE','1F4CA','26A1','1F48E','1F6E1','1F52E','1F3C6','2728','1F9D1','1F47E','1F4AB','1F5A5'];
-    const myId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-    const myAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-    const myNickname = localStorage.getItem('arcade_player_name') || ('User-' + myId.slice(0, 4));
-
-    const SECTION_MAP = {
-      '.tl-wrap': 'timeline', '#certGrid': 'certs', '.tc-section': 'testimonials',
-      '.conf-strip': 'conferences', '#linkedinFeed': 'articles', '.imp': 'impact'
-    };
-
-    const channel = _sb.channel('site-presence', { config: { presence: { key: myId } } });
-    const evChannel = _sb.channel('site-events');
-
-    let peers = {};
-    let liveCount = 0;
-    let trophyAwarded = false;
-    let criticalMassActive = false;
-    let mySection = null;
-    let myScrollPct = 0;
-    let myGameState = null;
-    let lastTrackTime = 0;
-    let xpMultiplier = 1;
-    let xpMultiplierEnd = 0;
-    window._mpXpMultiplier = () => xpMultiplier;
-
-    let myX = 0.5, myY = 0.5;
-    let lastMouseTime = 0;
-    document.addEventListener('mousemove', (e) => {
-      const now = Date.now();
-      if (now - lastMouseTime < 50) return;
-      lastMouseTime = now;
-      myX = e.clientX / window.innerWidth;
-      myY = e.clientY / window.innerHeight;
-    }, { passive: true });
-    window._mpGetMyPos = () => ({ x: myX, y: myY });
-
-    // High-five state
-    let pendingHighFives = {};
-    // Whisper state
-    let whisperTarget = null;
-    let sameSecTimers = {};
-    // Co-op lock state
-    let coopLocks = {};
-    // Smart contract state
-    let smartContractInterval = null;
-    let activeToken = null;
-    // Spectator state
-    let spectatingUser = null;
-    // Broadcast rate limit
-    let lastBroadcastTime = 0;
-    let lastTipTime = 0;
-
-    // P2P Mesh transport — send via WebRTC first, Supabase fallback
-    const _meshSeen = new Set();
-    function meshSend(payload) {
-      const mid = payload._mid = payload._mid || (myId.slice(0,6) + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2,5));
-      _meshSeen.add(mid);
-      setTimeout(() => _meshSeen.delete(mid), 15000);
-      if (window._mesh && window._mesh.getOpenCount() > 0) {
-        window._mesh.broadcast(payload);
-      }
-      evChannel.send({ type: 'broadcast', event: 'mp_event', payload });
-    }
-
-    function emojiFromCode(hex) { return String.fromCodePoint(parseInt(hex, 16)); }
-
-    // ── PRESENCE BAR UI ──
-    const barWrap = document.createElement('div');
-    barWrap.id = 'mpBar';
-    barWrap.className = 'mp-bar';
-    barWrap.innerHTML = `<div class="mp-avatars" id="mpAvatars"></div><div class="mp-status" id="mpStatus"></div>`;
-    vcEl.insertAdjacentElement('afterend', barWrap);
-
-    const audioInd = document.createElement('span');
-    audioInd.id = 'mpAudioInd';
-    audioInd.className = 'mp-audio-ind' + (localStorage.getItem('audio_enabled') === '1' ? ' active' : '');
-    audioInd.title = 'Toggle spatial audio';
-    const audioOn = localStorage.getItem('audio_enabled') === '1';
-    audioInd.innerHTML = `<span class="mp-audio-ind-icon">${audioOn ? '🔊' : '🔇'}</span><span class="mp-audio-ind-bars"><span class="mp-audio-ind-bar"></span><span class="mp-audio-ind-bar"></span><span class="mp-audio-ind-bar"></span></span>`;
-    audioInd.addEventListener('click', () => {
-      if (window._spatialAudio) {
-        const on = window._spatialAudio.toggle();
-        audioInd.classList.toggle('active', on);
-        audioInd.querySelector('.mp-audio-ind-icon').textContent = on ? '🔊' : '🔇';
-      }
-    });
-    barWrap.appendChild(audioInd);
-
-    const ctxMenu = document.createElement('div');
-    ctxMenu.id = 'mpCtx';
-    ctxMenu.className = 'mp-ctx';
-    ctxMenu.style.display = 'none';
-    document.body.appendChild(ctxMenu);
-
-    // Whisper bubble
-    const whisperEl = document.createElement('div');
-    whisperEl.id = 'mpWhisper';
-    whisperEl.className = 'mp-whisper';
-    whisperEl.style.display = 'none';
-    whisperEl.innerHTML = `<input type="text" class="mp-whisper-input" id="mpWhisperInput" maxlength="80" placeholder="Say hello..."><span class="mp-whisper-close" id="mpWhisperClose">&times;</span>`;
-    document.body.appendChild(whisperEl);
-
-    // Spectator banner
-    const specBanner = document.createElement('div');
-    specBanner.id = 'mpSpecBanner';
-    specBanner.className = 'mp-spec-banner';
-    specBanner.style.display = 'none';
-    document.body.appendChild(specBanner);
-
-    // Smart contract token container
-    const tokenEl = document.createElement('div');
-    tokenEl.id = 'mpToken';
-    tokenEl.className = 'mp-token';
-    tokenEl.style.display = 'none';
-    tokenEl.innerHTML = '<span class="mp-token-icon">📜</span><span class="mp-token-label">Smart Contract</span>';
-    document.body.appendChild(tokenEl);
-
-    function closeCtx() { ctxMenu.style.display = 'none'; }
-    document.addEventListener('click', (e) => { if (!e.target.closest('#mpCtx, .mp-avatar')) closeCtx(); });
-
-    // ── SECTION DETECTION ──
-    function detectSection() {
-      const vh = window.innerHeight;
-      for (const [sel, name] of Object.entries(SECTION_MAP)) {
-        const el = document.querySelector(sel);
-        if (!el) continue;
-        const r = el.getBoundingClientRect();
-        if (r.top < vh * 0.6 && r.bottom > vh * 0.4) return name;
-      }
-      return 'hero';
-    }
-
-    function getScrollPct() { return Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100) || 0; }
-
-    // ── THROTTLED PRESENCE TRACK ──
-    function trackMeta() {
-      const now = Date.now();
-      if (now - lastTrackTime < 2000) return;
-      lastTrackTime = now;
-      mySection = detectSection();
-      myScrollPct = getScrollPct();
-      channel.track({
-        nickname: myNickname, avatar: myAvatar, section: mySection,
-        scrollPct: myScrollPct, gameState: myGameState,
-        x: myX, y: myY, online_at: new Date().toISOString()
-      });
-    }
-    window.addEventListener('scroll', () => requestAnimationFrame(trackMeta), { passive: true });
-    setInterval(trackMeta, 3000);
-
-    // Expose for arcade games to set their state
-    window._mpSetGame = (state) => { myGameState = state; trackMeta(); };
-    window._mpClearGame = () => { myGameState = null; trackMeta(); };
-    window._mpGetPeers = () => peers;
-    window._mpMyId = myId;
-    window._openCursorChat = () => { if (typeof openCursorChat === 'function') openCursorChat(); };
-
-    // ── RENDER PRESENCE BAR ──
-    function renderBar() {
-      const avatarBox = document.getElementById('mpAvatars');
-      const statusBox = document.getElementById('mpStatus');
-      const peerList = Object.entries(peers).filter(([k]) => k !== myId);
-      liveCount = peerList.length + 1;
-      const others = peerList.length;
-
-      // Status text
-      if (others > 0) {
-        statusBox.innerHTML = `<span class="live-dot"></span> ${others} other${others > 1 ? ' professionals' : ' professional'} viewing now`;
-        statusBox.classList.add('visible');
-        if (!trophyAwarded) { trophyAwarded = true; if (typeof checkTrophy === 'function' && checkTrophy('networking_event') && typeof showTrophyToast === 'function') showTrophyToast('networking_event'); }
-      } else {
-        statusBox.classList.remove('visible');
-        statusBox.innerHTML = '';
-      }
-
-      // Avatar bubbles
-      let html = `<div class="mp-avatar mp-avatar-me" title="You (${myNickname})" data-id="${myId}">${emojiFromCode(myAvatar)}</div>`;
-      for (const [pid, pArr] of peerList) {
-        const p = pArr[0] || {};
-        const status = p.gameState ? `Playing ${p.gameState.game}` : (p.section || 'browsing');
-        html += `<div class="mp-avatar" title="${p.nickname || 'Anonymous'}: ${status}" data-id="${pid}" data-nick="${p.nickname||'Anon'}">${emojiFromCode(p.avatar || '1F47E')}</div>`;
-      }
-      avatarBox.innerHTML = html;
-
-      // Attach click handlers
-      avatarBox.querySelectorAll('.mp-avatar:not(.mp-avatar-me)').forEach(el => {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const pid = el.dataset.id;
-          const pData = (peers[pid] || [{}])[0];
-          showCtx(el, pid, pData);
-        });
-      });
-
-      // Swarm: attention glowing
-      checkAttentionGlow();
-      // Bio: critical mass
-      checkCriticalMass();
-      // Whisper: proximity check
-      checkProximityWhisper();
-      // VS mode check
-      checkVSMode();
-    }
-
-    // ── CONTEXT MENU ──
-    function showCtx(anchorEl, pid, pData) {
-      const nick = pData.nickname || 'Anon';
-      const isPlaying = pData.gameState && pData.gameState.status;
-      const isBoss = pData.gameState && pData.gameState.status === 'boss';
-      const sameSection = pData.section && pData.section === mySection;
-
-      let items = `<div class="mp-ctx-title">${nick}</div>`;
-      items += `<div class="mp-ctx-item" data-action="highfive" data-pid="${pid}">✋ High-Five</div>`;
-      if (sameSection) items += `<div class="mp-ctx-item" data-action="whisper" data-pid="${pid}">💬 Whisper</div>`;
-      items += `<div class="mp-ctx-item" data-action="tip" data-pid="${pid}">🪙 Tip 5 XP</div>`;
-      items += `<div class="mp-ctx-item" data-action="spectate" data-pid="${pid}">👁 Spectate</div>`;
-      if (isPlaying && pData.gameState.game === 'defender' && isBoss) {
-        items += `<div class="mp-ctx-item" data-action="invest" data-pid="${pid}">🛡 Invest (Power-Up)</div>`;
-      }
-      ctxMenu.innerHTML = items;
-      const rect = anchorEl.getBoundingClientRect();
-      ctxMenu.style.left = rect.left + 'px';
-      ctxMenu.style.top = (rect.bottom + 4) + 'px';
-      ctxMenu.style.display = 'block';
-
-      ctxMenu.querySelectorAll('.mp-ctx-item').forEach(it => {
-        it.addEventListener('click', () => {
-          const action = it.dataset.action;
-          const targetId = it.dataset.pid;
-          handleCtxAction(action, targetId);
-          closeCtx();
-        });
-      });
-    }
-
-    // ── CONTEXT ACTIONS ──
-    function handleCtxAction(action, targetId) {
-      switch (action) {
-        case 'highfive': sendHighFive(targetId); break;
-        case 'whisper': openWhisper(targetId); break;
-        case 'tip': sendTip(targetId); break;
-        case 'spectate': startSpectate(targetId); break;
-        case 'invest': sendInvest(targetId); break;
-      }
-    }
-
-    // ── SYSTEM 1a: HIGH-FIVE ──
-    function sendHighFive(targetId) {
-      meshSend({ type: 'high_five', from: myId, to: targetId, fromNick: myNickname });
-      pendingHighFives[targetId] = Date.now();
-      if (window.UniToast) window.UniToast('✋ High-five sent! Waiting for them to high-five back...');
-    }
-
-    function receiveHighFive(from, fromNick) {
-      if (window._presenceAudio) window._presenceAudio.onHighFive();
-      if (pendingHighFives[from] && Date.now() - pendingHighFives[from] < 10000) {
-        delete pendingHighFives[from];
-        spawnParticleBurst();
-        if (typeof checkTrophy === 'function' && checkTrophy('team_player') && typeof showTrophyToast === 'function') showTrophyToast('team_player');
-        if (window.UniToast) window.UniToast('🎉 DOUBLE HIGH-FIVE with ' + fromNick + '! +25 XP!');
-      } else {
-        pendingHighFives[from] = Date.now();
-        meshSend({ type: 'high_five', from: myId, to: from, fromNick: myNickname });
-        if (window.UniToast) window.UniToast('✋ ' + fromNick + ' wants to high-five! High-fiving back...');
-        setTimeout(() => {
-          spawnParticleBurst();
-          if (typeof checkTrophy === 'function' && checkTrophy('team_player') && typeof showTrophyToast === 'function') showTrophyToast('team_player');
-        }, 300);
-      }
-    }
-
-    function spawnParticleBurst() {
-      const burst = document.createElement('div');
-      burst.className = 'mp-particle-burst';
-      for (let i = 0; i < 20; i++) {
-        const p = document.createElement('span');
-        p.className = 'mp-particle';
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 40 + Math.random() * 80;
-        p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-        p.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
-        p.style.setProperty('--delay', (Math.random() * 0.2) + 's');
-        p.textContent = ['✋','⭐','🎉','💥','✨'][Math.floor(Math.random()*5)];
-        burst.appendChild(p);
-      }
-      document.body.appendChild(burst);
-      setTimeout(() => burst.remove(), 1500);
-    }
-
-    // ── SYSTEM 1b: PROXIMITY WHISPERS ──
-    function checkProximityWhisper() {
-      const peerList = Object.entries(peers).filter(([k]) => k !== myId);
-      for (const [pid, pArr] of peerList) {
-        const p = pArr[0] || {};
-        if (p.section && p.section === mySection && mySection !== 'hero') {
-          if (!sameSecTimers[pid]) sameSecTimers[pid] = Date.now();
-          else if (Date.now() - sameSecTimers[pid] > 3000) {
-            const nick = p.nickname || 'Anon';
-            if (window.UniToast) window.UniToast(`💬 ${nick} is also viewing ${mySection} — click their avatar to whisper`);
-            sameSecTimers[pid] = Date.now() + 30000;
-          }
-        } else {
-          delete sameSecTimers[pid];
-        }
-      }
-    }
-
-    function openWhisper(targetId) {
-      whisperTarget = targetId;
-      const pData = (peers[targetId] || [{}])[0];
-      whisperEl.style.display = 'flex';
-      const inp = document.getElementById('mpWhisperInput');
-      inp.placeholder = `Whisper to ${pData.nickname || 'Anon'}...`;
-      inp.focus();
-    }
-
-    document.getElementById('mpWhisperClose').addEventListener('click', () => {
-      whisperEl.style.display = 'none';
-      whisperTarget = null;
-    });
-
-    document.getElementById('mpWhisperInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && whisperTarget) {
-        const msg = e.target.value.trim().substring(0, 80);
-        if (!msg) return;
-        meshSend({ type: 'whisper', from: myId, to: whisperTarget, fromNick: myNickname, text: msg });
-        e.target.value = '';
-        if (window.UniToast) window.UniToast('💬 Whisper sent');
-        whisperEl.style.display = 'none';
-        whisperTarget = null;
-      }
-    });
-
-    function receiveWhisper(fromNick, text) {
-      if (window._presenceAudio) window._presenceAudio.onWhisper();
-      if (window.UniToast) window.UniToast(`💬 ${fromNick}: ${text}`);
-    }
-
-    // ── SYSTEM 2: ARCADE SPECTATOR ──
-    let vsPanel = null;
-    function checkVSMode() {
-      if (!myGameState) { if (vsPanel) { vsPanel.remove(); vsPanel = null; } return; }
-      const rival = Object.entries(peers).find(([k, pArr]) => {
-        if (k === myId) return false;
-        const p = pArr[0] || {};
-        return p.gameState && p.gameState.game === myGameState.game;
-      });
-      if (rival) {
-        const [rid, rArr] = rival;
-        const r = rArr[0];
-        if (!vsPanel) {
-          vsPanel = document.createElement('div');
-          vsPanel.className = 'mp-vs-panel';
-          document.body.appendChild(vsPanel);
-        }
-        vsPanel.innerHTML = `<div class="mp-vs-label">VS</div><div class="mp-vs-nick">${r.nickname || 'Anon'}</div><div class="mp-vs-score">${r.gameState.score || 0}</div>`;
-        vsPanel.style.display = 'flex';
-        // Ghost line
-        window._mpGhostScore = r.gameState.score || 0;
-      } else {
-        if (vsPanel) { vsPanel.style.display = 'none'; }
-        window._mpGhostScore = null;
-      }
-    }
-
-    // ── SYSTEM 2c: ANGEL INVESTOR ──
-    function sendInvest(targetId) {
-      meshSend({ type: 'power_up', from: myId, to: targetId, fromNick: myNickname, kind: 'shield' });
-      if (typeof checkTrophy === 'function' && checkTrophy('angel_investor') && typeof showTrophyToast === 'function') showTrophyToast('angel_investor');
-      if (window.VDna) window.VDna.addXp(10);
-      if (window.UniToast) window.UniToast('🛡 Power-up sent! +10 XP');
-    }
-
-    function receivePowerUp(fromNick) {
-      if (window._presenceAudio) window._presenceAudio.onPowerUp();
-      if (window._gamePowerUp) window._gamePowerUp('shield');
-      if (window.VDna) window.VDna.addXp(10);
-      if (window.UniToast) window.UniToast('🛡 ' + fromNick + ' invested in you! Shield activated! +10 XP');
-    }
-
-    // ── SYSTEM 3a: BROADCAST TERMINAL ──
-    function termBroadcast(text) {
-      const now = Date.now();
-      if (now - lastBroadcastTime < 10000) return '<span class="term-red">Rate limited. Wait 10s between broadcasts.</span>';
-      if (!text || !text.trim()) return '<span class="term-gray">Usage: broadcast &lt;message&gt;</span>';
-      lastBroadcastTime = now;
-      const msg = text.trim().substring(0, 200);
-      meshSend({ type: 'broadcast_msg', from: myId, fromNick: myNickname, text: msg });
-      if (window._mesh) window._mesh.addChatMessage(myId, myNickname, msg, 'broadcast');
-      return `<span class="term-green">📡 Broadcast sent: "${msg}"</span>`;
-    }
-
-    function escText(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-    function receiveBroadcast(fromNick, text) {
-      if (window._presenceAudio) window._presenceAudio.onBroadcast();
-      const body = document.getElementById('termBody');
-      if (body) {
-        body.innerHTML += `<div class="term-line"><span style="color:#a855f7">[broadcast]</span> <span style="color:#22c55e">${escText(fromNick)}</span>: ${escText(text)}</div>`;
-        body.scrollTop = body.scrollHeight;
-      }
-      if (window.UniToast) window.UniToast('📡 ' + escText(fromNick) + ': ' + escText(text));
-    }
-
-    // ── SYSTEM 3b: CO-OP LOCKS ──
-    function termEngage(args) {
-      const match = (args || '').match(/(\d)/);
-      const num = match ? parseInt(match[1]) : NaN;
-      if (num !== 1 && num !== 2) return '<span class="term-gray">Usage: engage lock 1 or engage lock 2</span>';
-      meshSend({ type: 'co_op_lock', from: myId, fromNick: myNickname, lockNum: num });
-      coopLocks['self_' + num] = Date.now();
-      checkCoopUnlock();
-      return `<span class="term-cyan">🔒 Lock ${num} engaged. Waiting for partner...</span>`;
-    }
-
-    function receiveCoopLock(from, fromNick, lockNum) {
-      coopLocks['peer_' + lockNum] = { time: Date.now(), from, fromNick };
-      checkCoopUnlock();
-    }
-
-    function checkCoopUnlock() {
-      const s1 = coopLocks['self_1'], s2 = coopLocks['self_2'];
-      const p1 = coopLocks['peer_1'], p2 = coopLocks['peer_2'];
-      const now = Date.now();
-      const W = 5000;
-      const hasBoth = (
-        ((s1 && p2 && p2.time && now - s1 < W && now - p2.time < W) ||
-         (s2 && p1 && p1.time && now - s2 < W && now - p1.time < W))
-      );
-      if (hasBoth) {
-        coopLocks = {};
-        if (typeof checkTrophy === 'function' && checkTrophy('hacker_coop') && typeof showTrophyToast === 'function') showTrophyToast('hacker_coop');
-        const body = document.getElementById('termBody');
-        if (body) {
-          body.innerHTML += `<div class="term-line"><span style="color:#22c55e;text-shadow:0 0 8px #22c55e">
-╔══════════════════════════════════════╗
-║  🔓 DUAL-LOCK SEQUENCE COMPLETE!    ║
-║  Co-op hack successful.             ║
-║  Hacker trophy unlocked! +30 XP     ║
-╚══════════════════════════════════════╝</span></div>`;
-          body.scrollTop = body.scrollHeight;
-        }
-        if (window.UniToast) window.UniToast('🔓 Hacker trophy unlocked! Co-op with another user!');
-      }
-    }
-
-    // ── SYSTEM 4a: ATTENTION GLOWING ──
-    function checkAttentionGlow() {
-      const sectionCounts = {};
-      const allPeers = Object.entries(peers);
-      for (const [, pArr] of allPeers) {
-        const p = pArr[0] || {};
-        if (p.section) sectionCounts[p.section] = (sectionCounts[p.section] || 0) + 1;
-      }
-
-      const selMap = { timeline: '.tl-wrap', certs: '#certGrid', testimonials: '.tc-section', conferences: '.conf-strip', articles: '#linkedinFeed', impact: '.imp' };
-      for (const [secName, sel] of Object.entries(selMap)) {
-        const el = document.querySelector(sel);
-        if (!el) continue;
-        const cnt = sectionCounts[secName] || 0;
-        let badge = el.querySelector('.mp-attn-badge');
-        if (cnt >= 3) {
-          el.classList.add('attention-glow');
-          if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'mp-attn-badge';
-            el.style.position = el.style.position || 'relative';
-            el.appendChild(badge);
-          }
-          badge.textContent = cnt + ' viewing now';
-        } else {
-          el.classList.remove('attention-glow');
-          if (badge) badge.remove();
-        }
-      }
-    }
-
-    // ── SYSTEM 4b: SPECTATOR MODE ──
-    function startSpectate(targetId) {
-      spectatingUser = targetId;
-      const pData = (peers[targetId] || [{}])[0];
-      specBanner.innerHTML = `👁 Spectating <strong>${pData.nickname || 'Anon'}</strong> <span class="mp-spec-exit" id="mpSpecExit">✕ Exit</span>`;
-      specBanner.style.display = 'flex';
-      document.getElementById('mpSpecExit').addEventListener('click', stopSpectate);
-      doSpectateScroll();
-    }
-
-    function stopSpectate() {
-      spectatingUser = null;
-      specBanner.style.display = 'none';
-    }
-
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && spectatingUser) stopSpectate(); });
-    document.addEventListener('click', (e) => { if (spectatingUser && !e.target.closest('#mpSpecBanner, .mp-avatar, #mpCtx')) stopSpectate(); });
-
-    function doSpectateScroll() {
-      if (!spectatingUser) return;
-      const pData = (peers[spectatingUser] || [{}])[0];
-      if (!pData || pData.scrollPct === undefined) return;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const targetY = (pData.scrollPct / 100) * maxScroll;
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-    }
-
-    // ── SYSTEM 5a: XP TIPPING ──
-    function sendTip(targetId) {
-      const now = Date.now();
-      if (now - lastTipTime < 30000) { if (window.UniToast) window.UniToast('⏳ Wait 30s between tips'); return; }
-      const vdna = window.VDna ? window.VDna.get() : {};
-      if ((vdna.xp || 0) < 10) { if (window.UniToast) window.UniToast('❌ Need at least 10 XP to tip'); return; }
-      lastTipTime = now;
-      if (window.VDna) { window.VDna.get().xp -= 5; window.VDna.save(); }
-      meshSend({ type: 'xp_tip', from: myId, to: targetId, fromNick: myNickname, amount: 5 });
-      spawnCoinAnimation();
-      if (window.UniToast) window.UniToast('🪙 Sent 5 XP tip!');
-    }
-
-    function receiveTip(fromNick, amount) {
-      if (window._presenceAudio) window._presenceAudio.onTip();
-      if (window.VDna) window.VDna.addXp(amount);
-      spawnCoinAnimation();
-      if (window.UniToast) window.UniToast('🪙 ' + fromNick + ' tipped you ' + amount + ' XP!');
-    }
-
-    function spawnCoinAnimation() {
-      const coin = document.createElement('div');
-      coin.className = 'mp-coin';
-      coin.textContent = '🪙';
-      document.body.appendChild(coin);
-      setTimeout(() => coin.remove(), 1200);
-    }
-
-    // ── SYSTEM 5b: SMART CONTRACTS ──
-    function spawnSmartContract() {
-      if (liveCount < 2 || activeToken) return;
-      const tid = Math.random().toString(36).slice(2, 8);
-      activeToken = tid;
-      tokenEl.style.left = (20 + Math.random() * 60) + 'vw';
-      tokenEl.style.top = (20 + Math.random() * 50) + 'vh';
-      tokenEl.style.display = 'flex';
-      tokenEl.onclick = () => claimContract(tid);
-      setTimeout(() => { if (activeToken === tid) { activeToken = null; tokenEl.style.display = 'none'; } }, 15000);
-    }
-
-    function claimContract(tid) {
-      if (activeToken !== tid) return;
-      activeToken = null;
-      tokenEl.style.display = 'none';
-      if (window._presenceAudio) window._presenceAudio.onContract();
-      meshSend({ type: 'smart_contract', from: myId, fromNick: myNickname, tokenId: tid });
-      xpMultiplier = 2;
-      xpMultiplierEnd = Date.now() + 60000;
-      if (typeof checkTrophy === 'function' && checkTrophy('smart_trader') && typeof showTrophyToast === 'function') showTrophyToast('smart_trader');
-      if (window.UniToast) window.UniToast('📜 Smart Contract executed! 2x XP for 60s!');
-      setTimeout(() => { xpMultiplier = 1; }, 60000);
-    }
-
-    function receiveSmartContract(fromNick) {
-      if (window._presenceAudio) window._presenceAudio.onContract();
-      if (activeToken) { activeToken = null; tokenEl.style.display = 'none'; }
-      xpMultiplier = 2;
-      xpMultiplierEnd = Date.now() + 60000;
-      if (window.UniToast) window.UniToast('📜 ' + fromNick + ' executed a Smart Contract! You get 2x XP for 60s!');
-      setTimeout(() => { xpMultiplier = 1; }, 60000);
-    }
-
-    // ── SYSTEM 6: CRITICAL MASS ──
-    function checkCriticalMass() {
-      if (liveCount >= 5 && !criticalMassActive) {
-        criticalMassActive = true;
-        if (!document.body.classList.contains('cyberpunk-mode') && window._toggleCyberpunk) window._toggleCyberpunk(true);
-        if (typeof checkTrophy === 'function' && checkTrophy('critical_mass') && typeof showTrophyToast === 'function') showTrophyToast('critical_mass');
-        if (window.UniToast) window.UniToast('⚡ Critical mass reached. Mainframe overloaded.');
-      } else if (liveCount < 5 && criticalMassActive) {
-        criticalMassActive = false;
-        if (document.body.classList.contains('cyberpunk-mode') && window._toggleCyberpunk) window._toggleCyberpunk(true);
-      }
-    }
-
-    // ── EVENT DISPATCHER ──
-    function handleBroadcastEvent(payload) {
-      if (!payload || !payload.type) return;
-      if (payload._mid && _meshSeen.has(payload._mid)) return;
-      if (payload._mid) { _meshSeen.add(payload._mid); setTimeout(() => _meshSeen.delete(payload._mid), 15000); }
-      switch (payload.type) {
-        case 'high_five':
-          if (payload.to === myId) receiveHighFive(payload.from, payload.fromNick);
-          break;
-        case 'whisper':
-          if (payload.to === myId) receiveWhisper(payload.fromNick, payload.text);
-          break;
-        case 'power_up':
-          if (payload.to === myId) receivePowerUp(payload.fromNick);
-          break;
-        case 'broadcast_msg':
-          if (payload.from !== myId) receiveBroadcast(payload.fromNick, payload.text);
-          break;
-        case 'co_op_lock':
-          if (payload.from !== myId) receiveCoopLock(payload.from, payload.fromNick, payload.lockNum);
-          break;
-        case 'xp_tip':
-          if (payload.to === myId) receiveTip(payload.fromNick, payload.amount);
-          break;
-        case 'cursor_chat':
-          if (payload.from !== myId) renderPeerChat(payload.from, payload.fromNick, payload.avatar, payload.text, payload.x, payload.y);
-          break;
-        case 'cursor_chat_end':
-          if (payload.from !== myId) removePeerChat(payload.from);
-          break;
-        case 'smart_contract':
-          if (payload.from !== myId) receiveSmartContract(payload.fromNick);
-          break;
-      }
-    }
-
-    // ── PRESENCE SYNC HANDLER ──
-    function onPresenceSync() {
-      const state = channel.presenceState();
-      const oldPeerIds = Object.keys(peers);
-      peers = state;
-      renderBar();
-      if (spectatingUser) doSpectateScroll();
-      if (window._presenceAudio) window._presenceAudio.onPresenceSync(peers);
-      for (const pid of oldPeerIds) {
-        if (!peers[pid] && peerChatBubbles[pid]) removePeerChat(pid);
-      }
-      if (window._mesh) window._mesh.syncPeers(Object.keys(state));
-    }
-
-    // ── SUBSCRIBE ──
-    channel
-      .on('presence', { event: 'sync' }, onPresenceSync)
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({
-            nickname: myNickname, avatar: myAvatar, section: detectSection(),
-            scrollPct: getScrollPct(), gameState: null,
-            x: myX, y: myY, online_at: new Date().toISOString()
-          });
-        }
-      });
-
-    evChannel
-      .on('broadcast', { event: 'mp_event' }, ({ payload }) => handleBroadcastEvent(payload))
-      .subscribe();
-
-    // ── P2P MESH AUTO-INIT ──
-    loadMesh().then(() => {
-      if (window._mesh) {
-        window._mesh.onMessage((peerId, msg) => {
-          if (msg && typeof msg === 'object' && msg.type) handleBroadcastEvent(msg);
-        });
-        window._mesh.syncPeers(Object.keys(channel.presenceState()));
-      }
-    }).catch(() => {});
-
-    // Smart contract spawner
-    smartContractInterval = setInterval(spawnSmartContract, 60000);
-    setTimeout(spawnSmartContract, 10000);
-
-    window.addEventListener('beforeunload', () => {
-      channel.untrack();
-      channel.unsubscribe();
-      evChannel.unsubscribe();
-      if (smartContractInterval) clearInterval(smartContractInterval);
-    });
-
-    // ── SYSTEM 7: FIGMA-STYLE CURSOR CHAT ──
-    let chatActive = false;
-    let chatText = '';
-    let chatBubbleEl = null;
-    let chatTimeout = null;
-    const peerChatBubbles = {};
-
-    chatBubbleEl = document.createElement('div');
-    chatBubbleEl.className = 'cc-bubble cc-mine';
-    chatBubbleEl.style.display = 'none';
-    chatBubbleEl.innerHTML = `<span class="cc-avatar">${emojiFromCode(myAvatar)}</span><span class="cc-text" id="ccMyText"></span><span class="cc-caret"></span>`;
-    document.body.appendChild(chatBubbleEl);
-
-    function positionMyBubble(e) {
-      if (!chatActive) return;
-      chatBubbleEl.style.left = e.clientX + 16 + 'px';
-      chatBubbleEl.style.top = e.clientY + 16 + 'px';
-    }
-
-    function openCursorChat() {
-      if (chatActive) return;
-      chatActive = true;
-      chatText = '';
-      document.getElementById('ccMyText').textContent = '';
-      chatBubbleEl.style.display = 'flex';
-      chatBubbleEl.style.left = (window.innerWidth * myX + 16) + 'px';
-      chatBubbleEl.style.top = (window.innerHeight * myY + 16) + 'px';
-      document.addEventListener('mousemove', positionMyBubble, { passive: true });
-      if (chatTimeout) clearTimeout(chatTimeout);
-    }
-
-    function closeCursorChat() {
-      if (!chatActive) return;
-      chatActive = false;
-      chatBubbleEl.style.display = 'none';
-      document.removeEventListener('mousemove', positionMyBubble);
-      if (chatText.trim()) {
-        meshSend({ type: 'cursor_chat_end', from: myId });
-      }
-      chatText = '';
-    }
-
-    function broadcastChatText() {
-      meshSend({
-        type: 'cursor_chat', from: myId, fromNick: myNickname, avatar: myAvatar,
-        text: chatText, x: myX, y: myY
-      });
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-      if (e.key === '/' && !chatActive) {
-        e.preventDefault();
-        openCursorChat();
-        return;
-      }
-      if (!chatActive) return;
-      if (e.key === 'Escape' || e.key === 'Enter') {
-        e.preventDefault();
-        closeCursorChat();
-        return;
-      }
-      if (e.key === 'Backspace') {
-        e.preventDefault();
-        chatText = chatText.slice(0, -1);
-        document.getElementById('ccMyText').textContent = chatText;
-        broadcastChatText();
-        resetChatDismiss();
-        return;
-      }
-      if (e.key.length === 1 && chatText.length < 120) {
-        e.preventDefault();
-        chatText += e.key;
-        document.getElementById('ccMyText').textContent = chatText;
-        broadcastChatText();
-        resetChatDismiss();
-      }
-    });
-
-    function resetChatDismiss() {
-      if (chatTimeout) clearTimeout(chatTimeout);
-      chatTimeout = setTimeout(closeCursorChat, 8000);
-    }
-
-    function renderPeerChat(fromId, fromNick, avatar, text, x, y) {
-      let bubble = peerChatBubbles[fromId];
-      if (!bubble) {
-        bubble = document.createElement('div');
-        bubble.className = 'cc-bubble cc-peer';
-        bubble.innerHTML = `<span class="cc-avatar">${emojiFromCode(avatar || '1F47E')}</span><span class="cc-nick">${fromNick}</span><span class="cc-text"></span>`;
-        document.body.appendChild(bubble);
-        peerChatBubbles[fromId] = bubble;
-        if (window._presenceAudio) window._presenceAudio.onWhisper();
-      }
-      bubble.querySelector('.cc-text').textContent = text;
-      bubble.style.left = (x * window.innerWidth + 16) + 'px';
-      bubble.style.top = (y * window.innerHeight + 16) + 'px';
-      bubble.style.display = 'flex';
-      if (bubble._timer) clearTimeout(bubble._timer);
-      bubble._timer = setTimeout(() => { bubble.style.display = 'none'; }, 10000);
-    }
-
-    function removePeerChat(fromId) {
-      const bubble = peerChatBubbles[fromId];
-      if (bubble) {
-        bubble.style.opacity = '0';
-        setTimeout(() => { bubble.style.display = 'none'; bubble.style.opacity = ''; }, 300);
-      }
-    }
-
-    // ── TERMINAL COMMANDS ──
-    window.TermCmds = window.TermCmds || {};
-    window.TermCmds.broadcast = (args) => termBroadcast(args);
-    window.TermCmds.engage = (args) => termEngage(args);
 })();
 
-    
+// ═══ PRESENCE ENGINE v2 (lazy-loaded) ═══
+var presenceLoaded=false,presenceLoadPromise=null;
+function loadPresenceEngine(){
+  if(presenceLoaded)return Promise.resolve();
+  if(presenceLoadPromise)return presenceLoadPromise;
+  if(!_sb)return Promise.reject();
+  presenceLoadPromise=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');s.src='presence-engine.js';
+    s.onload=()=>{presenceLoaded=true;resolve();};
+    s.onerror=()=>{presenceLoadPromise=null;reject();};
+    document.head.appendChild(s);
+  });
+  return presenceLoadPromise;
+}
+loadPresenceEngine().catch(()=>{});
+
+/* OLD MULTIPLAYER IIFE REMOVED — now in presence-engine.js */
+
 // ═══ SHARE CARD ═══
 window.openShare=function(){
     const c=document.getElementById('shareCanvas'),ctx=c.getContext('2d');
@@ -2712,9 +1945,7 @@ body:not(.zen-mode) .cursor-particle { display: none !important; }
     audioBtn.setAttribute('aria-label', 'Toggle spatial audio');
     audioBtn.title = 'Sound On/Off (S)';
     audioBtn.style.display = 'none';
-    const audioOnInit = localStorage.getItem('audio_enabled') === '1';
-    audioBtn.innerHTML = '<i class="fa-solid ' + (audioOnInit ? 'fa-volume-high' : 'fa-volume-xmark') + '" id="audioIcon"></i>';
-    if (audioOnInit) audioBtn.classList.add('active');
+    audioBtn.innerHTML = '<i class="fa-solid fa-volume-xmark" id="audioIcon"></i>';
     gbBtn.insertAdjacentElement('afterend', audioBtn);
     window._syncAudioBtn = function(on) {
       const ai = document.getElementById('audioIcon');
@@ -3707,18 +2938,6 @@ function loadMesh(){
   return meshLoadPromise;
 }
 
-var fluidLoaded=false,fluidLoadPromise=null;
-function loadFluid(){
-  if(fluidLoaded)return Promise.resolve();
-  if(fluidLoadPromise)return fluidLoadPromise;
-  fluidLoadPromise=new Promise((resolve,reject)=>{
-    const s=document.createElement('script');s.src='fluid.js';
-    s.onload=()=>{fluidLoaded=true;resolve();};
-    s.onerror=()=>{fluidLoadPromise=null;reject();};
-    document.head.appendChild(s);
-  });
-  return fluidLoadPromise;
-}
 
 var prefetchLoaded=false,prefetchLoadPromise=null;
 function loadPrefetch(){
@@ -3993,7 +3212,6 @@ body.cyberpunk-mode .bio-glow { display: none; }
           ? '🌆 Cyberpunk mode engaged — welcome to Night City'
           : '☀️ Cyberpunk mode deactivated — back to default';
       }
-      if (window._fluidSetTheme) window._fluidSetTheme(active ? 'cyberpunk' : 'dark');
       if (window.VDna) window.VDna.addXp(active ? 10 : 0);
       return active;
     };
@@ -4126,7 +3344,7 @@ body.cyberpunk-mode .bio-glow { display: none; }
 
   let ctx = null;
   let masterGain = null;
-  let enabled = localStorage.getItem('audio_enabled') === '1';
+  let enabled = false;
   let hadUserGesture = false;
 
   function markGesture() {
@@ -4267,358 +3485,7 @@ body.cyberpunk-mode .bio-glow { display: none; }
   window.TermCmds.sound = window.TermCmds.audio;
 })();
 
-// ═══ PRESENCE AUDIO ENGINE — Collaborative Soundscape ═══
-(function PresenceAudioEngine() {
-  'use strict';
-
-  function getCtx() {
-    if (window._spatialAudio && window._spatialAudio.getCtx) return window._spatialAudio.getCtx();
-    return null;
-  }
-
-  function getMaster() { return window._spatialAudio && window._spatialAudio.getMaster ? window._spatialAudio.getMaster() : null; }
-  function isEnabled() { return window._spatialAudio && window._spatialAudio.isEnabled(); }
-  function clampPan(v) { return Math.max(-1, Math.min(1, v)); }
-
-  const MAX_VOICES = 5;
-  const PENTATONIC = [261.63, 293.66, 329.63, 392.0, 440.0];
-  const TIMBRES = ['sine', 'triangle', 'sawtooth'];
-  const SECTION_ORDER = ['hero', 'timeline', 'certs', 'testimonials', 'conferences', 'articles', 'impact'];
-
-  let prevPeerPositions = {};
-  let prevPeerGameStates = {};
-  let prevPeerCount = 0;
-  let heartbeatInterval = null;
-
-  function hashId(id) {
-    let h = 0;
-    for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0;
-    return Math.abs(h);
-  }
-
-  function sectionDist(a, b) {
-    const ia = SECTION_ORDER.indexOf(a), ib = SECTION_ORDER.indexOf(b);
-    if (ia < 0 || ib < 0) return 3;
-    return Math.abs(ia - ib);
-  }
-
-  function getClosestPeers(peers, myId) {
-    const myPos = window._mpGetMyPos ? window._mpGetMyPos() : { x: 0.5, y: 0.5 };
-    const myData = peers[myId] ? (peers[myId][0] || {}) : {};
-    const mySection = myData.section || 'hero';
-    const peerList = [];
-    for (const [pid, pArr] of Object.entries(peers)) {
-      if (pid === myId) continue;
-      const p = pArr[0] || {};
-      const dx = (p.x || 0.5) - myPos.x;
-      const dy = (p.y || 0.5) - myPos.y;
-      const posDist = Math.sqrt(dx * dx + dy * dy);
-      const secDist = sectionDist(mySection, p.section || 'hero');
-      peerList.push({ pid, data: p, dist: posDist + secDist * 0.3 });
-    }
-    peerList.sort((a, b) => a.dist - b.dist);
-    return peerList.slice(0, MAX_VOICES);
-  }
-
-  function makeNoise(duration, freq, bandwidth, vol) {
-    const c = getCtx();
-    if (!c) return;
-    const bufSize = Math.floor(c.sampleRate * duration);
-    const buf = c.createBuffer(1, bufSize, c.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-    const src = c.createBufferSource();
-    src.buffer = buf;
-    const filter = c.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(freq, c.currentTime);
-    filter.Q.setValueAtTime(bandwidth || 1, c.currentTime);
-    const gain = c.createGain();
-    gain.gain.setValueAtTime(vol || 0.02, c.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + duration);
-    src.connect(filter).connect(gain).connect(getMaster() || c.destination);
-    src.start(c.currentTime);
-    src.stop(c.currentTime + duration);
-  }
-
-  function playTone(freq, duration, pan, type, vol, delay) {
-    const c = getCtx();
-    if (!c) return;
-    const t = c.currentTime + (delay || 0);
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    const panner = c.createStereoPanner();
-    osc.type = type || 'sine';
-    osc.frequency.setValueAtTime(freq, t);
-    gain.gain.setValueAtTime(vol || 0.03, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    panner.pan.setValueAtTime(clampPan(pan || 0), t);
-    osc.connect(gain).connect(panner).connect(getMaster() || c.destination);
-    osc.start(t);
-    osc.stop(t + duration);
-  }
-
-  function playSweep(startF, endF, duration, vol, type, delay) {
-    const c = getCtx();
-    if (!c) return;
-    const t = c.currentTime + (delay || 0);
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.setValueAtTime(startF, t);
-    osc.frequency.exponentialRampToValueAtTime(endF, t + duration);
-    gain.gain.setValueAtTime(vol || 0.03, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    osc.connect(gain).connect(getMaster() || c.destination);
-    osc.start(t);
-    osc.stop(t + duration);
-  }
-
-  // ── SYSTEM 1: SPATIAL & PHYSICS-BASED CURSORS ──
-
-  function updateSpatialCursors(closest, peers) {
-    for (const { pid, data, dist } of closest) {
-      const px = data.x || 0.5;
-      const pan = px * 2 - 1;
-      const proxVol = Math.max(0.005, 0.04 - dist * 0.015);
-      const freq = 180 + hashId(pid) % 120;
-      playTone(freq, 0.4, pan, 'sine', proxVol);
-
-      const prev = prevPeerPositions[pid];
-      if (prev) {
-        const dx = (data.x || 0.5) - prev.x;
-        const dy = (data.y || 0.5) - prev.y;
-        const vel = Math.sqrt(dx * dx + dy * dy);
-        if (vel > 0.15) {
-          const whooshVol = Math.min(0.03, vel * 0.04);
-          makeNoise(0.15, 800 + vel * 2000, 0.5, whooshVol);
-        }
-      }
-      prevPeerPositions[pid] = { x: data.x || 0.5, y: data.y || 0.5 };
-    }
-
-    for (const pid of Object.keys(prevPeerPositions)) {
-      if (!peers[pid]) delete prevPeerPositions[pid];
-    }
-  }
-
-  // ── SYSTEM 2: PENTATONIC SWARM ──
-
-  function onSwarmSync(peers, closest) {
-    const peerCount = Object.keys(peers).length - 1;
-
-    if (peerCount !== prevPeerCount) {
-      if (peerCount > prevPeerCount) {
-        playJoinArpeggio();
-        playJoinTone();
-      } else if (peerCount < prevPeerCount) {
-        playLeaveArpeggio();
-        playLeaveTone();
-      }
-      prevPeerCount = peerCount;
-    }
-
-    closest.forEach(({ pid, data }, i) => {
-      const h = hashId(pid);
-      const noteIdx = h % PENTATONIC.length;
-      const timbreIdx = h % TIMBRES.length;
-      const freq = PENTATONIC[noteIdx];
-      const timbre = TIMBRES[timbreIdx];
-      const pan = (data.x || 0.5) * 2 - 1;
-      const dur = 0.15 + (h % 15) * 0.01;
-      playTone(freq, dur, pan, timbre, 0.015, i * 0.2);
-    });
-  }
-
-  function playJoinArpeggio() {
-    for (let i = 0; i < 3; i++) {
-      playTone(PENTATONIC[i], 0.12, 0, 'sine', 0.02, i * 0.08);
-    }
-  }
-
-  function playLeaveArpeggio() {
-    for (let i = 2; i >= 0; i--) {
-      playTone(PENTATONIC[i], 0.12, 0, 'sine', 0.02, (2 - i) * 0.08);
-    }
-  }
-
-  // ── SYSTEM 3: TACTILE MULTIPLAYER EVENTS ──
-
-  function playHighFiveChord() {
-    if (!isEnabled()) return;
-    const C = 523.25, E = 659.25, G = 783.99;
-    playTone(C, 0.3, 0, 'triangle', 0.04);
-    playTone(E, 0.3, 0, 'triangle', 0.04);
-    playTone(G, 0.3, 0, 'triangle', 0.04);
-  }
-
-  function playTipCoin() {
-    if (!isEnabled()) return;
-    playTone(783.99, 0.06, 0, 'square', 0.025, 0);
-    playTone(659.25, 0.06, 0, 'square', 0.025, 0.07);
-    playTone(523.25, 0.06, 0, 'square', 0.025, 0.14);
-  }
-
-  function playJoinTone() {
-    if (!isEnabled()) return;
-    playTone(261.63, 0.1, 0, 'sine', 0.025, 0);
-    playTone(329.63, 0.1, 0, 'sine', 0.025, 0.08);
-  }
-
-  function playLeaveTone() {
-    if (!isEnabled()) return;
-    playTone(329.63, 0.1, 0, 'sine', 0.025, 0);
-    playTone(261.63, 0.1, 0, 'sine', 0.025, 0.08);
-  }
-
-  function playWhisperBreath() {
-    if (!isEnabled()) return;
-    makeNoise(0.1, 2000, 2, 0.02);
-  }
-
-  function playContractBass() {
-    if (!isEnabled()) return;
-    const c = getCtx();
-    if (!c) return;
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(65.41, c.currentTime);
-    gain.gain.setValueAtTime(0.001, c.currentTime);
-    gain.gain.linearRampToValueAtTime(0.04, c.currentTime + 0.15);
-    gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.5);
-    osc.connect(gain).connect(getMaster() || c.destination);
-    osc.start(c.currentTime);
-    osc.stop(c.currentTime + 0.5);
-  }
-
-  function playPowerUpSweep() {
-    if (!isEnabled()) return;
-    playSweep(200, 1200, 0.3, 0.03, 'sawtooth');
-  }
-
-  // ── SYSTEM 4: GHOST TYPING ──
-
-  function playGhostTyping() {
-    if (!isEnabled()) return;
-    const clicks = 3 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < clicks; i++) {
-      setTimeout(() => makeNoise(0.012, 4000 + Math.random() * 1000, 3, 0.008 + Math.random() * 0.004), i * 50);
-    }
-  }
-
-  function playRadarPing() {
-    if (!isEnabled()) return;
-    const c = getCtx();
-    if (!c) return;
-    const osc1 = c.createOscillator();
-    const g1 = c.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(1500, c.currentTime);
-    g1.gain.setValueAtTime(0.03, c.currentTime);
-    g1.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.2);
-    osc1.connect(g1).connect(getMaster() || c.destination);
-    osc1.start(c.currentTime);
-    osc1.stop(c.currentTime + 0.2);
-
-    const delay = c.createDelay(0.3);
-    delay.delayTime.setValueAtTime(0.1, c.currentTime);
-    const osc2 = c.createOscillator();
-    const g2 = c.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(1500, c.currentTime);
-    g2.gain.setValueAtTime(0.015, c.currentTime);
-    g2.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.3);
-    osc2.connect(g2).connect(delay).connect(getMaster() || c.destination);
-    osc2.start(c.currentTime);
-    osc2.stop(c.currentTime + 0.3);
-  }
-
-  // ── SYSTEM 5: ARCADE SPECTATOR ACOUSTICS ──
-
-  function playSeatTake() {
-    if (!isEnabled()) return;
-    makeNoise(0.1, 200, 0.5, 0.02);
-    playTone(120, 0.2, 0, 'sine', 0.015, 0.08);
-  }
-
-  function playDigitalApplause() {
-    if (!isEnabled()) return;
-    makeNoise(0.2, 2000, 0.8, 0.03);
-    playTone(523.25, 0.03, 0, 'square', 0.025, 0.05);
-    playTone(659.25, 0.03, 0, 'square', 0.025, 0.09);
-    playTone(783.99, 0.03, 0, 'square', 0.025, 0.13);
-  }
-
-  function startHeartbeat() {
-    if (heartbeatInterval) return;
-    heartbeatInterval = setInterval(() => {
-      if (!isEnabled()) return;
-      playTone(60, 0.05, 0, 'sine', 0.015);
-    }, 1000);
-  }
-
-  function stopHeartbeat() {
-    if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
-  }
-
-  function checkArcadeTransitions(peers) {
-    if (!isEnabled()) return;
-    const myId = window._mpMyId;
-    for (const [pid, pArr] of Object.entries(peers)) {
-      if (pid === myId) continue;
-      const p = pArr[0] || {};
-      const prev = prevPeerGameStates[pid];
-      const cur = p.gameState;
-
-      if (!prev && cur && cur.status === 'playing') {
-        playSeatTake();
-      }
-
-      if (cur && cur.status === 'finished' && (!prev || prev.status !== 'finished')) {
-        if (cur.score > 100) playDigitalApplause();
-      }
-
-      prevPeerGameStates[pid] = cur ? { ...cur } : null;
-    }
-
-    for (const pid of Object.keys(prevPeerGameStates)) {
-      if (!peers[pid]) delete prevPeerGameStates[pid];
-    }
-
-    const hasRival = Object.entries(peers).some(([k, pArr]) => {
-      if (k === myId) return false;
-      const p = pArr[0] || {};
-      const myGS = peers[myId] ? (peers[myId][0] || {}).gameState : null;
-      return myGS && p.gameState && p.gameState.game === myGS.game;
-    });
-
-    if (hasRival) startHeartbeat();
-    else stopHeartbeat();
-  }
-
-  function onPresenceSync(peers) {
-    if (!isEnabled()) return;
-    const myId = window._mpMyId;
-    const closest = getClosestPeers(peers, myId);
-    updateSpatialCursors(closest, peers);
-    onSwarmSync(peers, closest);
-    checkArcadeTransitions(peers);
-  }
-
-  window._presenceAudio = {
-    onHighFive: playHighFiveChord,
-    onTip: playTipCoin,
-    onJoin: playJoinTone,
-    onLeave: playLeaveTone,
-    onWhisper: playWhisperBreath,
-    onContract: playContractBass,
-    onPowerUp: playPowerUpSweep,
-    onBroadcast: playRadarPing,
-    onGuestbookEntry: playGhostTyping,
-    onPresenceSync: onPresenceSync
-  };
-})();
+/* PRESENCE AUDIO ENGINE REMOVED - now in presence-engine.js */
 
 // ═══════════════════════════════════════════════════════════════
 // PHASE 6.1: INTELLIGENCE LAYER — amrelharony.com
@@ -5346,7 +4213,6 @@ body.zen-mode #audioBtn { display: none !important; }
     { id:'hacker_coop',        icon:'🔓', name:'Hacker',                 desc:'Co-op unlocked the dual-lock sequence with another user', cat:'Social', xp:30 },
     { id:'angel_investor',     icon:'🛡️', name:'Angel Investor',         desc:'Sent a power-up to another player', cat:'Social', xp:10 },
     { id:'critical_mass',      icon:'⚡', name:'Mainframe Overload',     desc:'5+ users online simultaneously', cat:'Social', xp:20 },
-    { id:'smart_trader',       icon:'📜', name:'Smart Trader',           desc:'Executed a Smart Contract token', cat:'Social', xp:15 },
     // Milestones
     { id:'visit_3',             icon:'🔄', name:'Returning Visitor',       desc:'Came back 3+ times', cat:'Milestone', xp:10 },
     { id:'visit_10',            icon:'💎', name:'Loyal Visitor',           desc:'Visited 10+ times', cat:'Milestone', xp:20 },
@@ -6210,13 +5076,14 @@ body.zen-mode #audioBtn { display: none !important; }
       el.classList.add('show');
     }
 
-    let hideTimer = null, commandCount = 0;
+    let hideTimer = null, listeningTimer = null, commandCount = 0;
     recognition.onresult = (event) => {
       let text=''; for(let i=event.resultIndex;i<event.results.length;i++) text+=event.results[i][0].transcript;
       const isFinal=event.results[event.results.length-1].isFinal;
       const confidence = event.results[event.results.length-1][0].confidence;
       const confPct = Math.round((confidence||0) * 100);
 
+      if(listeningTimer){clearTimeout(listeningTimer);listeningTimer=null;}
       transcript.innerHTML=`<span class="heard">"${text}"</span> <span style="color:#2d3748;font-size:8px">${confPct}%</span>`;
       transcript.classList.add('show');
       if(hideTimer)clearTimeout(hideTimer);
@@ -6250,10 +5117,12 @@ body.zen-mode #audioBtn { display: none !important; }
       document.getElementById('voiceIcon').className='fa-solid fa-microphone';
       transcript.innerHTML='<span style="color:#ef4444;font-size:10px">🎙️ Listening... say a command</span>';
       transcript.classList.add('show');
+      if(listeningTimer)clearTimeout(listeningTimer);
+      listeningTimer=setTimeout(()=>{if(voiceActive)transcript.classList.remove('show');},5000);
       try{recognition.start();}catch(e){}
       if(navigator.vibrate)navigator.vibrate(50);
     }
-    function stopVoice(){voiceActive=false;btn.classList.remove('listening');btn.classList.remove('active');document.getElementById('voiceIcon').className='fa-solid fa-microphone-slash';try{recognition.stop();}catch(e){}}
+    function stopVoice(){voiceActive=false;btn.classList.remove('listening');btn.classList.remove('active');document.getElementById('voiceIcon').className='fa-solid fa-microphone-slash';if(listeningTimer){clearTimeout(listeningTimer);listeningTimer=null;}transcript.classList.remove('show');try{recognition.stop();}catch(e){}}
     function toggleVoice(){voiceActive?stopVoice():startVoice();}
     window._toggleVoice=toggleVoice;
 
@@ -6568,10 +5437,6 @@ body.zen-mode #audioBtn { display: none !important; }
   <span class="term-white">mesh</span>              Toggle mesh HUD (P2P connection overlay)
   <span class="term-white">mesh-stats</span>        Detailed mesh statistics (peers, latency, CRDT)
   <span class="term-white">peers</span>             List all WebRTC peer connections
-
-<span class="term-cyan">Fluid Background:</span>
-  <span class="term-white">fluid</span>             Toggle Navier-Stokes fluid simulation
-  <span class="term-white">fluid-stats</span>       Fluid sim resolution, FPS, trade count, audio
 
 <span class="term-cyan">Local AI (WebGPU LLM):</span>
   <span class="term-white">llm</span>               Show local AI status (model, speed)
@@ -6942,33 +5807,6 @@ body.zen-mode #audioBtn { display: none !important; }
         rows += `\n  <span ${attr}>●</span> ${pid.slice(0,8)}… <span class="term-gray">${st}${stats.latency >= 0 ? ' · ' + stats.latency + 'ms' : ''}</span>`;
       }
       return rows;
-    };
-
-    // ── Fluid Dynamics ──────────────────────────────
-    T.fluid = () => {
-      if (window._fluidActive) {
-        if (window._fluidDestroy) window._fluidDestroy();
-        fluidLoaded = false; fluidLoadPromise = null;
-        return '<span class="term-gray">🌊 Fluid simulation stopped — particles restored</span>';
-      }
-      fluidLoaded = false; fluidLoadPromise = null;
-      loadFluid().then(() => {
-        if (window._fluidActive && window.UniToast) window.UniToast('Navier-Stokes fluid activated');
-      }).catch(() => {});
-      return '<span class="term-green">🌊 Loading Navier-Stokes fluid simulation…</span>';
-    };
-
-    T['fluid-stats'] = () => {
-      if (!window._fluidActive || !window._fluidGetStats) return '<span class="term-gray">Fluid sim not active — type <span class="term-white">fluid</span> to start</span>';
-      const s = window._fluidGetStats();
-      return `<span class="term-green">🌊 Navier-Stokes Fluid Statistics</span>
-
-<span class="term-gray">Simulation:</span>  ${s.simW}×${s.simH} (canvas ${s.canvasW}×${s.canvasH})
-<span class="term-gray">Curl:</span>        ${s.curlStrength}
-<span class="term-gray">Slow frames:</span> ${s.slowFrames}
-<span class="term-gray">Audio:</span>       ${s.audioActive ? '<span class="term-green">● active</span>' : '<span class="term-gray">○ inactive</span>'}
-<span class="term-gray">Trades WS:</span>   ${s.tradeWSActive ? '<span class="term-green">● connected</span>' : '<span class="term-gray">○ disconnected</span>'}
-<span class="term-gray">Trades:</span>      ${s.tradeCount} processed`;
     };
 
     T.prefetch = () => {
