@@ -591,14 +591,20 @@
       cursorColor = [0.06, 0.09, 0.16];
       displayIntensity = 0.6;
       curlStrength = 18;
+      canvas.style.display = 'none';
+      if (bgC) bgC.style.display = '';
     } else if (document.body.classList.contains('cyberpunk-mode')) {
       cursorColor = [0.9, 0.1, 0.5];
       displayIntensity = 1.5;
       curlStrength = 35;
+      canvas.style.display = '';
+      if (bgC) bgC.style.display = 'none';
     } else {
       cursorColor = [0, 0.88, 1.0];
       displayIntensity = 1.0;
       curlStrength = 25;
+      canvas.style.display = '';
+      if (bgC) bgC.style.display = 'none';
     }
   }
 

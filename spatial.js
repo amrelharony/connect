@@ -290,7 +290,8 @@
     startLoop();
     setHUD('👁️ Tracking');
 
-    document.getElementById('spatialBtn')?.classList.add('spatial-active');
+    const spBtn = document.getElementById('spatialBtn');
+    if (spBtn) { spBtn.classList.add('spatial-active'); spBtn.classList.add('active'); }
     if (window.UniToast) window.UniToast('Spatial Nav active — look up/down to scroll, swipe to control');
     if (window.VDna) window.VDna.addXp(15);
 
@@ -309,7 +310,8 @@
     pinchHeld = false;
     gestureLabel = '';
 
-    document.getElementById('spatialBtn')?.classList.remove('spatial-active');
+    const spBtn = document.getElementById('spatialBtn');
+    if (spBtn) { spBtn.classList.remove('spatial-active'); spBtn.classList.remove('active'); }
   }
 
   function toggle() {

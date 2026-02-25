@@ -452,9 +452,13 @@
     if (!indicator || !label) return;
 
     if (open === 0) {
-      indicator.className = 'mesh-indicator mesh-off';
-      label.textContent = 'No peers';
-    } else if (open >= total) {
+      hudEl.style.opacity = '0';
+      hudEl.style.pointerEvents = 'none';
+      return;
+    }
+    hudEl.style.opacity = '';
+    hudEl.style.pointerEvents = '';
+    if (open >= total) {
       indicator.className = 'mesh-indicator mesh-full';
       label.textContent = open + ' peer' + (open > 1 ? 's' : '') + ' direct';
     } else {
