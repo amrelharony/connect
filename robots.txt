@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://amrelharony.com/sitemap.xml
