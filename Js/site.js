@@ -2085,6 +2085,9 @@ vp.addEventListener('mouseleave',startAuto);
 
 // Start auto-play after delay
 setTimeout(startAuto,5000);
+
+// Expose re-render for SPA navigation
+window._rerenderTestimonials = function() { currentIdx = 0; render(); startAuto(); };
 })();
 
 // ═════════════════════════════════════════════════
