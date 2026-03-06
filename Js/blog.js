@@ -722,11 +722,21 @@
         document.querySelectorAll('.sa').forEach(el => {
             el.classList.add('vis');
         });
+
         // Re-render testimonial carousel (needs recalc after being in hidden container)
         if (window._rerenderTestimonials) {
             setTimeout(window._rerenderTestimonials, 50);
+        } else {
+            var _fTrack = document.getElementById('tcTrack');
+            if (_fTrack && _fTrack.children.length === 0) {
+                blogView.classList.remove('active');
+                blogView.style.display = 'none';
+                document.title = originalTitle;
+                window.history.replaceState(null, '', window.location.pathname);
+                window.location.reload();
+                return;
+            }
         }
-        // Restore original page title
         document.title = originalTitle;
         window.scrollTo(0, 0);
     }
