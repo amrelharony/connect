@@ -688,6 +688,8 @@
     }
 
     function showPortfolio() {
+        var directCSS = document.getElementById('blogDirectCSS');
+        if (directCSS) directCSS.remove();
         if (app) app.style.display = '';
         blogView.classList.remove('active');
         blogView.style.display = 'none';
