@@ -690,6 +690,18 @@
     function showPortfolio() {
         var directCSS = document.getElementById('blogDirectCSS');
         if (directCSS) directCSS.remove();
+
+        // Inject CSS override that forces all animated elements visible
+        var forceCSS = document.getElementById('portfolioForceCSS');
+        if (!forceCSS) {
+            forceCSS = document.createElement('style');
+            forceCSS.id = 'portfolioForceCSS';
+            forceCSS.textContent = '#app{display:block!important;opacity:1!important}' +
+                '.rv,.sa,.nd{opacity:1!important;transform:none!important}' +
+                '.cert-card,.cert-grid,.tc-section,.tc-viewport,.tc-track,.tc-slide,.tc-card,.tc-cats,.tc-nav,.tc-dots,.tc-counter,.tc-auto-bar{opacity:1!important;visibility:visible!important}';
+            document.head.appendChild(forceCSS);
+        }
+
         if (app) {
             app.style.display = '';
             app.style.opacity = '1';
@@ -701,23 +713,14 @@
             el.style.display = el.dataset.blogHidden;
             delete el.dataset.blogHidden;
         });
-        // Ensure all animated elements are visible (handles direct-load and edge cases)
+        // Force all animation classes resolved
         document.querySelectorAll('.rv').forEach(el => {
             el.classList.remove('rv');
             el.style.opacity = '1';
             el.style.transform = 'none';
         });
-        document.querySelectorAll('.sa:not(.vis)').forEach(el => {
+        document.querySelectorAll('.sa').forEach(el => {
             el.classList.add('vis');
-        });
-        // Force key sections visible in case animations didn't complete
-        ['secCerts', 'secTestimonials', 'secJourney', 'secNewsletters', 'secContentHub'].forEach(id => {
-            var el = document.getElementById(id);
-            if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
-        });
-        ['certGrid', 'tcViewport', 'tcTrack', 'tcCats'].forEach(id => {
-            var el = document.getElementById(id);
-            if (el) el.style.opacity = '1';
         });
         // Restore original page title
         document.title = originalTitle;
