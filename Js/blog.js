@@ -689,8 +689,12 @@
 
     function showPortfolio() {
         var directCSS = document.getElementById('blogDirectCSS');
+        var wasDirect = !!directCSS;
         if (directCSS) directCSS.remove();
-        if (app) app.style.display = '';
+        if (app) {
+            app.style.display = '';
+            app.style.opacity = '1';
+        }
         blogView.classList.remove('active');
         blogView.style.display = 'none';
         // Restore portfolio elements
@@ -698,8 +702,17 @@
             el.style.display = el.dataset.blogHidden;
             delete el.dataset.blogHidden;
         });
+        // If returning from a direct blog load, ensure all reveal elements are visible
+        if (wasDirect) {
+            document.querySelectorAll('.rv').forEach(el => {
+                el.classList.remove('rv');
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            });
+        }
         // Restore original page title
         document.title = originalTitle;
+        window.scrollTo(0, 0);
     }
 
     // Listen for popstate (browser back/forward)
