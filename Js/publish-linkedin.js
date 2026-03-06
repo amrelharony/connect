@@ -13,6 +13,8 @@ const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const LI_TOKEN_VAR = { value: process.env.LINKEDIN_ACCESS_TOKEN };
 const LI_PERSON = process.env.LINKEDIN_PERSON_URN;
 
+console.log('[DEBUG] env check:', JSON.stringify({hasSbUrl:!!SB_URL,hasSbKey:!!SB_KEY,hasLiToken:!!LI_TOKEN_VAR.value,hasLiPerson:!!LI_PERSON,liPersonFormat:LI_PERSON?LI_PERSON.substring(0,15):'MISSING'}));
+
 if (!SB_URL || !SB_KEY || !LI_TOKEN_VAR.value || !LI_PERSON) {
   console.error('Missing required environment variables');
   process.exit(1);
@@ -27,9 +29,17 @@ const sbHeaders = {
 };
 
 async function sbQuery(table, filter) {
-  const res = await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, { headers: sbHeaders });
-  if (!res.ok) throw new Error(`Supabase GET ${table}: ${res.status} ${await res.text()}`);
-  return res.json();
+  const url = `${SB_URL}/rest/v1/${table}?${filter}`;
+  console.log(`[DEBUG] sbQuery ${table}: ${filter}`);
+  const res = await fetch(url, { headers: sbHeaders });
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`[DEBUG] sbQuery FAIL ${table}: ${res.status} ${errText.substring(0,300)}`);
+    throw new Error(`Supabase GET ${table}: ${res.status} ${errText}`);
+  }
+  const data = await res.json();
+  console.log(`[DEBUG] sbQuery OK ${table}: ${data.length} rows, ids=${JSON.stringify(data.map(r=>r.id).slice(0,5))}`);
+  return data;
 }
 
 async function sbUpdate(table, id, data) {
@@ -45,7 +55,10 @@ async function refreshTokenIfNeeded() {
   const clientId = process.env.LINKEDIN_CLIENT_ID;
   const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
   const refreshToken = process.env.LINKEDIN_REFRESH_TOKEN;
-  if (!clientId || !clientSecret || !refreshToken) return;
+  if (!clientId || !clientSecret || !refreshToken) {
+    console.log('[DEBUG] skipping token refresh (missing refresh creds):', JSON.stringify({hasClientId:!!clientId,hasClientSecret:!!clientSecret,hasRefreshToken:!!refreshToken}));
+    return;
+  }
 
   const testRes = await fetch('https://api.linkedin.com/v2/userinfo', {
     headers: { 'Authorization': `Bearer ${LI_TOKEN_VAR.value}` }
@@ -97,23 +110,28 @@ async function postToLinkedIn(text, articleUrl) {
     };
   }
 
+  console.log(`[DEBUG] postToLinkedIn: textLen=${text.length}, hasArticleUrl=${!!articleUrl}, author=${LI_PERSON.substring(0,15)}`);
+  console.log(`[DEBUG] LinkedIn request body:`, JSON.stringify(body, null, 2));
+
   const res = await fetch('https://api.linkedin.com/rest/posts', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${LI_TOKEN_VAR.value}`,
       'Content-Type': 'application/json',
       'X-Restli-Protocol-Version': '2.0.0',
-      'LinkedIn-Version': '202401'
+      'LinkedIn-Version': '202501'
     },
     body: JSON.stringify(body)
   });
 
   if (!res.ok) {
     const errBody = await res.text();
+    console.error(`[DEBUG] LinkedIn API FAIL: ${res.status} ${errBody}`);
     throw new Error(`LinkedIn POST failed: ${res.status} ${errBody}`);
   }
 
   const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || '';
+  console.log(`[DEBUG] LinkedIn post SUCCESS: ${postId}`);
   console.log(`  LinkedIn post created: ${postId}`);
   return postId;
 }
