@@ -2059,6 +2059,11 @@ function stopAuto(){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}}
 
 // Init
 filtered=shuffle(getFiltered('all'));
+
+// Expose re-render EARLY — must be defined before any DOM queries that could throw
+window._rerenderTestimonials = function() { currentIdx = 0; filtered=shuffle(getFiltered('all')); render(); startAuto(); };
+
+try {
 buildCats();render();
 
 // Nav buttons
@@ -2085,9 +2090,9 @@ vp.addEventListener('mouseleave',startAuto);
 
 // Start auto-play after delay
 setTimeout(startAuto,5000);
-
-// Expose re-render for SPA navigation
-window._rerenderTestimonials = function() { currentIdx = 0; render(); startAuto(); };
+} catch(_tcErr) {
+console.error('[TC] init error:', _tcErr);
+}
 })();
 
 // ═════════════════════════════════════════════════
