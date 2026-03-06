@@ -689,7 +689,6 @@
 
     function showPortfolio() {
         var directCSS = document.getElementById('blogDirectCSS');
-        var wasDirect = !!directCSS;
         if (directCSS) directCSS.remove();
         if (app) {
             app.style.display = '';
@@ -702,17 +701,24 @@
             el.style.display = el.dataset.blogHidden;
             delete el.dataset.blogHidden;
         });
-        // If returning from a direct blog load, ensure all reveal elements are visible
-        if (wasDirect) {
-            document.querySelectorAll('.rv').forEach(el => {
-                el.classList.remove('rv');
-                el.style.opacity = '1';
-                el.style.transform = 'none';
-            });
-            document.querySelectorAll('.sa').forEach(el => {
-                el.classList.add('vis');
-            });
-        }
+        // Ensure all animated elements are visible (handles direct-load and edge cases)
+        document.querySelectorAll('.rv').forEach(el => {
+            el.classList.remove('rv');
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+        });
+        document.querySelectorAll('.sa:not(.vis)').forEach(el => {
+            el.classList.add('vis');
+        });
+        // Force key sections visible in case animations didn't complete
+        ['secCerts', 'secTestimonials', 'secJourney', 'secNewsletters', 'secContentHub'].forEach(id => {
+            var el = document.getElementById(id);
+            if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+        });
+        ['certGrid', 'tcViewport', 'tcTrack', 'tcCats'].forEach(id => {
+            var el = document.getElementById(id);
+            if (el) el.style.opacity = '1';
+        });
         // Restore original page title
         document.title = originalTitle;
         window.scrollTo(0, 0);
