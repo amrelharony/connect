@@ -709,6 +709,9 @@
                 el.style.opacity = '1';
                 el.style.transform = 'none';
             });
+            document.querySelectorAll('.sa').forEach(el => {
+                el.classList.add('vis');
+            });
         }
         // Restore original page title
         document.title = originalTitle;
