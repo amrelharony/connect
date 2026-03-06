@@ -722,6 +722,10 @@
         document.querySelectorAll('.sa').forEach(el => {
             el.classList.add('vis');
         });
+        // Re-render testimonial carousel (needs recalc after being in hidden container)
+        if (window._rerenderTestimonials) {
+            setTimeout(window._rerenderTestimonials, 50);
+        }
         // Restore original page title
         document.title = originalTitle;
         window.scrollTo(0, 0);
