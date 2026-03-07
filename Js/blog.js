@@ -984,6 +984,9 @@
 
         } catch (e) {
             if (gen !== _routeGen) return;
+            // #region agent log
+            console.warn('[DBG-2bc5ee] renderArticle error:', e.message, e.stack);
+            // #endregion
             document.getElementById('lbArticle').innerHTML = '<div class="lb-404" role="alert"><div class="lb-404-code">500</div><div class="lb-404-msg">Something went wrong.</div></div>';
         }
     }
