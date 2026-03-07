@@ -950,7 +950,7 @@
             // Increment views (fire and forget, deduplicated per session)
             if (!_viewedSlugs.has(slug)) {
                 _viewedSlugs.add(slug);
-                window._sb.rpc('increment_article_views', { article_slug: slug }).catch(() => { });
+                window._sb.rpc('increment_article_views', { article_slug: slug }).then(function(){}, function(){});
             }
 
             const contentHtml = parseMarkdown(data.content);
