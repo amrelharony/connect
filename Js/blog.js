@@ -641,7 +641,11 @@
        ═══════════════════════════════════════════════════ */
     function getRoute() {
         const params = new URLSearchParams(window.location.search);
-        if (params.has('blog')) return { view: 'feed' };
+        if (params.has('blog')) {
+            const val = params.get('blog');
+            if (val && val !== 'feed') return { view: 'article', slug: val };
+            return { view: 'feed' };
+        }
         if (params.has('post')) return { view: 'article', slug: params.get('post') };
         return { view: 'portfolio' };
     }
