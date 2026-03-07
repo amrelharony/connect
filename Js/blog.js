@@ -2573,7 +2573,7 @@
                 return '<span class="blog-inline-tag">' + esc(t) + '</span>';
             }).join(' ');
             return '<div class="blog-inline-post" data-inline-article-slug="' + esc(a.slug) + '" style="cursor:pointer;transition-delay:' + (i * 60) + 'ms">' +
-                '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#6b7a90;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">' + fmtDate(a.created_at) + ' · ' + readTime(a.content || a.excerpt || '') + '</div>' +
+                '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:#6b7a90;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">' + fmtDate(a.created_at) + ' · ' + readingTime(a.content || a.excerpt || '') + '</div>' +
                 '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3">' + esc(a.title) + '</div>' +
                 (excerpt ? '<div style="font-size:12px;color:#6b7a90;line-height:1.5;margin-bottom:6px">' + excerpt + '</div>' : '') +
                 (tags ? '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tags + '</div>' : '') +
