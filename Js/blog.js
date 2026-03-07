@@ -984,9 +984,6 @@
 
         } catch (e) {
             if (gen !== _routeGen) return;
-            // #region agent log
-            console.warn('[DBG-2bc5ee] renderArticle error:', e.message, e.stack);
-            // #endregion
             document.getElementById('lbArticle').innerHTML = '<div class="lb-404" role="alert"><div class="lb-404-code">500</div><div class="lb-404-msg">Something went wrong.</div></div>';
         }
     }
@@ -1262,13 +1259,6 @@
               <button class="lb-cms-btn primary" id="lbTDraftsNew" style="padding:6px 14px;font-size:9px">+ NEW</button>
             </div>
             <div class="lb-drafts-list" id="lbTDraftsList"></div>
-            <div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)">
-              <div class="lb-drafts-header" style="margin-bottom:6px">
-                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px">☁️ CLOUD DRAFTS</span>
-                <span class="lb-drafts-count" id="lbTCloudDraftsCount"></span>
-              </div>
-              <div class="lb-drafts-list" id="lbTCloudDraftsList"></div>
-            </div>
           </div>
 
           <div class="lb-sub-content" data-msubtab-content="tscheduled">
@@ -1389,13 +1379,6 @@
               <button class="lb-cms-btn primary" id="lbDraftsNew" style="padding:6px 14px;font-size:9px">+ NEW DRAFT</button>
             </div>
             <div class="lb-drafts-list" id="lbDraftsList"></div>
-            <div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)">
-              <div class="lb-drafts-header" style="margin-bottom:6px">
-                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px">☁️ CLOUD DRAFTS</span>
-                <span class="lb-drafts-count" id="lbCloudDraftsCount"></span>
-              </div>
-              <div class="lb-drafts-list" id="lbCloudDraftsList"></div>
-            </div>
           </div>
 
           <div class="lb-sub-content" data-subtab-content="scheduled">
@@ -1434,7 +1417,7 @@
                 if (tab.dataset.admintab === 'article') {
                     var activeSub = adminDialog.querySelector('#lbArticleSubTabs .lb-sub-tab.active');
                     var key = activeSub ? activeSub.dataset.subtab : 'drafts';
-                    if (key === 'drafts') { renderDraftsList(); _renderFilteredTab('draft'); }
+                    if (key === 'drafts') renderDraftsList();
                     else if (key === 'scheduled') _renderFilteredTab('scheduled');
                     else if (key === 'published') _renderFilteredTab('published');
                 }
@@ -1587,106 +1570,69 @@
             badge.textContent = total ? '(' + total + ')' : '';
         }
 
-        async function renderTCloudDrafts() {
-            var listEl = document.getElementById('lbTCloudDraftsList');
-            var countEl = document.getElementById('lbTCloudDraftsCount');
-            if (!listEl) return;
-            if (window._fetchMicroblogCloudDrafts) {
-                _tCloudDrafts = await window._fetchMicroblogCloudDrafts();
-            }
-            if (countEl) countEl.textContent = _tCloudDrafts.length + ' draft' + (_tCloudDrafts.length !== 1 ? 's' : '');
-            updateTDraftsBadge();
-            if (!_tCloudDrafts.length) {
-                listEl.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--sub);padding:8px 0">No cloud drafts. Click SAVE DRAFT to save to the cloud.</div>';
-                return;
-            }
-            listEl.innerHTML = _tCloudDrafts.map(function(d) {
-                var preview = (d.content || '').substring(0, 80) + ((d.content || '').length > 80 ? '...' : '');
-                var date = new Date(d.created_at).toLocaleDateString();
-                return '<div class="lb-cms-article-row">' +
-                    '<span class="lb-cms-article-title" style="cursor:pointer" data-tcloud-edit="' + d.id + '">' + esc(preview || 'Empty draft') + '</span>' +
-                    '<span style="font-family:\'JetBrains Mono\',monospace;font-size:8px;color:var(--sub);margin-left:4px">☁️ ' + date + '</span>' +
-                    '<div class="lb-cms-article-actions">' +
-                        '<button class="lb-cms-btn primary" style="padding:4px 8px;font-size:8px" data-tcloud-publish="' + d.id + '">PUBLISH</button>' +
-                        '<button class="lb-cms-btn secondary" style="padding:4px 8px;font-size:8px" data-tcloud-edit="' + d.id + '">EDIT</button>' +
-                        '<button class="lb-cms-btn danger" style="padding:4px 8px;font-size:8px" data-tcloud-del="' + d.id + '">DEL</button>' +
-                    '</div></div>';
-            }).join('');
-            _bindTCloudActions(listEl);
-        }
-
-        function _bindTCloudActions(container) {
-            container.querySelectorAll('[data-tcloud-edit]').forEach(function(el) {
-                el.addEventListener('click', function() {
-                    var draft = _tCloudDrafts.find(function(d) { return d.id === el.dataset.tcloudEdit; });
-                    if (draft) {
-                        quickContent.value = draft.content || '';
-                        quickChar.textContent = (draft.content || '').length + ' / 500';
-                        document.getElementById('lbQuickStatus').textContent = 'Editing cloud draft';
-                        snd('tap');
-                    }
-                });
-            });
-            container.querySelectorAll('[data-tcloud-publish]').forEach(function(el) {
-                el.addEventListener('click', async function() {
-                    if (!confirm('Publish this thought now?')) return;
-                    if (window._publishMicroblogDraft) {
-                        var result = await window._publishMicroblogDraft(el.dataset.tcloudPublish);
-                        if (result.success) {
-                            snd('success');
-                            if (window.UniToast) window.UniToast('Thought published!', '', '🚀', 'success');
-                            if (window._refreshMicroblogFeed) window._refreshMicroblogFeed();
-                            await renderTCloudDrafts();
-                        } else {
-                            if (window.UniToast) window.UniToast('Failed to publish.', '', '⚠️', 'warn');
-                        }
-                    }
-                });
-            });
-            container.querySelectorAll('[data-tcloud-del]').forEach(function(el) {
-                el.addEventListener('click', async function() {
-                    if (!confirm('Delete this cloud draft permanently?')) return;
-                    if (window._deleteMicroblogPost) {
-                        var result = await window._deleteMicroblogPost(el.dataset.tcloudDel);
-                        if (result.success) {
-                            snd('success');
-                            if (window.UniToast) window.UniToast('Cloud draft deleted.', '', '🗑️', 'success');
-                            await renderTCloudDrafts();
-                        } else {
-                            if (window.UniToast) window.UniToast('Failed to delete.', '', '⚠️', 'warn');
-                        }
-                    }
-                });
-            });
-        }
-
-        function renderTDraftsList(filter) {
+        async function renderTDraftsList(filter) {
             var listEl = document.getElementById('lbTDraftsList');
             var countEl = document.getElementById('lbTDraftsCount');
             if (!listEl) return;
-            var drafts = getAllThoughtDrafts();
+
+            // Fetch cloud drafts
+            if (window._fetchMicroblogCloudDrafts) {
+                _tCloudDrafts = await window._fetchMicroblogCloudDrafts();
+            }
+
+            // Normalize local drafts
+            var localItems = getAllThoughtDrafts().map(function(d) {
+                return { src: 'local', id: d.id, content: d.content || '', ts: d.updatedAt || d.createdAt, raw: d };
+            });
+            // Normalize cloud drafts
+            var cloudItems = (_tCloudDrafts || []).map(function(d) {
+                return { src: 'cloud', id: d.id, content: d.content || '', ts: new Date(d.created_at).getTime(), raw: d };
+            });
+
+            var all = localItems.concat(cloudItems);
+            all.sort(function(a, b) { return b.ts - a.ts; });
+
             if (filter) {
                 var q = filter.toLowerCase();
-                drafts = drafts.filter(function(d) { return (d.content || '').toLowerCase().includes(q); });
+                all = all.filter(function(d) { return d.content.toLowerCase().includes(q); });
             }
-            if (countEl) countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '');
-            if (!drafts.length) {
+            if (countEl) countEl.textContent = all.length + ' draft' + (all.length !== 1 ? 's' : '');
+            updateTDraftsBadge();
+
+            if (!all.length) {
                 listEl.innerHTML = '<div class="lb-drafts-empty">' + (filter ? 'No drafts match "' + esc(filter) + '"' : 'No thought drafts yet.<br>Start writing and drafts are auto-saved.') + '</div>';
                 return;
             }
-            listEl.innerHTML = drafts.map(function(d) {
-                var preview = esc((d.content || '').slice(0, 80)) + ((d.content || '').length > 80 ? '...' : '');
-                var isActive = d.id === _tActiveDraftId;
-                return '<div class="lb-draft-row' + (isActive ? ' active' : '') + '" data-tdraft-id="' + d.id + '">' +
+
+            listEl.innerHTML = all.map(function(d) {
+                var preview = esc(d.content.slice(0, 80)) + (d.content.length > 80 ? '...' : '');
+                var icon = d.src === 'cloud' ? '☁️' : '💾';
+                var timeStr = d.src === 'local' ? _timeSince(d.ts) : new Date(d.ts).toLocaleDateString();
+                var isActive = d.src === 'local' && d.id === _tActiveDraftId;
+                if (d.src === 'local') {
+                    return '<div class="lb-draft-row' + (isActive ? ' active' : '') + '" data-tdraft-id="' + d.id + '">' +
+                        '<div class="lb-draft-info">' +
+                            '<div class="lb-draft-title">' + icon + ' ' + preview + '</div>' +
+                            '<div class="lb-draft-meta"><span>' + timeStr + '</span><span>' + d.content.length + ' chars</span></div>' +
+                        '</div>' +
+                        '<div class="lb-draft-actions">' +
+                            '<button class="lb-draft-btn" data-tdraft-load="' + d.id + '">OPEN</button>' +
+                            '<button class="lb-draft-btn del" data-tdraft-del="' + d.id + '">DEL</button>' +
+                        '</div></div>';
+                }
+                return '<div class="lb-draft-row" data-tcloud-id="' + d.id + '">' +
                     '<div class="lb-draft-info">' +
-                        '<div class="lb-draft-title">' + preview + '</div>' +
-                        '<div class="lb-draft-meta"><span>' + _timeSince(d.updatedAt || d.createdAt) + '</span><span>' + (d.content || '').length + ' chars</span></div>' +
+                        '<div class="lb-draft-title">' + icon + ' ' + (preview || 'Empty draft') + '</div>' +
+                        '<div class="lb-draft-meta"><span>' + timeStr + '</span><span>' + d.content.length + ' chars</span></div>' +
                     '</div>' +
                     '<div class="lb-draft-actions">' +
-                        '<button class="lb-draft-btn" data-tdraft-load="' + d.id + '">OPEN</button>' +
-                        '<button class="lb-draft-btn del" data-tdraft-del="' + d.id + '">DEL</button>' +
+                        '<button class="lb-draft-btn" data-tcloud-publish="' + d.id + '">PUB</button>' +
+                        '<button class="lb-draft-btn" data-tcloud-edit="' + d.id + '">EDIT</button>' +
+                        '<button class="lb-draft-btn del" data-tcloud-del="' + d.id + '">DEL</button>' +
                     '</div></div>';
             }).join('');
+
+            // Bind local draft actions
             listEl.querySelectorAll('[data-tdraft-load]').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1700,10 +1646,53 @@
                     if (confirm('Delete this draft?')) { deleteThoughtDraft(btn.dataset.tdraftDel); snd('delete'); }
                 });
             });
-            listEl.querySelectorAll('.lb-draft-row').forEach(function(row) {
+            listEl.querySelectorAll('[data-tdraft-id]').forEach(function(row) {
                 row.addEventListener('click', function() {
                     var draft = getAllThoughtDrafts().find(function(d) { return d.id === row.dataset.tdraftId; });
                     if (draft) loadThoughtDraft(draft);
+                });
+            });
+            // Bind cloud draft actions
+            listEl.querySelectorAll('[data-tcloud-edit]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var draft = _tCloudDrafts.find(function(d) { return d.id === el.dataset.tcloudEdit; });
+                    if (draft) {
+                        quickContent.value = draft.content || '';
+                        quickChar.textContent = (draft.content || '').length + ' / 500';
+                        document.getElementById('lbQuickStatus').textContent = 'Editing cloud draft';
+                        snd('tap');
+                    }
+                });
+            });
+            listEl.querySelectorAll('[data-tcloud-publish]').forEach(function(el) {
+                el.addEventListener('click', async function() {
+                    if (!confirm('Publish this thought now?')) return;
+                    if (window._publishMicroblogDraft) {
+                        var result = await window._publishMicroblogDraft(el.dataset.tcloudPublish);
+                        if (result.success) {
+                            snd('success');
+                            if (window.UniToast) window.UniToast('Thought published!', '', '🚀', 'success');
+                            if (window._refreshMicroblogFeed) window._refreshMicroblogFeed();
+                            await renderTDraftsList();
+                        } else {
+                            if (window.UniToast) window.UniToast('Failed to publish.', '', '⚠️', 'warn');
+                        }
+                    }
+                });
+            });
+            listEl.querySelectorAll('[data-tcloud-del]').forEach(function(el) {
+                el.addEventListener('click', async function() {
+                    if (!confirm('Delete this cloud draft permanently?')) return;
+                    if (window._deleteMicroblogPost) {
+                        var result = await window._deleteMicroblogPost(el.dataset.tcloudDel);
+                        if (result.success) {
+                            snd('success');
+                            if (window.UniToast) window.UniToast('Cloud draft deleted.', '', '🗑️', 'success');
+                            await renderTDraftsList();
+                        } else {
+                            if (window.UniToast) window.UniToast('Failed to delete.', '', '⚠️', 'warn');
+                        }
+                    }
                 });
             });
         }
@@ -1717,7 +1706,7 @@
                 var content = quickContent.value.trim();
                 if (content && window._saveMicroblogDraft) {
                     await window._saveMicroblogDraft(content, null, null);
-                    renderTCloudDrafts();
+                    renderTDraftsList();
                 }
             }, 30000);
         });
@@ -1732,7 +1721,7 @@
                 if (result.success) {
                     document.getElementById('lbQuickStatus').textContent = 'Draft saved to cloud!';
                     if (window.UniToast) window.UniToast('Thought draft saved to cloud.', '', '☁️', 'success');
-                    renderTCloudDrafts();
+                    renderTDraftsList();
                 } else {
                     document.getElementById('lbQuickStatus').textContent = 'Saved locally (cloud save failed).';
                     if (window.UniToast) window.UniToast('Saved locally.', '', '💾', 'success');
@@ -1856,7 +1845,7 @@
             adminDialog.querySelectorAll('#lbTabMicro .lb-sub-content').forEach(function(c) { c.classList.remove('active'); });
             var target = adminDialog.querySelector('[data-msubtab-content="' + key + '"]');
             if (target) target.classList.add('active');
-            if (key === 'tdrafts') { renderTDraftsList(); renderTCloudDrafts(); }
+            if (key === 'tdrafts') { renderTDraftsList(); }
             if (key === 'tscheduled') _renderMicroTab('tscheduled');
             if (key === 'tpublished') _renderMicroTab('tpublished');
         });
@@ -1869,8 +1858,7 @@
             _renderMicroTab('tpublished', e.target.value.trim());
         }, 200));
 
-        updateTDraftsBadge();
-        renderTCloudDrafts();
+        renderTDraftsList();
         fetchMicroPosts();
 
         // ── Shared: close / signout ──
@@ -2033,42 +2021,68 @@
             var countEl = document.getElementById('lbDraftsCount');
             if (!listEl) return;
 
-            var drafts = getAllDrafts();
+            // Local drafts
+            var localItems = getAllDrafts().map(function(d) {
+                return { src: 'local', id: d.id, title: d.title || 'Untitled Draft', content: d.content || '', tags: d.tags || '', excerpt: d.excerpt || '', ts: d.updatedAt || d.createdAt, raw: d };
+            });
+            // Cloud draft articles
+            var cloudItems = _allAdminArticles.filter(function(a) { return _classifyArticle(a) === 'draft'; }).map(function(a) {
+                return { src: 'cloud', id: a.id, title: a.title || 'Untitled', content: a.content || '', tags: '', excerpt: a.excerpt || '', slug: a.slug, ts: new Date(a.created_at).getTime(), raw: a };
+            });
+
+            var all = localItems.concat(cloudItems);
+            all.sort(function(a, b) { return b.ts - a.ts; });
+
             if (filter) {
                 var q = filter.toLowerCase();
-                drafts = drafts.filter(function(d) {
-                    return (d.title || '').toLowerCase().includes(q) ||
-                           (d.tags || '').toLowerCase().includes(q) ||
-                           (d.excerpt || '').toLowerCase().includes(q) ||
-                           (d.content || '').toLowerCase().includes(q);
+                all = all.filter(function(d) {
+                    return d.title.toLowerCase().includes(q) || d.tags.toLowerCase().includes(q) ||
+                           d.excerpt.toLowerCase().includes(q) || d.content.toLowerCase().includes(q);
                 });
             }
-            if (countEl) countEl.textContent = drafts.length + ' draft' + (drafts.length !== 1 ? 's' : '');
+            if (countEl) countEl.textContent = all.length + ' draft' + (all.length !== 1 ? 's' : '');
+            updateDraftsBadge();
 
-            if (!drafts.length) {
-                listEl.innerHTML = '<div class="lb-drafts-empty">' + (filter ? 'No drafts match "' + esc(filter) + '"' : 'No local drafts yet.<br>Start writing and drafts are auto-saved.') + '</div>';
+            if (!all.length) {
+                listEl.innerHTML = '<div class="lb-drafts-empty">' + (filter ? 'No drafts match "' + esc(filter) + '"' : 'No drafts yet.<br>Start writing and drafts are auto-saved.') + '</div>';
                 return;
             }
 
-            listEl.innerHTML = drafts.map(function(d) {
+            listEl.innerHTML = all.map(function(d) {
+                var icon = d.src === 'cloud' ? '☁️' : '💾';
                 var words = _wordCount(d.content);
-                var isActive = d.id === _activeDraftId;
-                return '<div class="lb-draft-row' + (isActive ? ' active' : '') + '" data-draft-id="' + d.id + '">' +
+                if (d.src === 'local') {
+                    var isActive = d.id === _activeDraftId;
+                    return '<div class="lb-draft-row' + (isActive ? ' active' : '') + '" data-draft-id="' + d.id + '">' +
+                        '<div class="lb-draft-info">' +
+                            '<div class="lb-draft-title">' + icon + ' ' + esc(d.title) + '</div>' +
+                            '<div class="lb-draft-meta">' +
+                                '<span>' + _timeSince(d.ts) + '</span>' +
+                                '<span>' + words + ' word' + (words !== 1 ? 's' : '') + '</span>' +
+                                (d.tags ? '<span>' + esc(d.tags) + '</span>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="lb-draft-actions">' +
+                            '<button class="lb-draft-btn" data-draft-load="' + d.id + '">OPEN</button>' +
+                            '<button class="lb-draft-btn del" data-draft-del="' + d.id + '">DEL</button>' +
+                        '</div></div>';
+                }
+                return '<div class="lb-draft-row">' +
                     '<div class="lb-draft-info">' +
-                        '<div class="lb-draft-title">' + esc(d.title || 'Untitled Draft') + '</div>' +
+                        '<div class="lb-draft-title">' + icon + ' ' + esc(d.title) + '</div>' +
                         '<div class="lb-draft-meta">' +
-                            '<span>' + _timeSince(d.updatedAt || d.createdAt) + '</span>' +
+                            '<span>' + new Date(d.ts).toLocaleDateString() + '</span>' +
                             '<span>' + words + ' word' + (words !== 1 ? 's' : '') + '</span>' +
-                            (d.tags ? '<span>' + esc(d.tags) + '</span>' : '') +
                         '</div>' +
                     '</div>' +
                     '<div class="lb-draft-actions">' +
-                        '<button class="lb-draft-btn" data-draft-load="' + d.id + '">OPEN</button>' +
-                        '<button class="lb-draft-btn del" data-draft-del="' + d.id + '">DEL</button>' +
-                    '</div>' +
-                '</div>';
+                        '<button class="lb-draft-btn" data-publish-draft="' + d.id + '">PUB</button>' +
+                        '<button class="lb-draft-btn" data-edit-slug="' + esc(d.slug || '') + '">EDIT</button>' +
+                        '<button class="lb-draft-btn del" data-delete-id="' + d.id + '">DEL</button>' +
+                    '</div></div>';
             }).join('');
 
+            // Bind local draft actions
             listEl.querySelectorAll('[data-draft-load]').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -2087,12 +2101,14 @@
                     }
                 });
             });
-            listEl.querySelectorAll('.lb-draft-row').forEach(function(row) {
+            listEl.querySelectorAll('[data-draft-id]').forEach(function(row) {
                 row.addEventListener('click', function() {
                     var draft = getAllDrafts().find(function(d) { return d.id === row.dataset.draftId; });
                     if (draft) loadDraftIntoEditor(draft);
                 });
             });
+            // Bind cloud article actions (PUBLISH, EDIT, DEL)
+            _bindArticleActions(listEl);
         }
 
         function scheduleAutoSave() {
@@ -2110,7 +2126,6 @@
         document.getElementById('lbDraftsSearch').addEventListener('input', debounce(function(e) {
             var q = e.target.value.trim();
             renderDraftsList(q);
-            _renderFilteredTab('draft', q);
         }, 200));
         document.getElementById('lbDraftsNew').addEventListener('click', function() {
             saveCurrentDraft(true);
@@ -2135,7 +2150,7 @@
             document.getElementById('lbTabArticle').querySelectorAll('.lb-sub-content').forEach(function(c) { c.classList.remove('active'); });
             var target = adminDialog.querySelector('[data-subtab-content="' + key + '"]');
             if (target) target.classList.add('active');
-            if (key === 'drafts') { renderDraftsList(); _renderFilteredTab('draft'); }
+            if (key === 'drafts') renderDraftsList();
             if (key === 'scheduled') _renderFilteredTab('scheduled');
             if (key === 'published') _renderFilteredTab('published');
         });
@@ -2226,21 +2241,10 @@
             if (r.error) throw r.error;
             _allAdminArticles = r.data || [];
 
-            _renderFilteredTab('draft');
+            renderDraftsList();
             _renderFilteredTab('scheduled');
             _renderFilteredTab('published');
-            _updateDraftsBadgeWithCloud();
         } catch (e) {}
-    }
-
-    function _updateDraftsBadgeWithCloud() {
-        var badge = document.getElementById('lbDraftsBadge');
-        if (!badge) return;
-        var localCount = 0;
-        try { localCount = (JSON.parse(localStorage.getItem('_lb_drafts')) || []).length; } catch(e) {}
-        var cloudCount = _allAdminArticles.filter(function(a) { return _classifyArticle(a) === 'draft'; }).length;
-        var total = localCount + cloudCount;
-        badge.textContent = total ? '(' + total + ')' : '';
     }
 
     function _classifyArticle(a) {
@@ -2250,8 +2254,7 @@
     }
 
     function _renderFilteredTab(tab, filter) {
-        var cfg = { draft:     { listId: 'lbCloudDraftsList', countId: 'lbCloudDraftsCount', badgeId: null },
-                    scheduled: { listId: 'lbSchedList', countId: 'lbSchedCount', badgeId: 'lbSchedBadge' },
+        var cfg = { scheduled: { listId: 'lbSchedList', countId: 'lbSchedCount', badgeId: 'lbSchedBadge' },
                     published: { listId: 'lbPubList', countId: 'lbPubCount', badgeId: 'lbPubBadge' } }[tab];
         if (!cfg) return;
         var articles = _allAdminArticles.filter(function(a) { return _classifyArticle(a) === tab; });
@@ -2274,7 +2277,7 @@
         if (!listEl) return;
 
         if (!data || !data.length) {
-            var msgs = { draft: 'No cloud drafts. Click SAVE DRAFT to save to the cloud.', scheduled: 'No scheduled articles.', published: 'No published articles.' };
+            var msgs = { scheduled: 'No scheduled articles.', published: 'No published articles.' };
             listEl.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--sub);padding:8px 0">' + (msgs[mode] || 'No articles.') + '</div>';
             return;
         }
@@ -2588,8 +2591,18 @@
                 .eq('published', true)
                 .order('created_at', { ascending: false })
                 .limit(5)
-                .then(function(r) { renderInlineArticles(r.data || []); })
-                .catch(function() { renderInlineArticles([]); });
+                .then(function(r) {
+                    // #region agent log
+                    console.warn('[DBG-2bc5ee] inlineFeed result:', 'data:', r.data ? r.data.length + ' articles' : 'null', 'error:', r.error ? JSON.stringify(r.error) : 'none');
+                    // #endregion
+                    renderInlineArticles(r.data || []);
+                })
+                .catch(function(err) {
+                    // #region agent log
+                    console.warn('[DBG-2bc5ee] inlineFeed catch:', err);
+                    // #endregion
+                    renderInlineArticles([]);
+                });
         } else {
             renderInlineArticles([]);
         }
