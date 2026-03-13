@@ -75,6 +75,57 @@ async function refreshTokenIfNeeded() {
   }
 }
 
+async function uploadImageToLinkedIn(imageUrl) {
+  if (!imageUrl) return null;
+
+  console.log(`  Downloading image: ${imageUrl}`);
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) {
+    console.log(`  X Image download failed: ${imgRes.status} ${imgRes.statusText}`);
+    return null;
+  }
+  const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
+  console.log(`  OK Image downloaded: ${imgBuffer.length} bytes`);
+
+  console.log(`  Initializing LinkedIn image upload (owner: ${LI_PERSON})...`);
+  const initRes = await fetch('https://api.linkedin.com/rest/images?action=initializeUpload', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${LI_TOKEN_VAR.value}`,
+      'Content-Type': 'application/json',
+      'X-Restli-Protocol-Version': '2.0.0',
+      'LinkedIn-Version': '202601'
+    },
+    body: JSON.stringify({ initializeUploadRequest: { owner: LI_PERSON } })
+  });
+  if (!initRes.ok) {
+    const errBody = await initRes.text();
+    console.log(`  X LinkedIn image init failed: ${initRes.status} ${errBody}`);
+    return null;
+  }
+  const initData = await initRes.json();
+  const { uploadUrl, image: imageUrn } = initData.value;
+  console.log(`  OK Got upload URL, image URN: ${imageUrn}`);
+
+  console.log(`  Uploading binary to LinkedIn...`);
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${LI_TOKEN_VAR.value}`,
+      'Content-Type': 'application/octet-stream'
+    },
+    body: imgBuffer
+  });
+  if (!uploadRes.ok) {
+    const errBody = await uploadRes.text();
+    console.log(`  X LinkedIn image upload failed: ${uploadRes.status} ${errBody}`);
+    return null;
+  }
+
+  console.log(`  OK Uploaded image to LinkedIn: ${imageUrn}`);
+  return imageUrn;
+}
+
 async function postToLinkedIn(text, articleUrl) {
   const body = {
     author: LI_PERSON,
@@ -97,6 +148,7 @@ async function postToLinkedIn(text, articleUrl) {
     };
   }
 
+  console.log(`  Creating LinkedIn post (type: ${articleUrl ? 'article' : 'text'})...`);
   const res = await fetch('https://api.linkedin.com/rest/posts', {
     method: 'POST',
     headers: {
@@ -114,7 +166,45 @@ async function postToLinkedIn(text, articleUrl) {
   }
 
   const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || '';
-  console.log(`  LinkedIn post created: ${postId}`);
+  console.log(`  OK LinkedIn post created: ${postId}`);
+  return postId;
+}
+
+async function postToLinkedInWithImage(text, imageUrn) {
+  const body = {
+    author: LI_PERSON,
+    lifecycleState: 'PUBLISHED',
+    visibility: 'PUBLIC',
+    commentary: text,
+    distribution: {
+      feedDistribution: 'MAIN_FEED',
+      targetEntities: [],
+      thirdPartyDistributionChannels: []
+    },
+    content: {
+      media: { id: imageUrn }
+    }
+  };
+
+  console.log(`  Creating LinkedIn post (type: image, urn: ${imageUrn})...`);
+  const res = await fetch('https://api.linkedin.com/rest/posts', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${LI_TOKEN_VAR.value}`,
+      'Content-Type': 'application/json',
+      'X-Restli-Protocol-Version': '2.0.0',
+      'LinkedIn-Version': '202601'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`LinkedIn POST (image) failed: ${res.status} ${errBody}`);
+  }
+
+  const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || '';
+  console.log(`  OK LinkedIn image post created: ${postId}`);
   return postId;
 }
 
@@ -129,7 +219,18 @@ async function publishThoughts() {
   for (const row of rows) {
     try {
       console.log(`Publishing thought ${row.id}...`);
-      await postToLinkedIn(row.content);
+
+      if (row.image_url) {
+        const imageUrn = await uploadImageToLinkedIn(row.image_url);
+        if (imageUrn) {
+          await postToLinkedInWithImage(row.content, imageUrn);
+        } else {
+          await postToLinkedIn(row.content);
+        }
+      } else {
+        await postToLinkedIn(row.content);
+      }
+
       await sbUpdate('microblog', row.id, { linkedin_posted: true, published: true });
       console.log(`  Done: ${row.id}`);
     } catch (err) {
@@ -141,7 +242,7 @@ async function publishThoughts() {
 async function publishArticles() {
   const now = new Date().toISOString();
   const rows = await sbQuery('longform_articles',
-    `select=id,title,slug,excerpt,content,published&linkedin_posted=eq.false&or=(published.eq.true,and(scheduled_at.not.is.null,scheduled_at.lte.${now}))`
+    `select=id,title,slug,excerpt,cover_image,published&linkedin_posted=eq.false&or=(published.eq.true,and(scheduled_at.not.is.null,scheduled_at.lte.${now}))`
   );
 
   console.log(`Found ${rows.length} article(s) due for LinkedIn`);
@@ -149,9 +250,28 @@ async function publishArticles() {
   for (const row of rows) {
     try {
       console.log(`Publishing article "${row.title}" (${row.id})...`);
+      console.log(`  cover_image: ${row.cover_image || '(none)'}`);
+
+      if (!row.published) {
+        await sbUpdate('longform_articles', row.id, { published: true });
+        console.log(`  Set published=true for scheduled article`);
+      }
+
       const url = `${SITE}/?blog=${encodeURIComponent(row.slug)}`;
       const text = `${row.title}\n\n${row.excerpt || ''}\n\nRead more: ${url}`.trim();
-      await postToLinkedIn(text, url);
+
+      if (row.cover_image) {
+        const imageUrn = await uploadImageToLinkedIn(row.cover_image);
+        if (imageUrn) {
+          await postToLinkedInWithImage(text, imageUrn);
+        } else {
+          console.log(`  Image upload failed, falling back to article post`);
+          await postToLinkedIn(text, url);
+        }
+      } else {
+        await postToLinkedIn(text, url);
+      }
+
       await sbUpdate('longform_articles', row.id, { linkedin_posted: true, published: true });
       console.log(`  Done: ${row.id}`);
     } catch (err) {
