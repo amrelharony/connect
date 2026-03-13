@@ -305,6 +305,7 @@
                 <label class="lb-cms-label">Cover Image</label>
                 <div style="display:flex;gap:6px;align-items:center">
                   <input class="lb-cms-input" id="lbCmsCover" placeholder="Paste image or URL..." style="flex:1">
+                  <button type="button" class="lb-cms-btn secondary" id="lbCmsCoverClear" title="Remove cover image" style="padding:6px 10px;font-size:9px;display:none;align-items:center">✕</button>
                   <label class="lb-cms-btn secondary" style="cursor:pointer;white-space:nowrap;padding:6px 10px;font-size:9px;display:inline-flex;align-items:center;gap:4px">
                     📎 Upload<input type="file" accept="image/*" id="lbCmsCoverFile" style="display:none">
                   </label>
@@ -1390,6 +1391,7 @@
             document.getElementById('lbCmsExcerpt').value = draft.excerpt || '';
             document.getElementById('lbCmsTags').value = draft.tags || '';
             document.getElementById('lbCmsCover').value = draft.cover || '';
+            updateCoverPreview(draft.cover || '');
             B._setEditorValue(draft.content || '');
             B.editingArticle = null;
             _updatePreview();
@@ -1422,6 +1424,7 @@
             document.getElementById('lbCmsExcerpt').value = '';
             document.getElementById('lbCmsTags').value = '';
             document.getElementById('lbCmsCover').value = '';
+            updateCoverPreview('');
             B._setEditorValue('');
             document.getElementById('lbCmsPreviewContent').innerHTML = '<span style="color:var(--sub);font-family:\'JetBrains Mono\',monospace;font-size:10px">Live preview will appear here...</span>';
             document.getElementById('lbCmsScheduleRow').style.display = 'none';
@@ -2050,9 +2053,15 @@
 
         function updateCoverPreview(url) {
             var prev = document.getElementById('lbCmsCoverPreview');
+            var clearBtn = document.getElementById('lbCmsCoverClear');
             if (!prev) return;
-            if (url && url.startsWith('http')) { prev.src = url; prev.style.display = 'block'; }
-            else { prev.src = ''; prev.style.display = 'none'; }
+            if (url && url.startsWith('http')) {
+                prev.src = url; prev.style.display = 'block';
+                if (clearBtn) clearBtn.style.display = 'inline-flex';
+            } else {
+                prev.src = ''; prev.style.display = 'none';
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
         }
 
         // ── Cover image: file upload button ──
@@ -2103,6 +2112,12 @@
         // ── Cover image: show preview when URL changes ──
         document.getElementById('lbCmsCover').addEventListener('input', function() {
             updateCoverPreview(this.value.trim());
+        });
+
+        // ── Cover image: clear button ──
+        document.getElementById('lbCmsCoverClear').addEventListener('click', function() {
+            document.getElementById('lbCmsCover').value = '';
+            updateCoverPreview('');
         });
 
         // ── Article content: clipboard paste (textarea fallback; CM6 paste handled in _setupEditor) ──
@@ -2445,6 +2460,7 @@
             document.getElementById('lbCmsExcerpt').value = data.excerpt || '';
             document.getElementById('lbCmsTags').value = (data.tags || []).join(', ');
             document.getElementById('lbCmsCover').value = data.cover_image || '';
+            updateCoverPreview(data.cover_image || '');
             B._setEditorValue(data.content || '');
 
             if (data.scheduled_at && !data.published) {
@@ -2661,6 +2677,7 @@
                 document.getElementById('lbCmsExcerpt').value = '';
                 document.getElementById('lbCmsTags').value = '';
                 document.getElementById('lbCmsCover').value = '';
+                updateCoverPreview('');
                 B._setEditorValue('');
                 document.getElementById('lbCmsPreviewContent').innerHTML = '<span style="color:var(--sub);font-family:\'JetBrains Mono\',monospace;font-size:10px">Live preview will appear here...</span>';
                 const _si = document.getElementById('lbCmsSeries');
