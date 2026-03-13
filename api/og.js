@@ -23,7 +23,7 @@ export default async function handler(req) {
     article = rows[0];
   } catch (_) {
     return fetch(new URL('/_index.html', url.origin));
-  }
+  } 
 
   const htmlRes = await fetch(new URL('/_index.html', url.origin));
   let html = await htmlRes.text();
@@ -69,17 +69,12 @@ export default async function handler(req) {
   });
   html = html.replace('</head>', `<script type="application/ld+json">${ld}</script>\n</head>`);
 
-  // #region agent log
-  const _debugHeaders = {
-    'Content-Type': 'text/html; charset=utf-8',
-    'Cache-Control': 's-maxage=60, stale-while-revalidate=300',
-    'X-OG-Slug': slug,
-    'X-OG-Has-Cover': String(hasCover),
-    'X-OG-Image': image,
-    'X-OG-Raw-Cover': rawImage || '(empty)'
-  };
-  // #endregion
-  return new Response(html, { headers: _debugHeaders });
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 's-maxage=60, stale-while-revalidate=300'
+    }
+  });
 }
 
 function metaRe(attr, val) {
