@@ -69,12 +69,17 @@ export default async function handler(req) {
   });
   html = html.replace('</head>', `<script type="application/ld+json">${ld}</script>\n</head>`);
 
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 's-maxage=60, stale-while-revalidate=300'
-    }
-  });
+  // #region agent log
+  const _debugHeaders = {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 's-maxage=60, stale-while-revalidate=300',
+    'X-OG-Slug': slug,
+    'X-OG-Has-Cover': String(hasCover),
+    'X-OG-Image': image,
+    'X-OG-Raw-Cover': rawImage || '(empty)'
+  };
+  // #endregion
+  return new Response(html, { headers: _debugHeaders });
 }
 
 function metaRe(attr, val) {
