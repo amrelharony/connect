@@ -126,7 +126,7 @@ async function uploadImageToLinkedIn(imageUrl) {
   return imageUrn;
 }
 
-async function postToLinkedIn(text, articleUrl) {
+async function postToLinkedIn(text, articleUrl, thumbnailUrn) {
   const body = {
     author: LI_PERSON,
     lifecycleState: 'PUBLISHED',
@@ -146,6 +146,7 @@ async function postToLinkedIn(text, articleUrl) {
         title: text.split('\n')[0] || 'New Article'
       }
     };
+    if (thumbnailUrn) body.content.article.thumbnail = thumbnailUrn;
   }
 
   console.log(`  Creating LinkedIn post (type: ${articleUrl ? 'article' : 'text'})...`);
@@ -260,7 +261,12 @@ async function publishArticles() {
       const url = `${SITE}/?post=${encodeURIComponent(row.slug)}`;
       const text = `${row.title}\n\n${row.excerpt || ''}\n\nRead more: ${url}`.trim();
 
-      await postToLinkedIn(text, url);
+      let thumbnailUrn = null;
+      if (row.cover_image) {
+        thumbnailUrn = await uploadImageToLinkedIn(row.cover_image);
+        if (!thumbnailUrn) console.log(`  Thumbnail upload failed, posting without image`);
+      }
+      await postToLinkedIn(text, url, thumbnailUrn);
 
       await sbUpdate('longform_articles', row.id, { linkedin_posted: true, published: true });
       console.log(`  Done: ${row.id}`);
