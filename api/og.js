@@ -37,7 +37,7 @@ export default async function handler(req) {
     ? (rawImage.startsWith('http') ? rawImage : `${SITE}/${rawImage.replace(/^\//, '')}`)
     : '';
   const image = absImage
-    ? `${SITE}/api/og-image?url=${encodeURIComponent(absImage)}`
+    ? `${SITE}/api/cover-proxy?url=${encodeURIComponent(absImage)}`
     : `${SITE}/Assets/profile.jpg`;
 
   html = html
