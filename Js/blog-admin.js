@@ -1225,9 +1225,15 @@
             cmContainer.id = 'lbCmEditor';
             cmContainer.style.cssText = 'flex:1;display:flex;flex-direction:column;min-height:300px;position:relative';
 
-            var view = await B._initCM6(cmContainer, editorEl ? editorEl.value : '', _updatePreview);
+            var _capturedVal = editorEl ? editorEl.value : '';
+            var view = await B._initCM6(cmContainer, _capturedVal, _updatePreview);
 
             if (view && editorEl && editorEl.parentNode) {
+                var _pendingContent = B._pendingEditorContent || editorEl.value || '';
+                if (_pendingContent && _pendingContent !== _capturedVal) {
+                    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: _pendingContent } });
+                }
+                B._pendingEditorContent = null;
                 editorEl.parentNode.insertBefore(cmContainer, editorEl);
                 editorEl.style.display = 'none';
 
@@ -2446,6 +2452,7 @@
             if (error || !data) return;
 
             B.editingArticle = data;
+            B._setEditorValue(data.content || '');
 
             // Switch to article tab
             B.adminDialog.querySelectorAll('.lb-cms-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -2461,7 +2468,6 @@
             document.getElementById('lbCmsTags').value = (data.tags || []).join(', ');
             document.getElementById('lbCmsCover').value = data.cover_image || '';
             updateCoverPreview(data.cover_image || '');
-            B._setEditorValue(data.content || '');
 
             if (data.scheduled_at && !data.published) {
                 var dt = new Date(data.scheduled_at);
