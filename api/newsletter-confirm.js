@@ -76,7 +76,9 @@ export default async function handler(req) {
       if (!emailRes.ok) {
         const err = await emailRes.text();
         console.error('Resend error:', err);
-        return new Response(JSON.stringify({ error: 'Failed to send email' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+        // #region agent log
+        return new Response(JSON.stringify({ error: 'Failed to send email', resendStatus: emailRes.status, resendError: err }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+        // #endregion
       }
 
       return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
