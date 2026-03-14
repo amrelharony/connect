@@ -1805,15 +1805,45 @@
 
         updateDraftsBadge();
 
+        // ── Convert image File/Blob to WebP via Canvas (with optional max dimension) ──
+        function convertToWebP(imageFile, quality, maxDim) {
+            quality = quality || 0.85;
+            maxDim = maxDim || 2400;
+            return new Promise(function(resolve) {
+                if (imageFile.type === 'image/webp' && imageFile.size < 500000) { resolve(imageFile); return; }
+                var img = new Image();
+                img.onload = function() {
+                    var w = img.naturalWidth, h = img.naturalHeight;
+                    if (w > maxDim || h > maxDim) {
+                        var ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    var c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    c.toBlob(function(blob) {
+                        URL.revokeObjectURL(img.src);
+                        if (!blob) { resolve(imageFile); return; }
+                        var webpFile = new File([blob], imageFile.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+                        console.log('[WebP] ' + (imageFile.size / 1024).toFixed(0) + 'KB → ' + (webpFile.size / 1024).toFixed(0) + 'KB (' + Math.round(100 - webpFile.size / imageFile.size * 100) + '% saved)');
+                        resolve(webpFile);
+                    }, 'image/webp', quality);
+                };
+                img.onerror = function() { URL.revokeObjectURL(img.src); resolve(imageFile); };
+                img.src = URL.createObjectURL(imageFile);
+            });
+        }
+        window._convertToWebP = convertToWebP;
+
         // ── Shared image upload helper ──
         async function uploadImageToStorage(imageFile, prefix) {
             if (!imageFile || !window._sb) throw new Error('No file or Supabase unavailable');
             if (!hasSupabaseAuth()) throw new Error('Supabase Auth required for image uploads. Sign in via Ctrl+Shift+P → Sign Out → Re-login.');
-            // Refresh session to ensure a valid token for storage RLS
             try { await window._sb.auth.refreshSession(); } catch (_) {}
-            var ext = (imageFile.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
-            var fn = (prefix || 'img') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-            var ur = await window._sb.storage.from('microblog-images').upload(fn, imageFile, { cacheControl: '3600', upsert: false });
+            imageFile = await convertToWebP(imageFile);
+            var fn = (prefix || 'img') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.webp';
+            var ur = await window._sb.storage.from('microblog-images').upload(fn, imageFile, { cacheControl: '3600', upsert: false, contentType: 'image/webp' });
             if (ur.error) {
                 if (ur.error.message && ur.error.message.includes('row-level security')) {
                     throw new Error('Storage RLS blocked upload. Check that the microblog-images bucket allows INSERT for authenticated users.');
