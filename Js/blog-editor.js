@@ -162,8 +162,20 @@
     }
 
     function _setEditorValue(text) {
+        B._pendingEditorContent = text || '';
         if (_cmView) {
             _cmView.dispatch({ changes: { from: 0, to: _cmView.state.doc.length, insert: text || '' } });
+        } else if (text) {
+            var _retryCount = 0;
+            var _retryId = setInterval(function() {
+                _retryCount++;
+                if (_cmView) {
+                    clearInterval(_retryId);
+                    if (_cmView.state.doc.toString() !== text) {
+                        _cmView.dispatch({ changes: { from: 0, to: _cmView.state.doc.length, insert: text } });
+                    }
+                } else if (_retryCount >= 60) { clearInterval(_retryId); }
+            }, 250);
         }
         var ta = document.getElementById('lbCmsContent');
         if (ta) ta.value = text || '';
