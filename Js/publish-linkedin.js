@@ -1,5 +1,5 @@
 // publish-linkedin.js — Publish scheduled Supabase posts to LinkedIn
-// Runs via GitHub Actions cron every minute
+// Runs via GitHub Actions cron every 30 minutes
 //
 // Required env vars:
 //   SUPABASE_URL, SUPABASE_SERVICE_KEY,
@@ -81,11 +81,11 @@ async function uploadImageToLinkedIn(imageUrl) {
   console.log(`  Downloading image: ${imageUrl}`);
   const imgRes = await fetch(imageUrl);
   if (!imgRes.ok) {
-    console.log(`  X Image download failed: ${imgRes.status} ${imgRes.statusText}`);
+    console.log(`  ✗ Image download failed: ${imgRes.status} ${imgRes.statusText}`);
     return null;
   }
   const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
-  console.log(`  OK Image downloaded: ${imgBuffer.length} bytes`);
+  console.log(`  ✓ Image downloaded: ${imgBuffer.length} bytes`);
 
   console.log(`  Initializing LinkedIn image upload (owner: ${LI_PERSON})...`);
   const initRes = await fetch('https://api.linkedin.com/rest/images?action=initializeUpload', {
@@ -100,12 +100,12 @@ async function uploadImageToLinkedIn(imageUrl) {
   });
   if (!initRes.ok) {
     const errBody = await initRes.text();
-    console.log(`  X LinkedIn image init failed: ${initRes.status} ${errBody}`);
+    console.log(`  ✗ LinkedIn image init failed: ${initRes.status} ${errBody}`);
     return null;
   }
   const initData = await initRes.json();
   const { uploadUrl, image: imageUrn } = initData.value;
-  console.log(`  OK Got upload URL, image URN: ${imageUrn}`);
+  console.log(`  ✓ Got upload URL, image URN: ${imageUrn}`);
 
   console.log(`  Uploading binary to LinkedIn...`);
   const uploadRes = await fetch(uploadUrl, {
@@ -118,11 +118,11 @@ async function uploadImageToLinkedIn(imageUrl) {
   });
   if (!uploadRes.ok) {
     const errBody = await uploadRes.text();
-    console.log(`  X LinkedIn image upload failed: ${uploadRes.status} ${errBody}`);
+    console.log(`  ✗ LinkedIn image upload failed: ${uploadRes.status} ${errBody}`);
     return null;
   }
 
-  console.log(`  OK Uploaded image to LinkedIn: ${imageUrn}`);
+  console.log(`  ✓ Uploaded image → ${imageUrn}`);
   return imageUrn;
 }
 
@@ -166,7 +166,7 @@ async function postToLinkedIn(text, articleUrl) {
   }
 
   const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || '';
-  console.log(`  OK LinkedIn post created: ${postId}`);
+  console.log(`  ✓ LinkedIn post created: ${postId}`);
   return postId;
 }
 
@@ -204,7 +204,7 @@ async function postToLinkedInWithImage(text, imageUrn) {
   }
 
   const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || '';
-  console.log(`  OK LinkedIn image post created: ${postId}`);
+  console.log(`  ✓ LinkedIn image post created: ${postId}`);
   return postId;
 }
 
@@ -257,20 +257,10 @@ async function publishArticles() {
         console.log(`  Set published=true for scheduled article`);
       }
 
-      const url = `${SITE}/?blog=${encodeURIComponent(row.slug)}`;
+      const url = `${SITE}/?post=${encodeURIComponent(row.slug)}`;
       const text = `${row.title}\n\n${row.excerpt || ''}\n\nRead more: ${url}`.trim();
 
-      if (row.cover_image) {
-        const imageUrn = await uploadImageToLinkedIn(row.cover_image);
-        if (imageUrn) {
-          await postToLinkedInWithImage(text, imageUrn);
-        } else {
-          console.log(`  Image upload failed, falling back to article post`);
-          await postToLinkedIn(text, url);
-        }
-      } else {
-        await postToLinkedIn(text, url);
-      }
+      await postToLinkedIn(text, url);
 
       await sbUpdate('longform_articles', row.id, { linkedin_posted: true, published: true });
       console.log(`  Done: ${row.id}`);
