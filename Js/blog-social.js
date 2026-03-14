@@ -309,21 +309,42 @@
         var contentEl = document.querySelector('.lb-content');
         if (!contentEl) return;
 
+        var _lastTouchTime = 0;
+
         _quoteHandlers.mouseup = function(e) {
+            if (Date.now() - _lastTouchTime < 1000) return;
             setTimeout(function() { showQuoteTooltip(e, article); }, 10);
         };
-        _quoteHandlers.touchend = function(e) {
-            setTimeout(function() { showQuoteTooltip(e, article); }, 300);
-        };
         contentEl.addEventListener('mouseup', _quoteHandlers.mouseup);
-        contentEl.addEventListener('touchend', _quoteHandlers.touchend);
+
+        _quoteHandlers.touchstart = function() { _lastTouchTime = Date.now(); };
+        contentEl.addEventListener('touchstart', _quoteHandlers.touchstart, { passive: true });
+
+        var _selChangeTimer = null;
+        _quoteHandlers.selectionchange = function() {
+            clearTimeout(_selChangeTimer);
+            var sel = window.getSelection();
+            if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+            _selChangeTimer = setTimeout(function() {
+                sel = window.getSelection();
+                if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+                var anchor = sel.anchorNode;
+                if (anchor && contentEl.contains(anchor.nodeType === 3 ? anchor.parentElement : anchor)) {
+                    showQuoteTooltip(null, article);
+                }
+            }, 600);
+        };
+        document.addEventListener('selectionchange', _quoteHandlers.selectionchange);
     }
 
     function destroyTextSelection() {
         var contentEl = document.querySelector('.lb-content');
-        if (contentEl && _quoteHandlers.mouseup) {
-            contentEl.removeEventListener('mouseup', _quoteHandlers.mouseup);
-            contentEl.removeEventListener('touchend', _quoteHandlers.touchend);
+        if (contentEl) {
+            if (_quoteHandlers.mouseup) contentEl.removeEventListener('mouseup', _quoteHandlers.mouseup);
+            if (_quoteHandlers.touchstart) contentEl.removeEventListener('touchstart', _quoteHandlers.touchstart);
+        }
+        if (_quoteHandlers.selectionchange) {
+            document.removeEventListener('selectionchange', _quoteHandlers.selectionchange);
         }
         _quoteHandlers = {};
         removeQuoteTooltip();
