@@ -679,9 +679,9 @@
     try {
       var img = null;
       if (imageFile) {
-        var ext = imageFile.name.split('.').pop() || 'jpg';
-        var fn = Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-        var ur = await window._sb.storage.from(BUCKET).upload(fn, imageFile, { cacheControl: '3600', upsert: false });
+        if (window._convertToWebP) imageFile = await window._convertToWebP(imageFile);
+        var fn = Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.webp';
+        var ur = await window._sb.storage.from(BUCKET).upload(fn, imageFile, { cacheControl: '3600', upsert: false, contentType: 'image/webp' });
         if (ur.error) throw ur.error;
         var pu = window._sb.storage.from(BUCKET).getPublicUrl(ur.data.path);
         img = pu.data.publicUrl;
@@ -714,9 +714,9 @@
     try {
       var img = null;
       if (imageFile) {
-        var ext = imageFile.name.split('.').pop() || 'jpg';
-        var fn = Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-        var ur = await window._sb.storage.from(BUCKET).upload(fn, imageFile, { cacheControl: '3600', upsert: false });
+        if (window._convertToWebP) imageFile = await window._convertToWebP(imageFile);
+        var fn = Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.webp';
+        var ur = await window._sb.storage.from(BUCKET).upload(fn, imageFile, { cacheControl: '3600', upsert: false, contentType: 'image/webp' });
         if (ur.error) throw ur.error;
         img = window._sb.storage.from(BUCKET).getPublicUrl(ur.data.path).data.publicUrl;
       }
