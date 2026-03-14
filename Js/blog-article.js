@@ -100,34 +100,16 @@
                 var res = await window._sb.rpc('subscribe_newsletter', { p_email: email, p_job_title: jobTitle, p_phone: phone || null });
                 var token = res.data;
 
-                // #region agent log
-                console.log('[DBG-603f51] RPC result:', {hasToken:!!token, tokenType:typeof token, tokenLen:token?String(token).length:0, hasError:!!res.error, errorMsg:res.error?res.error.message:'none'});
-                // #endregion
-
                 if (res.error) throw new Error(res.error.message || 'Subscription failed');
 
                 snd('success');
 
                 if (token) {
-                    // #region agent log
-                    console.log('[DBG-603f51] Calling /api/newsletter-confirm...');
-                    // #endregion
-
-                    try {
-                        var _confirmRes = await fetch('/api/newsletter-confirm', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: email, token: token })
-                        });
-                        var _confirmBody = await _confirmRes.text();
-                        // #region agent log
-                        console.log('[DBG-603f51] confirm API response:', {status:_confirmRes.status, body:_confirmBody});
-                        // #endregion
-                    } catch(_confirmErr) {
-                        // #region agent log
-                        console.log('[DBG-603f51] confirm API FETCH ERROR:', _confirmErr.message, _confirmErr.name);
-                        // #endregion
-                    }
+                    fetch('/api/newsletter-confirm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, token: token })
+                    }).catch(function() {});
 
                     var formEl = document.getElementById('lbNewsletterForm');
                     if (formEl) formEl.style.display = 'none';
@@ -135,10 +117,6 @@
                     statusEl.className = 'lb-newsletter-status visible';
                     if (window.UniToast) window.UniToast('Almost there!', 'Check your inbox to confirm your subscription.', '📧', 'success');
                 } else {
-                    // #region agent log
-                    console.log('[DBG-603f51] No token returned - already subscribed path');
-                    // #endregion
-
                     btn.textContent = 'SUBSCRIBED ✓';
                     emailInput.value = '';
                     jobTitleInput.value = '';
