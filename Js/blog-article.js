@@ -435,6 +435,19 @@
     var _toolbarAutoHideDelay = 8000;
     var _toolbarHideTime = 0;
 
+    function _syncChallengeHUD(show) {
+        var ch = document.querySelector('.challenge-hud');
+        if (!ch) return;
+        var _g = window.gsap;
+        if (show) {
+            ch.classList.add('show');
+            if (_g && !B._reducedMotion) { _g.killTweensOf(ch); _g.to(ch, { opacity: 1, y: 0, duration: 0.3, ease: 'back.out(1.4)' }); }
+        } else {
+            if (_g && !B._reducedMotion) { _g.killTweensOf(ch); _g.to(ch, { opacity: 0, y: 8, duration: 0.25, ease: 'power2.in', onComplete: function() { ch.classList.remove('show'); } }); }
+            else { ch.classList.remove('show'); }
+        }
+    }
+
     function _showToolbar() {
         if (!_toolbar) return;
         if (_toolbarVisible) { _resetToolbarHideTimer(); return; }
@@ -449,6 +462,7 @@
             _toolbar.style.visibility = 'visible';
             _toolbar.style.transform = 'none';
         }
+        _syncChallengeHUD(true);
         _resetToolbarHideTimer();
     }
 
@@ -466,6 +480,7 @@
             _toolbar.style.opacity = '0';
             _toolbar.style.visibility = 'hidden';
         }
+        _syncChallengeHUD(false);
     }
 
     window._hideArticleToolbar = function() {
