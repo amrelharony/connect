@@ -11,7 +11,7 @@ function html(title, body) {
 .card{max-width:440px;text-align:center;padding:48px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);backdrop-filter:blur(12px)}
 .icon{font-size:48px;margin-bottom:16px}.title{font-size:22px;font-weight:700;margin-bottom:8px}.sub{font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:24px}
 a.btn{display:inline-block;padding:12px 28px;background:#00e1ff;color:#0a0e17;font-weight:700;font-size:13px;text-decoration:none;border-radius:8px;letter-spacing:.5px;text-transform:uppercase}
-a.btn:hover{opacity:.9}</style></head><body><div class="card">${body}</div></body></html>`, {
+a.btn:hover{opacity:.9}.ae-logo{display:block;margin:0 auto 20px;width:56px;height:56px;border-radius:12px}</style></head><body><div class="card"><img src="https://amrelharony.com/Assets/ae.svg" alt="AE" class="ae-logo">${body}</div></body></html>`, {
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
   });
 }
@@ -76,9 +76,7 @@ export default async function handler(req) {
       if (!emailRes.ok) {
         const err = await emailRes.text();
         console.error('Resend error:', err);
-        // #region agent log
-        return new Response(JSON.stringify({ error: 'Failed to send email', resendStatus: emailRes.status, resendError: err }), { status: 502, headers: { 'Content-Type': 'application/json' } });
-        // #endregion
+        return new Response(JSON.stringify({ error: 'Failed to send email' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
       }
 
       return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
@@ -116,12 +114,10 @@ function confirmationEmailHTML(confirmUrl) {
           <tr><td style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);font-size:1px;line-height:1px">&nbsp;</td></tr>
           <tr><td style="padding:52px 44px;text-align:center">
 
-            <!-- AE monogram -->
+            <!-- AE logo -->
             <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 26px">
-              <tr><td style="width:60px;height:60px;border-radius:50%;text-align:center;vertical-align:middle;background:linear-gradient(135deg,#00e1ff,#6366f1,#a855f7);box-shadow:0 6px 28px rgba(0,225,255,0.28),0 0 0 1px rgba(0,225,255,0.1)">
-                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" style="width:60px;height:60px;v-text-anchor:middle" arcsize="50%" fillcolor="#00e1ff" stroke="f"><v:textbox inset="0,0,0,0"><center><![endif]-->
-                <span style="font-family:${mono};font-size:18px;font-weight:700;color:#ffffff;letter-spacing:3px;line-height:60px">AE</span>
-                <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
+              <tr><td style="text-align:center">
+                <img src="https://amrelharony.com/Assets/ae.svg" alt="AE" width="60" height="60" style="display:block;margin:0 auto;width:60px;height:60px;border-radius:12px">
               </td></tr>
             </table>
 
