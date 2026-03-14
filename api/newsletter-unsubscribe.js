@@ -13,7 +13,7 @@ function html(title, body) {
 .card{max-width:440px;text-align:center;padding:48px 32px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);backdrop-filter:blur(12px)}
 .icon{font-size:48px;margin-bottom:16px}.title{font-size:22px;font-weight:700;margin-bottom:8px}.sub{font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:24px}
 a.btn{display:inline-block;padding:12px 28px;background:#00e1ff;color:#0a0e17;font-weight:700;font-size:13px;text-decoration:none;border-radius:8px;letter-spacing:.5px;text-transform:uppercase}
-a.btn:hover{opacity:.9}</style></head><body><div class="card">${body}</div></body></html>`, {
+a.btn:hover{opacity:.9}.ae-logo{display:block;margin:0 auto 20px;width:56px;height:56px;border-radius:12px}</style></head><body><div class="card"><img src="https://amrelharony.com/Assets/ae.svg" alt="AE" class="ae-logo">${body}</div></body></html>`, {
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
   });
 }
