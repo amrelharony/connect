@@ -66,7 +66,7 @@ export default async function handler(req) {
         method: 'POST',
         headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'Amr Elharony <noreply@amrelharony.com>',
+          from: 'Amr Elharony <noreply@updates.amrelharony.com>',
           to: [email],
           subject: 'Confirm your subscription — Amr Elharony',
           html: confirmationEmailHTML(confirmUrl)
