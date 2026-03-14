@@ -223,12 +223,10 @@ function bulletinEmailHTML(articles, unsubUrl) {
   <!-- ===== HEADER ===== -->
   <tr><td style="padding:0 0 44px;text-align:center">
 
-    <!-- AE monogram -->
+    <!-- AE logo -->
     <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 22px">
-      <tr><td style="width:64px;height:64px;border-radius:50%;text-align:center;vertical-align:middle;background:linear-gradient(135deg,#00e1ff,#6366f1,#a855f7);box-shadow:0 6px 28px rgba(0,225,255,0.28),0 0 0 1px rgba(0,225,255,0.1)">
-        <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" style="width:64px;height:64px;v-text-anchor:middle" arcsize="50%" fillcolor="#00e1ff" stroke="f"><v:textbox inset="0,0,0,0"><center><![endif]-->
-        <span style="font-family:${mono};font-size:20px;font-weight:700;color:#ffffff;letter-spacing:3px;line-height:64px">AE</span>
-        <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
+      <tr><td style="text-align:center">
+        <img src="https://amrelharony.com/Assets/ae.svg" alt="AE" width="64" height="64" style="display:block;margin:0 auto;width:64px;height:64px;border-radius:12px">
       </td></tr>
     </table>
 
