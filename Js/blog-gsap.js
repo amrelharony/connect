@@ -1,5 +1,5 @@
 // blog-gsap.js — GSAP-powered blog animations (entrance, scroll reveals, transitions, parallax, micro-interactions)
-(function() {
+(function () {
     'use strict';
     var B = window._Blog;
     if (!B) return;
@@ -17,17 +17,17 @@
     // ─── Mood Animation Profiles (synced with Emotion Engine) ───
 
     var MOOD_PROFILES = {
-        neutral:     { ds: 1,    ease: 'power3.out',          titleEase: 'back.out(1.3)',          ss: 1,    yBase: 1,    parallax: 6  },
-        warm:        { ds: 1.1,  ease: 'power3.out',          titleEase: 'back.out(1.6)',          ss: 1.1,  yBase: 1.15, parallax: 8  },
-        playful:     { ds: 1.05, ease: 'elastic.out(1,0.45)', titleEase: 'elastic.out(1,0.4)',     ss: 1.15, yBase: 1.2,  parallax: 9  },
-        focused:     { ds: 0.75, ease: 'power4.out',          titleEase: 'power4.out',             ss: 0.7,  yBase: 0.7,  parallax: 3  },
-        determined:  { ds: 0.8,  ease: 'power4.out',          titleEase: 'power3.out',             ss: 0.75, yBase: 0.75, parallax: 4  },
-        calm:        { ds: 1.3,  ease: 'power2.out',          titleEase: 'power2.out',             ss: 1.2,  yBase: 0.8,  parallax: 4  },
-        serene:      { ds: 1.35, ease: 'power2.out',          titleEase: 'power2.out',             ss: 1.25, yBase: 0.75, parallax: 3  },
-        intense:     { ds: 0.7,  ease: 'power4.out',          titleEase: 'power3.out',             ss: 0.6,  yBase: 0.85, parallax: 10 },
-        melancholy:  { ds: 1.4,  ease: 'power2.inOut',        titleEase: 'power2.out',             ss: 1.3,  yBase: 0.6,  parallax: 3  },
-        surprised:   { ds: 0.9,  ease: 'elastic.out(1,0.35)', titleEase: 'elastic.out(1,0.3)',     ss: 0.9,  yBase: 1.3,  parallax: 7  },
-        curious:     { ds: 1,    ease: 'power3.out',          titleEase: 'back.out(1.5)',          ss: 1.2,  yBase: 1.1,  parallax: 6  }
+        neutral: { ds: 1, ease: 'power3.out', titleEase: 'back.out(1.3)', ss: 1, yBase: 1, parallax: 6 },
+        warm: { ds: 1.1, ease: 'power3.out', titleEase: 'back.out(1.6)', ss: 1.1, yBase: 1.15, parallax: 8 },
+        playful: { ds: 1.05, ease: 'elastic.out(1,0.45)', titleEase: 'elastic.out(1,0.4)', ss: 1.15, yBase: 1.2, parallax: 9 },
+        focused: { ds: 0.75, ease: 'power4.out', titleEase: 'power4.out', ss: 0.7, yBase: 0.7, parallax: 3 },
+        determined: { ds: 0.8, ease: 'power4.out', titleEase: 'power3.out', ss: 0.75, yBase: 0.75, parallax: 4 },
+        calm: { ds: 1.3, ease: 'power2.out', titleEase: 'power2.out', ss: 1.2, yBase: 0.8, parallax: 4 },
+        serene: { ds: 1.35, ease: 'power2.out', titleEase: 'power2.out', ss: 1.25, yBase: 0.75, parallax: 3 },
+        intense: { ds: 0.7, ease: 'power4.out', titleEase: 'power3.out', ss: 0.6, yBase: 0.85, parallax: 10 },
+        melancholy: { ds: 1.4, ease: 'power2.inOut', titleEase: 'power2.out', ss: 1.3, yBase: 0.6, parallax: 3 },
+        surprised: { ds: 0.9, ease: 'elastic.out(1,0.35)', titleEase: 'elastic.out(1,0.3)', ss: 0.9, yBase: 1.3, parallax: 7 },
+        curious: { ds: 1, ease: 'power3.out', titleEase: 'back.out(1.5)', ss: 1.2, yBase: 1.1, parallax: 6 }
     };
 
     function _getMoodProfile(moodOverride) {
@@ -46,7 +46,7 @@
 
     // ─── 1. Feed Entrance Timeline ───
 
-    B._gsapFeedEntrance = function(wrapEl) {
+    B._gsapFeedEntrance = function (wrapEl) {
         if (!_ok() || !wrapEl) return false;
 
         var blogView = wrapEl.closest('#blogView');
@@ -94,7 +94,7 @@
 
     // ─── 2. ScrollTrigger Card/Element Reveals ───
 
-    B._gsapScrollReveals = function(container) {
+    B._gsapScrollReveals = function (container) {
         if (!_stOk() || !container) return false;
 
         var blogView = container.closest('#blogView');
@@ -103,18 +103,18 @@
         var revealEls = container.querySelectorAll('.lb-reveal:not(.gsap-revealed)');
         var revealLeftEls = container.querySelectorAll('.lb-reveal-left:not(.gsap-revealed)');
         if (revealEls.length) {
-            _gsap.set(revealEls, { opacity: 0, y: 24 });
+            _gsap.set(revealEls, { opacity: 0 });
 
             _ST.batch(revealEls, {
                 start: 'top 92%',
-                onEnter: function(batch) {
+                onEnter: function (batch) {
                     _gsap.to(batch, {
-                        opacity: 1, y: 0,
-                        stagger: 0.07,
-                        duration: 0.5,
-                        ease: 'power3.out',
-                        onComplete: function() {
-                            batch.forEach(function(el) { el.classList.add('gsap-revealed', 'visible'); });
+                        opacity: 1,
+                        stagger: 0.09,
+                        duration: 0.6,
+                        ease: 'power2.out',
+                        onComplete: function () {
+                            batch.forEach(function (el) { el.classList.add('gsap-revealed', 'visible'); });
                         }
                     });
                 },
@@ -127,14 +127,14 @@
 
             _ST.batch(revealLeftEls, {
                 start: 'top 92%',
-                onEnter: function(batch) {
+                onEnter: function (batch) {
                     _gsap.to(batch, {
                         opacity: 1, x: 0,
                         stagger: 0.06,
                         duration: 0.55,
                         ease: 'power3.out',
-                        onComplete: function() {
-                            batch.forEach(function(el) { el.classList.add('gsap-revealed', 'visible'); });
+                        onComplete: function () {
+                            batch.forEach(function (el) { el.classList.add('gsap-revealed', 'visible'); });
                         }
                     });
                 },
@@ -149,7 +149,7 @@
 
     var _gsapTransitionActive = false;
 
-    B._gsapRouteTransition = function(callback) {
+    B._gsapRouteTransition = function (callback) {
         if (!_ok()) return false;
 
         if (_gsapTransitionActive) return false;
@@ -165,7 +165,7 @@
         overlay.style.pointerEvents = 'all';
 
         var tl = _gsap.timeline({
-            onComplete: function() {
+            onComplete: function () {
                 _gsapTransitionActive = false;
                 overlay.style.pointerEvents = 'none';
                 _gsap.set(overlay, { clearProps: 'opacity' });
@@ -173,28 +173,28 @@
         });
 
         tl.set(overlay, { opacity: 0 })
-        .to(overlay, {
-            opacity: 1,
-            duration: 0.25,
-            ease: 'power2.inOut'
-        })
-        .call(function() {
-            try { callback(); } catch (e) { console.error('[blog-gsap] transition callback error:', e); }
-            window.scrollTo(0, 0);
-        })
-        .to(overlay, {
-            opacity: 0,
-            duration: 0.3,
-            ease: 'power2.out',
-            delay: 0.05
-        });
+            .to(overlay, {
+                opacity: 1,
+                duration: 0.25,
+                ease: 'power2.inOut'
+            })
+            .call(function () {
+                try { callback(); } catch (e) { console.error('[blog-gsap] transition callback error:', e); }
+                window.scrollTo(0, 0);
+            })
+            .to(overlay, {
+                opacity: 0,
+                duration: 0.3,
+                ease: 'power2.out',
+                delay: 0.05
+            });
 
         return true;
     };
 
     // ─── 4. Hero Parallax ───
 
-    B._gsapHeroParallax = function(heroEl) {
+    B._gsapHeroParallax = function (heroEl) {
         if (!_stOk() || !heroEl) return;
 
         var img = heroEl.querySelector('.lb-hero-img');
@@ -202,16 +202,7 @@
         var gradient = heroEl.querySelector('.lb-hero-gradient');
 
         if (img) {
-            _gsap.to(img, {
-                yPercent: 6,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: heroEl,
-                    start: 'top top',
-                    end: 'bottom top',
-                    scrub: 0.6
-                }
-            });
+            // No transform on img — scale/translate inside border-radius causes rendering artifacts
         }
 
         if (body) {
@@ -244,7 +235,7 @@
 
     // ─── 5. Newsletter Entrance ───
 
-    B._gsapNewsletter = function(nlEl) {
+    B._gsapNewsletter = function (nlEl) {
         if (!_stOk() || !nlEl) return;
 
         var container = nlEl.querySelector('.lb-newsletter');
@@ -273,24 +264,24 @@
 
     // ─── 6. Card Tap/Press Micro-interactions ───
 
-    B._gsapCardMicro = function(card) {
+    B._gsapCardMicro = function (card) {
         if (!_ok() || !card || card._gsapMicro) return;
         card._gsapMicro = true;
 
-        card.addEventListener('pointerdown', function(e) {
+        card.addEventListener('pointerdown', function (e) {
             if (e.target.closest('.lb-card-v2-bookmark')) return;
             _gsap.to(card, { scale: 0.97, duration: 0.15, ease: 'power2.out' });
         });
 
-        card.addEventListener('pointerup', function() {
+        card.addEventListener('pointerup', function () {
             _gsap.to(card, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.4)' });
         });
 
-        card.addEventListener('pointerleave', function() {
+        card.addEventListener('pointerleave', function () {
             _gsap.to(card, { scale: 1, duration: 0.25, ease: 'power2.out', overwrite: true });
         });
 
-        card.addEventListener('mouseenter', function() {
+        card.addEventListener('mouseenter', function () {
             _gsap.to(card, {
                 boxShadow: '0 6px 28px rgba(0,225,255,.12), inset 0 1px 0 rgba(255,255,255,.06)',
                 duration: 0.3,
@@ -298,7 +289,7 @@
             });
         });
 
-        card.addEventListener('mouseleave', function() {
+        card.addEventListener('mouseleave', function () {
             _gsap.to(card, {
                 boxShadow: 'none',
                 duration: 0.35,
@@ -309,7 +300,7 @@
 
     // ─── 7. Article Entrance Timeline ───
 
-    B._gsapArticleEntrance = function(articleEl) {
+    B._gsapArticleEntrance = function (articleEl) {
         if (!_ok() || !articleEl) return false;
 
         var blogView = articleEl.closest('#blogView');
@@ -326,55 +317,106 @@
         var header = articleEl.querySelector('.lb-article-header');
         var cover = articleEl.querySelector('.lb-article > img[itemprop="image"]');
 
+        // ── Date: clipPath wipe reveal + letter-spacing settle
         if (date) {
-            tl.from(date, { y: 16 * p.yBase, opacity: 0, letterSpacing: '4px', duration: 0.45 * p.ds }, 0);
+            _gsap.set(date, { opacity: 0, clipPath: 'inset(0 100% 0 0)', letterSpacing: '6px' });
+            tl.to(date, {
+                opacity: 1, clipPath: 'inset(0 0% 0 0)', letterSpacing: 'normal',
+                duration: 0.6 * p.ds, ease: 'power3.out',
+                onComplete: function () { _gsap.set(date, { clearProps: 'clipPath' }); }
+            }, 0);
         }
 
+        // ── H1: split words, 3D flip in with blur
         if (h1) {
-            tl.from(h1, { y: 40 * p.yBase, opacity: 0, duration: 0.65 * p.ds, ease: p.titleEase }, 0.06);
+            var h1Text = h1.textContent;
+            var words = h1Text.split(/\s+/);
+            h1.innerHTML = words.map(function (w) {
+                return '<span style="display:inline-block;perspective:600px"><span class="_gsap-word" style="display:inline-block">' + w + '</span></span>';
+            }).join(' ');
+            var wordEls = h1.querySelectorAll('._gsap-word');
+            _gsap.set(wordEls, { opacity: 0, rotationX: -80, transformOrigin: '50% 100%', filter: 'blur(6px)', y: 20 });
+            _gsap.set(h1, { opacity: 1 });
+            tl.to(wordEls, {
+                opacity: 1, rotationX: 0, filter: 'blur(0px)', y: 0,
+                stagger: 0.04 * p.ss, duration: 0.7 * p.ds, ease: 'back.out(1.5)',
+                onComplete: function () { h1.textContent = h1Text; }
+            }, 0.08);
         }
 
+        // ── Excerpt: fade up with blur clear
         if (excerpt) {
-            tl.from(excerpt, { y: 20 * p.yBase, opacity: 0, duration: 0.5 * p.ds }, 0.18);
+            _gsap.set(excerpt, { opacity: 0, y: 16, filter: 'blur(3px)' });
+            tl.to(excerpt, {
+                opacity: 1, y: 0, filter: 'blur(0px)',
+                duration: 0.6 * p.ds, ease: 'power2.out'
+            }, 0.25);
         }
 
+        // ── Meta: children spring in with elastic ease
         if (meta) {
-            tl.from(meta, { y: 14 * p.yBase, opacity: 0, duration: 0.4 * p.ds }, 0.26);
+            var metaChildren = meta.querySelectorAll('span, time, a');
+            if (metaChildren.length) {
+                _gsap.set(metaChildren, { opacity: 0, x: -14, scale: 0.85 });
+                tl.to(metaChildren, {
+                    opacity: 1, x: 0, scale: 1,
+                    stagger: 0.06 * p.ss, duration: 0.4 * p.ds, ease: 'elastic.out(1, 0.5)'
+                }, 0.32);
+            } else {
+                _gsap.set(meta, { opacity: 0, y: 10 });
+                tl.to(meta, { opacity: 1, y: 0, duration: 0.4 * p.ds }, 0.32);
+            }
         }
 
+        // ── Tags: scale–spring pop cascade
         if (tags.length) {
-            tl.from(tags, { x: -10, opacity: 0, stagger: 0.035 * p.ss, duration: 0.3 * p.ds }, 0.32);
+            _gsap.set(tags, { opacity: 0, scale: 0.4, rotationZ: -8 });
+            tl.to(tags, {
+                opacity: 1, scale: 1, rotationZ: 0,
+                stagger: 0.05 * p.ss, duration: 0.45 * p.ds, ease: 'elastic.out(1, 0.4)'
+            }, 0.38);
         }
 
+        // ── Header border: sweep reveal
         if (header) {
             tl.from(header, {
                 borderBottomColor: 'transparent',
-                duration: 0.5 * p.ds,
+                duration: 0.6 * p.ds,
                 ease: 'power2.out'
-            }, 0.4);
+            }, 0.5);
         }
 
+        // ── Cover: cinematic curtain reveal (waits for image load)
         if (cover) {
-            tl.from(cover, {
-                scale: 1.04, opacity: 0, duration: 0.7 * p.ds, ease: 'power2.out',
-                onComplete: function() {
-                    if (!_ST) return;
-                    _gsap.set(cover, { clearProps: 'scale' });
-                    _gsap.to(cover, {
-                        yPercent: p.parallax,
-                        ease: 'none',
-                        scrollTrigger: {
-                            trigger: cover,
-                            start: 'top 80%',
-                            end: 'bottom 20%',
-                            scrub: 0.5
-                        }
-                    });
-                }
-            }, 0.3);
+            cover.classList.add('gsap-revealed', 'visible');
+
+            _gsap.set(cover, {
+                clipPath: 'inset(0% 50% 0% 50%)',
+                scale: 1.12,
+                filter: 'brightness(1.4) saturate(0.3) blur(4px)',
+                opacity: 0
+            });
+
+            var _cinematicReveal = function () {
+                var cTl = _gsap.timeline({
+                    onComplete: function () {
+                        _gsap.set(cover, { clearProps: 'all' });
+                    }
+                });
+                cTl.to(cover, { opacity: 1, duration: 0.25, ease: 'power2.out' }, 0);
+                cTl.to(cover, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.0, ease: 'power3.inOut' }, 0.1);
+                cTl.to(cover, { scale: 1, duration: 1.2, ease: 'power2.out' }, 0.1);
+                cTl.to(cover, { filter: 'brightness(1) saturate(1) blur(0px)', duration: 0.9, ease: 'power2.out' }, 0.2);
+            };
+
+            if (cover.complete && cover.naturalWidth) {
+                setTimeout(_cinematicReveal, 80);
+            } else {
+                cover.addEventListener('load', function () { setTimeout(_cinematicReveal, 40); }, { once: true });
+            }
         }
 
-        [date, h1, excerpt, meta].forEach(function(el) {
+        [date, h1, excerpt, meta].forEach(function (el) {
             if (el) el.classList.add('gsap-revealed', 'visible');
         });
 
@@ -395,7 +437,7 @@
             _gsap.set(title, { opacity: 0, x: -20 });
             _ST.create({
                 trigger: title, start: 'top 90%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     _gsap.to(title, { opacity: 1, x: 0, duration: 0.45 * p.ds, ease: p.ease });
                 }
             });
@@ -405,7 +447,7 @@
             _gsap.set(form, { opacity: 0, y: 16, scale: 0.96 });
             _ST.create({
                 trigger: form, start: 'top 90%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     _gsap.to(form, { opacity: 1, y: 0, scale: 1, duration: 0.5 * p.ds, ease: p.ease });
                 }
             });
@@ -415,7 +457,7 @@
             _gsap.set(comments, { opacity: 0, y: 16 });
             _ST.batch(comments, {
                 start: 'top 92%',
-                onEnter: function(batch) {
+                onEnter: function (batch) {
                     _gsap.to(batch, {
                         opacity: 1, y: 0, stagger: 0.06 * p.ss,
                         duration: 0.45 * p.ds, ease: p.ease
@@ -428,7 +470,7 @@
 
     // ─── 9. Article Content Scroll Reveals ───
 
-    B._gsapArticleScrollReveals = function(contentEl) {
+    B._gsapArticleScrollReveals = function (contentEl) {
         if (!_stOk() || !contentEl) return false;
 
         var blogView = contentEl.closest('#blogView');
@@ -437,7 +479,7 @@
         var p = _getMoodProfile();
 
         if (_articleMoodHandler) document.removeEventListener('moodchange', _articleMoodHandler);
-        _articleMoodHandler = function(e) {
+        _articleMoodHandler = function (e) {
             var np = _getMoodProfile(e.detail.mood);
             for (var k in np) p[k] = np[k];
         };
@@ -455,144 +497,181 @@
 
         var article = contentEl.closest('.lb-article');
 
-        contentEl.querySelectorAll('h2').forEach(function(el) {
-            _gsap.set(el, { opacity: 0, y: 30 });
+        // ── H2: clipPath wipe + underline sweep + glow
+        contentEl.querySelectorAll('h2').forEach(function (el) {
+            _gsap.set(el, { opacity: 0, clipPath: 'inset(0 100% 0 0)' });
             _ST.create({
                 trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
-                    _gsap.to(el, {
-                        opacity: 1, y: 0, duration: 0.55 * p.ds, ease: p.ease,
-                        onComplete: function() {
-                            el.classList.add('gsap-revealed', 'visible');
-                        }
-                    });
-                    if (el.style.borderTopWidth !== '0px') {
-                        _gsap.from(el, {
-                            borderTopColor: 'transparent', duration: 0.6 * p.ds, delay: 0.15,
-                            ease: 'power2.out'
-                        });
-                    }
-                }
-            });
-        });
-
-        contentEl.querySelectorAll('h3').forEach(function(el) {
-            _gsap.set(el, { opacity: 0, y: 20 });
-            _ST.create({
-                trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
-                    _gsap.to(el, {
-                        opacity: 1, y: 0, duration: 0.45 * p.ds, ease: p.ease,
-                        onComplete: function() { el.classList.add('gsap-revealed', 'visible'); }
-                    });
-                }
-            });
-        });
-
-        contentEl.querySelectorAll('blockquote').forEach(function(el) {
-            _gsap.set(el, { opacity: 0, x: -12 });
-            _ST.create({
-                trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
-                    _gsap.to(el, {
-                        opacity: 1, x: 0, duration: 0.55 * p.ds, ease: p.ease,
-                        onComplete: function() {
-                            el.classList.add('gsap-revealed', 'visible');
-                            _glowFlash(el);
-                        }
-                    });
-                }
-            });
-        });
-
-        contentEl.querySelectorAll('pre').forEach(function(el) {
-            _gsap.set(el, { opacity: 0, clipPath: 'inset(0 0 100% 0)' });
-            _ST.create({
-                trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
-                    _gsap.to(el, {
-                        opacity: 1, clipPath: 'inset(0 0 0% 0)',
-                        duration: 0.6 * p.ds, ease: 'power2.out',
-                        onComplete: function() {
+                onEnter: function () {
+                    var h2Tl = _gsap.timeline({
+                        onComplete: function () {
                             el.classList.add('gsap-revealed', 'visible');
                             _gsap.set(el, { clearProps: 'clipPath' });
                             _glowFlash(el);
                         }
                     });
+                    h2Tl.to(el, {
+                        opacity: 1, clipPath: 'inset(0 0% 0 0)',
+                        duration: 0.7 * p.ds, ease: 'power3.out'
+                    }, 0);
+                    if (el.style.borderTopWidth !== '0px') {
+                        h2Tl.from(el, {
+                            borderTopColor: 'transparent', duration: 0.5 * p.ds,
+                            delay: 0.2, ease: 'power2.out'
+                        }, 0);
+                    }
                 }
             });
         });
 
-        contentEl.querySelectorAll('figure, .lb-gallery').forEach(function(el) {
-            _gsap.set(el, { opacity: 0, scale: 0.96, y: 16 });
+        // ── H3: fade in with rotationX flip + blur clear
+        contentEl.querySelectorAll('h3').forEach(function (el) {
+            _gsap.set(el, { opacity: 0, rotationX: -40, transformOrigin: '50% 100%', filter: 'blur(3px)', y: 12 });
             _ST.create({
                 trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     _gsap.to(el, {
-                        opacity: 1, scale: 1, y: 0,
-                        duration: 0.6 * p.ds, ease: p.ease,
-                        onComplete: function() { el.classList.add('gsap-revealed', 'visible'); }
+                        opacity: 1, rotationX: 0, filter: 'blur(0px)', y: 0,
+                        duration: 0.6 * p.ds, ease: 'back.out(1.4)',
+                        onComplete: function () { el.classList.add('gsap-revealed', 'visible'); }
                     });
                 }
             });
         });
 
-        contentEl.querySelectorAll('hr').forEach(function(el) {
-            _gsap.set(el, { scaleX: 0, transformOrigin: 'center center' });
+        // ── Blockquotes: border-left grows + content slides from left + glow
+        contentEl.querySelectorAll('blockquote').forEach(function (el) {
+            _gsap.set(el, { opacity: 0, x: -20, clipPath: 'inset(0 100% 0 0)' });
             _ST.create({
                 trigger: el, start: 'top 88%', once: true,
-                onEnter: function() {
+                onEnter: function () {
+                    var bqTl = _gsap.timeline({
+                        onComplete: function () {
+                            el.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(el, { clearProps: 'clipPath' });
+                            _glowFlash(el);
+                        }
+                    });
+                    bqTl.to(el, { opacity: 1, x: 0, duration: 0.6 * p.ds, ease: 'power3.out' }, 0);
+                    bqTl.to(el, { clipPath: 'inset(0 0% 0 0)', duration: 0.7 * p.ds, ease: 'power2.out' }, 0.05);
+                }
+            });
+        });
+
+        // ── Code blocks: scan-line reveal (top-down clipPath) + glow pulse
+        contentEl.querySelectorAll('pre').forEach(function (el) {
+            _gsap.set(el, { opacity: 0, clipPath: 'inset(0 0 100% 0)', filter: 'blur(2px)' });
+            _ST.create({
+                trigger: el, start: 'top 88%', once: true,
+                onEnter: function () {
+                    var preTl = _gsap.timeline({
+                        onComplete: function () {
+                            el.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(el, { clearProps: 'clipPath,filter' });
+                            _glowFlash(el);
+                        }
+                    });
+                    preTl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
+                    preTl.to(el, {
+                        clipPath: 'inset(0 0 0% 0)', filter: 'blur(0px)',
+                        duration: 0.8 * p.ds, ease: 'power2.out'
+                    }, 0.05);
+                }
+            });
+        });
+
+        // ── Figures/galleries: center-out clipPath reveal + scale settle
+        contentEl.querySelectorAll('figure, .lb-gallery').forEach(function (el) {
+            _gsap.set(el, { opacity: 0, clipPath: 'inset(5% 5% 5% 5%)', scale: 0.95, filter: 'saturate(0) blur(3px)' });
+            _ST.create({
+                trigger: el, start: 'top 88%', once: true,
+                onEnter: function () {
+                    var figTl = _gsap.timeline({
+                        onComplete: function () {
+                            el.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(el, { clearProps: 'clipPath,filter' });
+                        }
+                    });
+                    figTl.to(el, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
+                    figTl.to(el, {
+                        clipPath: 'inset(0% 0% 0% 0%)', scale: 1,
+                        filter: 'saturate(1) blur(0px)',
+                        duration: 0.9 * p.ds, ease: 'power3.out'
+                    }, 0.05);
+                }
+            });
+        });
+
+        // ── HR: scaleX from center with subtle rotation
+        contentEl.querySelectorAll('hr').forEach(function (el) {
+            _gsap.set(el, { scaleX: 0, transformOrigin: 'center center', rotationZ: 1 });
+            _ST.create({
+                trigger: el, start: 'top 88%', once: true,
+                onEnter: function () {
                     _gsap.to(el, {
-                        scaleX: 1, duration: 0.7 * p.ds, ease: 'power2.inOut',
-                        onComplete: function() { el.classList.add('gsap-revealed', 'visible'); }
+                        scaleX: 1, rotationZ: 0,
+                        duration: 0.8 * p.ds, ease: 'power3.inOut',
+                        onComplete: function () { el.classList.add('gsap-revealed', 'visible'); }
                     });
                 }
             });
         });
 
+        // ── TOC: slide from left with blur + scale
         var toc = article ? article.querySelector('.lb-toc') : null;
         if (toc) {
-            _gsap.set(toc, { opacity: 0, x: -20, scale: 0.98 });
+            _gsap.set(toc, { opacity: 0, x: -30, scale: 0.96, filter: 'blur(4px)' });
             _ST.create({
                 trigger: toc, start: 'top 88%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     _gsap.to(toc, {
-                        opacity: 1, x: 0, scale: 1,
-                        duration: 0.5 * p.ds, ease: p.ease,
-                        onComplete: function() { toc.classList.add('gsap-revealed', 'visible'); }
+                        opacity: 1, x: 0, scale: 1, filter: 'blur(0px)',
+                        duration: 0.6 * p.ds, ease: 'power3.out',
+                        onComplete: function () {
+                            toc.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(toc, { clearProps: 'filter' });
+                        }
                     });
                 }
             });
         }
 
+        // ── Footer: staggered children with elastic spring
         var footer = article ? article.querySelector('.lb-article-footer') : null;
         if (footer) {
             var shareIcons = footer.querySelectorAll('.lb-share-icon');
             var bookmarkBtn = footer.querySelector('.lb-bookmark-btn');
             var ttsBtn = footer.querySelector('.lb-tts-btn');
 
-            _gsap.set(footer, { opacity: 0, y: 24, scale: 0.97 });
-            if (shareIcons.length) _gsap.set(shareIcons, { opacity: 0, x: -8, scale: 0.8 });
-            if (bookmarkBtn) _gsap.set(bookmarkBtn, { opacity: 0, y: 6 });
-            if (ttsBtn) _gsap.set(ttsBtn, { opacity: 0, y: 6 });
+            _gsap.set(footer, { opacity: 0, y: 24, clipPath: 'inset(100% 0 0 0)' });
+            if (shareIcons.length) _gsap.set(shareIcons, { opacity: 0, scale: 0.3, rotationZ: -15 });
+            if (bookmarkBtn) _gsap.set(bookmarkBtn, { opacity: 0, y: 10, scale: 0.8 });
+            if (ttsBtn) _gsap.set(ttsBtn, { opacity: 0, y: 10, scale: 0.8 });
 
             _ST.create({
                 trigger: footer, start: 'top 88%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     var ftTl = _gsap.timeline({
                         defaults: { ease: p.ease },
-                        onComplete: function() { footer.classList.add('gsap-revealed', 'visible'); }
+                        onComplete: function () {
+                            footer.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(footer, { clearProps: 'clipPath' });
+                        }
                     });
-                    ftTl.to(footer, { opacity: 1, y: 0, scale: 1, duration: 0.5 * p.ds }, 0);
+                    ftTl.to(footer, { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)', duration: 0.6 * p.ds, ease: 'power3.out' }, 0);
                     if (shareIcons.length) {
-                        ftTl.to(shareIcons, { opacity: 1, x: 0, scale: 1, stagger: 0.04 * p.ss, duration: 0.35 * p.ds, ease: 'back.out(1.4)' }, 0.12);
+                        ftTl.to(shareIcons, {
+                            opacity: 1, scale: 1, rotationZ: 0,
+                            stagger: 0.05 * p.ss, duration: 0.4 * p.ds, ease: 'elastic.out(1, 0.35)'
+                        }, 0.15);
                     }
-                    if (bookmarkBtn) ftTl.to(bookmarkBtn, { opacity: 1, y: 0, duration: 0.3 * p.ds }, 0.35);
-                    if (ttsBtn) ftTl.to(ttsBtn, { opacity: 1, y: 0, duration: 0.3 * p.ds }, 0.4);
+                    if (bookmarkBtn) ftTl.to(bookmarkBtn, { opacity: 1, y: 0, scale: 1, duration: 0.35 * p.ds, ease: 'back.out(2)' }, 0.35);
+                    if (ttsBtn) ftTl.to(ttsBtn, { opacity: 1, y: 0, scale: 1, duration: 0.35 * p.ds, ease: 'back.out(2)' }, 0.4);
                 }
             });
         }
 
+        // ── Author card: avatar 3D pop + staggered bio elements
         var authorCard = article ? article.querySelector('.lb-author-card') : null;
         if (authorCard) {
             var avatar = authorCard.querySelector('.lb-author-avatar');
@@ -600,28 +679,47 @@
             var authorBio = authorCard.querySelector('.lb-author-bio');
             var authorLinks = authorCard.querySelector('.lb-author-links');
 
-            _gsap.set(authorCard, { opacity: 0, y: 20, scale: 0.98 });
+            _gsap.set(authorCard, { opacity: 0, y: 24, clipPath: 'inset(10% 10% 10% 10%)' });
             _ST.create({
                 trigger: authorCard, start: 'top 88%', once: true,
-                onEnter: function() {
+                onEnter: function () {
                     var acTl = _gsap.timeline({
                         defaults: { ease: p.ease },
-                        onComplete: function() { authorCard.classList.add('gsap-revealed', 'visible'); }
+                        onComplete: function () {
+                            authorCard.classList.add('gsap-revealed', 'visible');
+                            _gsap.set(authorCard, { clearProps: 'clipPath' });
+                        }
                     });
-                    acTl.to(authorCard, { opacity: 1, y: 0, scale: 1, duration: 0.5 * p.ds }, 0);
-                    if (avatar) acTl.from(avatar, { scale: 0.6, opacity: 0, duration: 0.45 * p.ds, ease: 'back.out(2)' }, 0.1);
-                    if (authorName) acTl.from(authorName, { x: 12, opacity: 0, duration: 0.35 * p.ds }, 0.2);
-                    if (authorBio) acTl.from(authorBio, { y: 8, opacity: 0, duration: 0.35 * p.ds }, 0.3);
-                    if (authorLinks) acTl.from(authorLinks, { y: 8, opacity: 0, scale: 0.9, duration: 0.3 * p.ds, ease: 'back.out(1.4)' }, 0.38);
+                    acTl.to(authorCard, {
+                        opacity: 1, y: 0, clipPath: 'inset(0% 0% 0% 0%)',
+                        duration: 0.6 * p.ds, ease: 'power3.out'
+                    }, 0);
+                    if (avatar) acTl.from(avatar, {
+                        scale: 0.2, rotation: -180, opacity: 0,
+                        duration: 0.55 * p.ds, ease: 'back.out(2)'
+                    }, 0.12);
+                    if (authorName) acTl.from(authorName, {
+                        x: 20, opacity: 0, filter: 'blur(4px)',
+                        duration: 0.4 * p.ds, ease: 'power3.out'
+                    }, 0.22);
+                    if (authorBio) acTl.from(authorBio, {
+                        y: 12, opacity: 0, filter: 'blur(2px)',
+                        duration: 0.4 * p.ds, ease: 'power2.out'
+                    }, 0.32);
+                    if (authorLinks) acTl.from(authorLinks, {
+                        y: 10, opacity: 0, scale: 0.8,
+                        duration: 0.35 * p.ds, ease: 'elastic.out(1, 0.4)'
+                    }, 0.4);
                 }
             });
         }
 
+        // ── Comments section
         var commentsSection = article ? article.querySelector('.lb-comments-section') : null;
         if (!commentsSection) {
             var commentsContainer = article ? article.querySelector('#lbCommentsSection') : null;
             if (commentsContainer) {
-                var _commObs = new MutationObserver(function(mutations, obs) {
+                var _commObs = new MutationObserver(function (mutations, obs) {
                     var cs = commentsContainer.querySelector('.lb-comments-section');
                     if (!cs) return;
                     obs.disconnect();
@@ -633,17 +731,22 @@
             _animateComments(commentsSection, p);
         }
 
+        // ── Remaining reveals: staggered fade with blur
         var remainingReveals = article ? article.querySelectorAll('.lb-reveal:not(.gsap-revealed)') : [];
         if (remainingReveals.length) {
-            _gsap.set(remainingReveals, { opacity: 0, y: 30 });
+            _gsap.set(remainingReveals, { opacity: 0, y: 20, filter: 'blur(2px)' });
             _ST.batch(remainingReveals, {
                 start: 'top 90%',
-                onEnter: function(batch) {
+                onEnter: function (batch) {
                     _gsap.to(batch, {
-                        opacity: 1, y: 0, stagger: 0.06 * p.ss,
+                        opacity: 1, y: 0, filter: 'blur(0px)',
+                        stagger: 0.06 * p.ss,
                         duration: 0.55 * p.ds, ease: p.ease,
-                        onComplete: function() {
-                            batch.forEach(function(el) { el.classList.add('gsap-revealed', 'visible'); });
+                        onComplete: function () {
+                            batch.forEach(function (el) {
+                                el.classList.add('gsap-revealed', 'visible');
+                                _gsap.set(el, { clearProps: 'filter' });
+                            });
                         }
                     });
                 },
@@ -656,9 +759,9 @@
 
     // ─── Cleanup helper ───
 
-    B._gsapKillScrollTriggers = function() {
+    B._gsapKillScrollTriggers = function () {
         if (_ST) {
-            _ST.getAll().forEach(function(t) { t.kill(); });
+            _ST.getAll().forEach(function (t) { t.kill(); });
         }
         if (_articleMoodHandler) {
             document.removeEventListener('moodchange', _articleMoodHandler);
@@ -668,13 +771,13 @@
         if (blogView) blogView.classList.remove('gsap-active');
     };
 
-    B._gsapRefreshScrollTrigger = function() {
+    B._gsapRefreshScrollTrigger = function () {
         if (_ST) _ST.refresh();
     };
 
     // ── Brand text scramble (matches main site Scr class) ──
     var _scrChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    B._scrambleBrand = function(el, text) {
+    B._scrambleBrand = function (el, text) {
         if (!el || B._reducedMotion) return;
         var q = [];
         for (var i = 0; i < text.length; i++) {
