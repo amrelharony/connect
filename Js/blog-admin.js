@@ -1423,6 +1423,7 @@
         window._lbDeleteDraft = deleteDraft;
 
         function clearEditorForNewDraft() {
+
             _setActiveDraft(null);
             B.editingArticle = null;
             document.getElementById('lbCmsTitle').value = '';
@@ -1447,6 +1448,7 @@
             const vp = document.getElementById('lbVersionPanel');
             if (vp) vp.style.display = 'none';
         }
+        window._lbClearEditorForNewDraft = clearEditorForNewDraft;
 
         function updateDraftsBadge() {
             const badge = document.getElementById('lbDraftsBadge');
@@ -2709,7 +2711,7 @@
 
             if (!isAutoSave && (publish || scheduledAt)) {
                 // After publish or schedule, reset to a fresh new draft
-                clearEditorForNewDraft();
+                if (typeof window._lbClearEditorForNewDraft === 'function') window._lbClearEditorForNewDraft();
                 document.getElementById('lbCmsStatus').textContent = doneMsg;
             } else if (!B.editingArticle && !isAutoSave) {
                 document.getElementById('lbCmsTitle').value = '';
