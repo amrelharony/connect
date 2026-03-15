@@ -33,12 +33,16 @@ export default async function handler(req) {
   const desc  = esc(article.excerpt || article.title);
   const rawImage = article.cover_image || '';
   const hasCover = !!rawImage;
-  const absImage = rawImage
+  // Use direct image URL — proxy adds latency that WhatsApp's crawler can't handle
+  const image = rawImage
     ? (rawImage.startsWith('http') ? rawImage : `${SITE}/${rawImage.replace(/^\//, '')}`)
-    : '';
-  const image = absImage
-    ? `${SITE}/api/cover-proxy?url=${encodeURIComponent(absImage)}`
     : `${SITE}/Assets/profile.jpg`;
+
+  // Detect image content type for og:image:type
+  const imgType = image.match(/\.png(\?|$)/i) ? 'image/png'
+    : image.match(/\.webp(\?|$)/i) ? 'image/webp'
+    : image.match(/\.gif(\?|$)/i) ? 'image/gif'
+    : 'image/jpeg';
 
   html = html
     .replace(/<title>[^<]*<\/title>/, `<title>${title} \u2014 Amr Elharony</title>`)
@@ -56,6 +60,12 @@ export default async function handler(req) {
     .replace(metaRe('name',     'twitter:image:alt'),    `$1${title}"`)
     .replace(metaRe('name',     'description'),          `$1${desc}"`)
     .replace(/(<link rel="canonical" href=")[^"]*"/,     `$1${articleUrl}"`);
+
+  // Inject og:image:type for WhatsApp compatibility (after the og:image:alt tag)
+  html = html.replace(
+    /(<meta\s+property="og:image:alt"[^>]*>)/,
+    `$1\n    <meta property="og:image:type" content="${imgType}">`
+  );
 
   const ld = JSON.stringify({
     '@context': 'https://schema.org',
