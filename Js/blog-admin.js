@@ -2707,7 +2707,11 @@
                 window.UniToast(scheduledAt ? 'Article scheduled!' : (publish ? 'Article published!' : 'Draft saved.'), '', scheduledAt ? '\ud83d\udd50' : (publish ? '\ud83d\ude80' : '\ud83d\udcbe'), 'success');
             }
 
-            if (!B.editingArticle && !isAutoSave) {
+            if (!isAutoSave && (publish || scheduledAt)) {
+                // After publish or schedule, reset to a fresh new draft
+                clearEditorForNewDraft();
+                document.getElementById('lbCmsStatus').textContent = doneMsg;
+            } else if (!B.editingArticle && !isAutoSave) {
                 document.getElementById('lbCmsTitle').value = '';
                 document.getElementById('lbCmsSlug').value = '';
                 document.getElementById('lbCmsExcerpt').value = '';
@@ -2725,8 +2729,6 @@
                 document.getElementById('lbCmsScheduleRow').style.display = 'none';
                 document.getElementById('lbCmsScheduleAt').value = '';
             }
-
-            if (!isAutoSave && !B.editingArticle) B.editingArticle = null;
             if (!isAutoSave) await fetchAdminArticles();
 
             if (publish && !scheduledAt) {
@@ -2806,9 +2808,7 @@
         B.adminDialog.addEventListener('close', () => {
             snd('menuClose');
         });
-        B.adminDialog.addEventListener('click', e => {
-            if (e.target === B.adminDialog) closeAdmin();
-        });
+        // Clicking outside the admin dialog no longer closes it
     }
 
     /* ═══════════════════════════════════════════════════
