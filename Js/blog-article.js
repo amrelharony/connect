@@ -315,6 +315,7 @@
     var _readingPanel = null;
     var LS_READING = '_lb_reading_prefs';
     var _readingAddedLightMode = false;
+    var _readingRemovedLightMode = false;
 
     function getReadingPrefs() {
         try { return JSON.parse(localStorage.getItem(LS_READING)) || {}; } catch(e) { return {}; }
@@ -329,9 +330,19 @@
         if (p.fontSize) content.style.fontSize = p.fontSize;
         if (p.fontFamily) content.style.fontFamily = p.fontFamily;
         document.body.classList.remove('lb-sepia');
+        // Restore light-mode we previously added
         if (_readingAddedLightMode) { document.body.classList.remove('light-mode'); _readingAddedLightMode = false; }
-        if (p.theme === 'sepia') document.body.classList.add('lb-sepia');
-        else if (p.theme === 'light' && !document.body.classList.contains('light-mode')) {
+        // Restore light-mode we previously removed
+        if (_readingRemovedLightMode) { document.body.classList.add('light-mode'); _readingRemovedLightMode = false; }
+        if (p.theme === 'dark') {
+            // Force dark: remove light-mode even if it was set by the global toggle
+            if (document.body.classList.contains('light-mode')) {
+                document.body.classList.remove('light-mode');
+                _readingRemovedLightMode = true;
+            }
+        } else if (p.theme === 'sepia') {
+            document.body.classList.add('lb-sepia');
+        } else if (p.theme === 'light' && !document.body.classList.contains('light-mode')) {
             document.body.classList.add('light-mode');
             _readingAddedLightMode = true;
         }
@@ -421,6 +432,7 @@
         if (_readingPanel) { _readingPanel.remove(); _readingPanel = null; }
         document.body.classList.remove('lb-sepia');
         if (_readingAddedLightMode) { document.body.classList.remove('light-mode'); _readingAddedLightMode = false; }
+        if (_readingRemovedLightMode) { document.body.classList.add('light-mode'); _readingRemovedLightMode = false; }
     }
 
     /* ═══════════════════════════════════════════════════
@@ -1072,7 +1084,7 @@
           <footer class="lb-article-footer lb-reveal">
             <div class="lb-share-panel">
               <a class="lb-share-icon twitter" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(data.title + (data.excerpt ? '\n\n' + data.excerpt : ''))}&url=${encodeURIComponent(articleUrl)}" target="_blank" rel="noopener" title="Share on X" aria-label="Share on X"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
-              <a class="lb-share-icon linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(articleUrl)}&title=${encodeURIComponent(data.title)}&summary=${encodeURIComponent(data.excerpt || '')}" target="_blank" rel="noopener" title="Share on LinkedIn" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+              <a class="lb-share-icon linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}" target="_blank" rel="noopener" title="Share on LinkedIn" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
               <a class="lb-share-icon whatsapp" href="https://wa.me/?text=${encodeURIComponent(data.title + (data.excerpt ? '\n\n' + data.excerpt : '') + '\n\n' + articleUrl)}" target="_blank" rel="noopener" title="Share on WhatsApp" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a>
               <a class="lb-share-icon telegram" href="https://t.me/share/url?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(data.title + (data.excerpt ? '\n\n' + data.excerpt : ''))}" target="_blank" rel="noopener" title="Share on Telegram" aria-label="Share on Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i></a>
               <a class="lb-share-icon email" href="mailto:?subject=${encodeURIComponent(data.title)}&body=${encodeURIComponent(data.title + (data.excerpt ? '\n\n' + data.excerpt : '') + '\n\n' + articleUrl)}" title="Share via Email" aria-label="Share via Email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a>
