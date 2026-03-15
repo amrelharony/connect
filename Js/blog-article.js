@@ -1075,11 +1075,11 @@
             <div class="lb-article-meta lb-reveal">
               <span itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Amr Elharony">${B.readingTime(data.content)}</span>
               <span aria-label="${data.views || 0} views">👁 ${data.views || 0} views</span>
-              ${(data.tags || []).length ? `<div class="lb-article-tags">${(data.tags || []).map(t => `<span class="lb-card-tag" itemprop="keywords">${esc(t)}</span>`).join('')}</div>` : ''}
             </div>
           </header>
           ${data.cover_image ? `<img class="lb-cover-img lb-reveal" src="${esc(data.cover_image)}" alt="${esc(data.title)}" itemprop="image" fetchpriority="high">` : ''}
           <div class="lb-content has-dropcap" itemprop="articleBody">${contentHtml}</div>
+          ${(data.tags || []).length ? `<div class="lb-article-tags lb-reveal">${(data.tags || []).map(t => `<span class="lb-card-tag" itemprop="keywords">${esc(t)}</span>`).join('')}</div>` : ''}
           <div class="lb-reactions" id="lbReactions"></div>
           <footer class="lb-article-footer lb-reveal">
             <div class="lb-share-panel">
