@@ -87,7 +87,7 @@
 .light-mode .lb-cover-img{box-shadow:0 8px 30px rgba(0,0,0,.1)}
 .lb-article-excerpt{font-family:'Source Serif 4',Georgia,'Times New Roman',serif;font-size:18px;line-height:1.6;color:var(--sub);margin-bottom:20px;font-style:italic}
 .lb-article-meta{display:flex;align-items:center;gap:20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub)}
-.lb-article-tags{display:flex;gap:6px;flex-wrap:wrap}
+.lb-article-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:32px;padding-top:20px;border-top:1px solid var(--border)}
 
 /* â”€â”€ Article Content (Markdown rendered) â”€â”€ */
 .lb-content{font-family:'Source Serif 4',Georgia,'Times New Roman',serif;font-size:17px;line-height:1.85;color:var(--text);word-break:break-word}
