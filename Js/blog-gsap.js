@@ -103,15 +103,15 @@
         var revealEls = container.querySelectorAll('.lb-reveal:not(.gsap-revealed)');
         var revealLeftEls = container.querySelectorAll('.lb-reveal-left:not(.gsap-revealed)');
         if (revealEls.length) {
-            _gsap.set(revealEls, { opacity: 0, y: 50, rotationX: 4 });
+            _gsap.set(revealEls, { opacity: 0, y: 24 });
 
             _ST.batch(revealEls, {
                 start: 'top 92%',
                 onEnter: function(batch) {
                     _gsap.to(batch, {
-                        opacity: 1, y: 0, rotationX: 0,
-                        stagger: 0.08,
-                        duration: 0.7,
+                        opacity: 1, y: 0,
+                        stagger: 0.07,
+                        duration: 0.5,
                         ease: 'power3.out',
                         onComplete: function() {
                             batch.forEach(function(el) { el.classList.add('gsap-revealed', 'visible'); });
@@ -203,7 +203,7 @@
 
         if (img) {
             _gsap.to(img, {
-                yPercent: 15,
+                yPercent: 6,
                 ease: 'none',
                 scrollTrigger: {
                     trigger: heroEl,
