@@ -1188,6 +1188,7 @@ window.closeShortcuts=function(){const el=document.getElementById('shortcutOverl
 // Remove old keydown handler first — we'll replace with unified
 (function(){
     const unifiedKeys=e=>{
+        if(e.ctrlKey&&e.shiftKey&&(e.code==='KeyP'||(e.key||'').toUpperCase()==='P')){e.preventDefault();if(window.openBlogAdmin)window.openBlogAdmin();else if(window._Blog&&window._Blog.adminDialog){window._Blog.adminDialog.showModal();}return;}
         if(e.key==='Escape'){const _escPairs=[['passkeyOverlay','_closePasskey'],['easterEgg','closeEgg'],['shareOverlay','closeShare'],['trophyOverlay','closeTrophy'],['termOverlay','closeTerm'],['gameOverlay','closeGame'],['shortcutOverlay','closeShortcuts'],['arcadeOverlay','_closeArcade'],['miniGameOverlay','_closeMG'],['guestbookOverlay','_closeGuestbook'],['gameCaseOverlay','_closeAdmin'],['ai3dOverlay','_close3D'],['ttsReaderOverlay','_closeTTSReader'],['cmdPaletteOverlay','_closePalette'],['nftMatOverlay','_closeNftModal']];let closed=false;for(const[id,fn]of _escPairs){const el=document.getElementById(id);if(el&&(el.classList.contains('show')||el.classList.contains('visible'))&&typeof window[fn]==='function'){window[fn]();closed=true;break;}}if(!closed)dismissSmartCta();document.activeElement.blur();return;}
         const tag=document.activeElement.tagName;
         if(tag==='INPUT'||tag==='TEXTAREA')return;
