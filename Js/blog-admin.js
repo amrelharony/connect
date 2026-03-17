@@ -2818,7 +2818,7 @@
        KEYBOARD SHORTCUT — Ctrl+Shift+P
        ═══════════════════════════════════════════════════ */
     document.addEventListener('keydown', e => {
-        if (e.ctrlKey && e.shiftKey && e.key === B.ADMIN_SHORTCUT.key) {
+        if (e.ctrlKey && e.shiftKey && (e.code === 'KeyP' || (e.key || '').toUpperCase() === B.ADMIN_SHORTCUT.key)) {
             e.preventDefault();
             if (B.adminDialog && B.adminDialog.open) {
                 closeAdmin();
